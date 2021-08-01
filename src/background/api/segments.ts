@@ -1,0 +1,235 @@
+import { ipcMain } from "electron"
+import { DBPlaylist, DBRundown, DBSegment, IpcOperation, IpcOperationType, Segment } from '../interfaces'
+import { db } from '../db'
+import { v4 as uuid } from 'uuid'
+import { RunResult } from 'sqlite3'
+import { coreHandler } from "../coreHandler"
+import { PeripheralDeviceAPI } from "@sofie-automation/server-core-integration"
+import { createAllPartsInCore } from "./parts"
+
+export const mutations = {
+	async create (payload: any): Promise<{ result?: Segment, error?: Error }> {
+		const id = uuid()
+		const document = {
+			...payload,
+		}
+		delete document.id
+		delete document.playlistId
+		delete document.rundownId
+
+		if (!payload.rundownId) return {
+			error: new Error('Missing rundownId')
+		}
+
+		const { result, error } = await new Promise((resolve, reject) => db.run(`
+			INSERT INTO segments (id,playlistId,rundownId,document)
+			VALUES (?,?,?,json(?));
+		`, [
+			id,
+			payload.playlistId || null,
+			payload.rundownId,
+			JSON.stringify(document)
+		], function (e: Error | null) {
+			if (e) {
+				resolve({ result: undefined, error: e })
+			} else if (this) {
+				resolve({ result: this.lastID, error: undefined })
+			}
+		}))
+
+		if (result) {
+			const document = await new Promise<DBSegment>((resolve, reject) => db.get(`
+				SELECT *
+				FROM segments
+				WHERE id = ?
+				LIMIT 1;
+			`, [ id ], (e, r) => {
+				console.log(e, r)
+				resolve(r)
+			}))
+
+			return {
+				result: {
+					...JSON.parse(document.document),
+					id: document.id,
+					playlistId: document.playlistId,
+					rundownId: document.rundownId
+				}
+			} 
+		}
+
+		return { error }
+	},
+	async read (payload: any): Promise<{ result?: Segment | Segment[], error?: Error }> {
+		if (payload && payload.id) {
+			const document = await new Promise<DBSegment>((resolve, reject) => db.get(`
+				SELECT *
+				FROM segments
+				WHERE id = ?
+				LIMIT 1;
+			`, [
+				payload.id
+			], (e, r) => e ? reject(e) : resolve(r)))
+
+			return {
+				result: {
+					...JSON.parse(document.document),
+					id: document.id,
+					rundownId: document.rundownId,
+					playlistId: document.playlistId
+				}
+			}
+		} else if (payload && payload.rundownId) {
+			const documents = await new Promise<DBSegment[]>((resolve, reject) => db.all(`
+				SELECT *
+				FROM segments
+				WHERE rundownId = ?
+			`, [
+				payload.rundownId
+			], (e, r) => e ? reject(e) : resolve(r)))
+
+			return {
+				result: documents.map(d => ({
+					...JSON.parse(d.document),
+					id: d.id,
+					rundownId: d.rundownId,
+					playlistId: d.playlistId
+				}))
+			} 
+		} else {
+			const documents = await new Promise<DBSegment[]>((resolve, reject) => db.all(`
+				SELECT *
+				FROM segments
+			`, (e, r) => e ? reject(e) : resolve(r)))
+
+			return {
+				result: documents.map(d => ({
+					...JSON.parse(d.document),
+					id: d.id,
+					rundownId: d.rundownId,
+					playlistId: d.playlistId
+				}))
+			}
+		}
+	},
+	async update (payload: any): Promise<{ result?: Segment, error?: Error }> {
+		const update = {
+			...payload,
+			id: null,
+			playlistId: null,
+			rundownId: null,
+		}
+		const { result, error } = await new Promise((resolve, reject) => db.run(`
+			UPDATE segments
+			SET playlistId = ?, document = (SELECT json_patch(segments.document, json(?)) FROM segments WHERE id = ?)
+			WHERE id = "${payload.id}";
+		`, [
+			payload.playlistId || null,
+			JSON.stringify(update),
+			payload.id
+		], (e) => e ? resolve({ error: e, result: undefined }) : resolve({ result: true, error: undefined })))
+
+		if (result) {
+			const document = await new Promise<DBSegment>((resolve, reject) => db.get(`
+				SELECT *
+				FROM segments
+				WHERE id = ?
+				LIMIT 1;
+			`, [ payload.id ], (e, r) => {
+				console.log(e, r)
+				resolve(r)
+			}))
+
+			return {
+				result: {
+					...JSON.parse(document.document),
+					id: payload.id,
+					rundownId: document.rundownId
+				}
+			}
+		}
+
+		return {
+			error
+		}
+	},
+	async delete (payload: any): Promise<{ error?: Error }> {
+		return new Promise((resolve, reject) => db.run(`
+			DELETE FROM segments
+			WHERE id = "${payload.id}";
+		`, (_: RunResult, error: Error | null) => resolve({ error: error || undefined })))
+	}
+}
+
+ipcMain.handle('segments', async (_, operation: IpcOperation) => {
+	if (operation.type === IpcOperationType.Create) {
+		const { result, error } = await mutations.create(operation.payload)
+
+		if (result && !result.float) {
+			coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [result.rundownId, mutateSegment(result)])
+		}
+
+		return result || error
+	} else if (operation.type === IpcOperationType.Read) {
+		const { result, error } = await mutations.read(operation.payload)
+
+		return result || error
+	} else if (operation.type === IpcOperationType.Update) {
+		const { result: document } = await mutations.read({ id: operation.payload.id })
+		const { result, error } = await mutations.update(operation.payload)
+
+		if (document && 'id' in document && result) {
+			sendSegmentDiffToCore(document, result)
+		}
+
+		return result || error
+	} else if (operation.type === IpcOperationType.Delete) {
+		const { error } = await mutations.delete(operation.payload)
+
+		return error || true
+	}
+})
+
+function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
+	if (oldSegment.float && !newSegment.float) {
+		console.log('dataSegmentCreate', newSegment.rundownId, newSegment.id)
+		coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [newSegment.rundownId, mutateSegment(newSegment)])
+	} else if (!oldSegment.float && newSegment.float) {
+		console.log('dataSegmentDelete', newSegment.rundownId, newSegment.id)
+		coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentDelete, [newSegment.rundownId, newSegment.id])
+	} else if (!oldSegment.float && !newSegment.float) {
+		console.log('dataSegmentUpdate', newSegment.rundownId, newSegment.id)
+		coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentUpdate, [newSegment.rundownId, mutateSegment(newSegment)])
+	}
+}
+
+export async function createAllSegmentsInCore (rundownId: string) {
+	const { result, error } = await mutations.read({ rundownId })
+
+	if (error) {
+		console.log(error)
+		return
+	}
+
+	if (result && Array.isArray(result)) {
+		result
+			.filter(s => !s.float)
+			.forEach(async segment => {
+				await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [segment.rundownId, mutateSegment(segment)])
+				await createAllPartsInCore(segment.id)
+			})
+	}
+}
+
+function mutateSegment(segment: Segment): any {
+	return {
+		externalId: segment.id,
+		name: segment.name,
+		rank: segment.rank,
+		payload: {
+			name: segment.name,
+			rank: segment.rank,
+		},
+		parts: []
+	}
+}
