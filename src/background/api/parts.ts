@@ -202,9 +202,10 @@ export async function createAllPartsInCore(segmentId: string) {
 	const { result } = await mutations.read({ segmentId })
 
 	if (result && Array.isArray(result)) {
-		result.sort((a, b) => a.rank - b.rank).forEach(async s => {
-			if (!s.float) coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartCreate, [s.rundownId, s.segmentId, await mutatePart(s)])
-		})
+		const sortedParts = result.sort((a, b) => a.rank - b.rank)
+		for (const s of sortedParts) {
+			if (!s.float) await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartCreate, [s.rundownId, s.segmentId, await mutatePart(s)])
+		}
 	}
 }
 

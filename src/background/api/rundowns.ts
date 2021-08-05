@@ -15,7 +15,7 @@ export function mutateRundown(rundown: Rundown) {
 		payload: {
 			name: rundown.name,
 			expectedStart: rundown.expectedStartTime,
-			expectedEndTime: rundown.expectedEndTime,
+			expectedEnd: rundown.expectedEndTime,
 			...(rundown.metaData || {})
 		}
 	}

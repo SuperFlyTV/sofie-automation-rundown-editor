@@ -10,22 +10,29 @@ export const editField = <T extends any>(doc: string, field: string, index?: str
 			if (index) {
 				return self.editObject ? self.editObject[index]?.[field] : self[doc]?.[index]?.[field] || defaultVal
 			} else {
-				return self.editObject ? self.editObject[field] : self[doc]?.[field] || defaultVal
+				const editObj = self.editObject ? self.editObject[field] : undefined
+				const docObj = self[doc]?.[field] ?? defaultVal
+
+				return editObj ?? docObj
 			}
 		},
 		set(value: T) {
 			const self = this as any
+			const isValue = value !== undefined && value !== null && value !== ''
+			console.log(field, value, isValue)
+
 			if (!self.editObject) {
 				self.editObject = {
 					...self[doc]
 				}
 			}
+
 			if (index) {
 				if (!self.editObject[index]) self.editObject[index] = {}
 
-				self.editObject[index][field] = value
+				self.editObject[index][field] = isValue ? value : null
 			} else {
-				self.editObject[field] = value
+				self.editObject[field] = isValue ? value : null
 			}
 		}
 	}

@@ -65,37 +65,9 @@ import {
 	Rundown,
 	Segment
 } from '@/background/interfaces'
+import { editField } from '@/util/lib'
 import store from '@/store'
 import Vue from 'vue'
-
-const editField = <T extends any>(field: string, index?: string) => ({
-	[field]: {
-		get(): T | undefined {
-			const self = this as any
-			// console.log((this as any).part[field])
-			if (index) {
-				return self.editObject ? self.editObject[index]?.[field] : self.piece?.[index]?.[field]
-			} else {
-				return self.editObject ? self.editObject[field] : self.piece?.[field]
-			}
-		},
-		set(value: T) {
-			const self = this as any
-			if (!self.editObject) {
-				self.editObject = {
-					...self.piece
-				}
-			}
-			if (index) {
-				if (!self.editObject[index]) self.editObject[index] = {}
-
-				self.editObject[index][field] = value
-			} else {
-				self.editObject[field] = value
-			}
-		}
-	}
-})
 
 export default Vue.extend({
 	computed: {
@@ -123,8 +95,8 @@ export default Vue.extend({
 			}
 		},
 
-		...editField<number>('duration'),
-		...editField<number>('start')
+		...editField('piece', 'duration'),
+		...editField('piece', 'start')
 	},
 	data() {
 		return {
@@ -150,7 +122,7 @@ export default Vue.extend({
 			if (!this.editObject['payload']) {
 				this.editObject.payload = {}
 			}
-			if (value === undefined || '') value = null
+			if (value === undefined || value === '') value = null
 			this.editObject.payload[field] = value
 		},
 		update() {

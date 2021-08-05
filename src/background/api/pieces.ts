@@ -216,7 +216,7 @@ export async function getMutatedPiecesFromPart(partId: string): Promise<any[]> {
 			clipName: undefined,
 			attributes: {
 				...piece.payload,
-				adlib: piece.start === undefined
+				adlib: piece.start === undefined || piece.start === null
 			},
 			position: undefined,
 		}))

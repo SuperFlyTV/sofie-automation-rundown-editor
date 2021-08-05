@@ -19,13 +19,13 @@
 
 			<div class="field-editor" v-for="(field, i) in rundownMetadata" :key="i">
 				<label for="id">Field ID:</label>
-				<input type="text" name="id" v-model="field.id" />
+				<input type="text" name="id" v-model="field.id" @click="createEditObj" />
 
 				<label for="label">Label:</label>
-				<input type="text" name="label" v-model="field.label" />
+				<input type="text" name="label" v-model="field.label" @click="createEditObj" />
 
 				<label for="type">Type:</label>
-				<select name="type" id="type" v-model="field.type">
+				<select name="type" id="type" v-model="field.type" @change="createEditObj">
 					<option v-for="(type, entry) in fieldTypes" :key="type" :value="type">{{ entry }}</option>
 				</select>
 
@@ -71,6 +71,14 @@ export default Vue.extend({
 		}
 	},
 	methods: {
+		createEditObj() {
+			if (!this.editObject) {
+				this.editObject = {
+					...this.settings,
+					rundownMetadata: [...(this.settings.rundownMetadata || [])]
+				}
+			}
+		},
 		removeField(id: string) {
 			if (!this.editObject) {
 				this.editObject = {

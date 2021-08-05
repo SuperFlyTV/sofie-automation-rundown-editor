@@ -31,18 +31,23 @@
 
 			<div class="field-editor" v-for="(field, i) in payload" :key="i">
 				<label for="id">Field ID:</label>
-				<input type="text" name="id" v-model="field.id" />
+				<input type="text" name="id" v-model="field.id" @click="createEditObj" />
 
 				<label for="label">Label:</label>
-				<input type="text" name="label" v-model="field.label" />
+				<input type="text" name="label" v-model="field.label" @click="createEditObj" />
 
 				<label for="type">Type:</label>
-				<select name="type" id="type" v-model="field.type">
+				<select name="type" id="type" v-model="field.type" @change="createEditObj">
 					<option v-for="(type, entry) in fieldTypes" :key="type" :value="type">{{ entry }}</option>
 				</select>
 
 				<label for="includeInName">Include in name:</label>
-				<input type="checkbox" name="includeInName" v-model="field.includeInName" />
+				<input
+					type="checkbox"
+					name="includeInName"
+					v-model="field.includeInName"
+					@click="createEditObj"
+				/>
 
 				<span class="link" @click="() => removeField(field.id)"><fa icon="trash"/></span>
 			</div>
@@ -88,6 +93,14 @@ export default Vue.extend({
 		}
 	},
 	methods: {
+		createEditObj() {
+			if (!this.editObject) {
+				this.editObject = {
+					...this.item,
+					payload: (this.item.payload || []).map(item => ({ ...item }))
+				}
+			}
+		},
 		reset() {
 			this.editObject = undefined
 		},
