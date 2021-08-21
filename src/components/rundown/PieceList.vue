@@ -137,7 +137,8 @@ a {
 	cursor: pointer;
 }
 
-.active {
+.active,
+.router-link-active {
 	border: 1px solid #009dff;
 }
 </style>

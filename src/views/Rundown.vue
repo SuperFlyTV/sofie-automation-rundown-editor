@@ -1,7 +1,7 @@
 <template>
 	<div class="rundown d-flex flex-column">
 		<template v-if="loaded">
-			<rundown-header class="d-flex justify-content-between" />
+			<rundown-header class="" />
 			<div class="body flex-grow-1 d-flex">
 				<segment-list />
 				<router-view class="flex-grow-1" name="rundown-left"></router-view>

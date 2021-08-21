@@ -17,7 +17,7 @@
 				>
 					<router-link
 						:to="`/rundown/${rundown.id}/part/${part.id}`"
-						:class="classes('part', { floated: segment.float || part.float })"
+						:class="classes('part', { floated: segment.float || part.float, active: part.active })"
 						v-for="part in segment.parts"
 						:key="part.id"
 					>
@@ -45,6 +45,11 @@ export default Vue.extend({
 			return store.state.rundowns.find((r) => r.id === this.$route.params.id) || undefined
 		},
 		segments() {
+			const pieceId = this.$route.params.piece
+			const piece = pieceId && store.state.pieces.find((p) => p.id === pieceId)
+
+			const activePartId = piece ? piece.partId : this.$route.params.part
+
 			// todo filter for rundown id
 			return store.state.segments
 				.map((segment) => ({
@@ -58,7 +63,8 @@ export default Vue.extend({
 						.sort((a, b) => (a.rank || 0) - (b.rank || 0))
 						.map((p) => ({
 							...p,
-							payload: p.payload || {}
+							payload: p.payload || {},
+							active: p.id === activePartId
 						}))
 				}))
 				.sort((a, b) => (a.rank || 0) - (b.rank || 0))

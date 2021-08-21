@@ -1,17 +1,22 @@
 <template>
 	<div class="header">
-		<div class="d-flex">
-			<div>Expected start: <br />{{ start }}</div>
-			<div>Expected duration: <br />{{ duration }}</div>
-			<div>Diff: <br />{{ diff }}</div>
-		</div>
 		<div class="name">
-			{{ rundown.name }}
+			<router-link :to="'/rundown/' + rundown.id">{{ rundown.name }}</router-link>
 		</div>
-		<div>
-			<router-link class="close" to="/">
-				<fa icon="times" />
-			</router-link>
+		<div class="d-flex justify-content-between">
+			<div class="d-grid timing">
+				<div class="label">Expected start:</div>
+				<div>{{ start }}</div>
+				<div class="label">Expected duration:</div>
+				<div>{{ duration }}</div>
+				<div class="label">Diff:</div>
+				<div>{{ diff }}</div>
+			</div>
+			<div>
+				<router-link class="close" to="/">
+					<fa icon="times" />
+				</router-link>
+			</div>
 		</div>
 	</div>
 </template>
@@ -64,6 +69,7 @@ export default Vue.extend({
 
 a {
 	color: white;
+	text-decoration: none;
 }
 .close {
 	font-size: 1.8em;
@@ -71,5 +77,17 @@ a {
 }
 .name {
 	line-height: 2.8em;
+	height: 0;
+	text-align: center;
+}
+.timing {
+	display: grid;
+	grid-template-columns: auto auto auto;
+	grid-template-rows: auto auto;
+	gap: 0 0.2em;
+	grid-auto-flow: column;
+}
+.timing .label {
+	font-size: 0.8em;
 }
 </style>
