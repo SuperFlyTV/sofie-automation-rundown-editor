@@ -6,6 +6,7 @@ import { RunResult } from 'sqlite3'
 import { coreHandler } from "../coreHandler"
 import { PeripheralDeviceAPI } from "@sofie-automation/server-core-integration"
 import { createAllPartsInCore } from "./parts"
+import { mutations as rundownMutations } from './rundowns'
 
 export const mutations = {
 	async create (payload: any): Promise<{ result?: Segment, error?: Error }> {
@@ -190,7 +191,12 @@ ipcMain.handle('segments', async (_, operation: IpcOperation) => {
 	}
 })
 
-function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
+async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
+	const rd = await rundownMutations.read({ id: newSegment.rundownId })
+	if (rd.result && !Array.isArray(rd.result) && rd.result.sync === false) {
+		return
+	}
+	
 	if (oldSegment.float && !newSegment.float) {
 		console.log('dataSegmentCreate', newSegment.rundownId, newSegment.id)
 		coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [newSegment.rundownId, mutateSegment(newSegment)])

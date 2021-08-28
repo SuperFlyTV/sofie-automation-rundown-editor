@@ -6,6 +6,8 @@ import { RunResult } from 'sqlite3'
 import { coreHandler } from "../coreHandler"
 import { PeripheralDeviceAPI } from "@sofie-automation/server-core-integration"
 import { getMutatedPiecesFromPart } from './pieces'
+import { mutations as rundownMutations } from './rundowns'
+import { mutations as segmentsMutations } from './segments'
 
 export const mutations = {
 	async create (payload: any): Promise<{ result?: Part, error?: Error }> {
@@ -210,15 +212,32 @@ export async function createAllPartsInCore(segmentId: string) {
 }
 
 export async function sendPartUpdateToCore(partId: string) {
-	// todo - this rundown might not be synced.
 	const { result } = await mutations.read({ id: partId })
-
+	
 	if (result && !Array.isArray(result) && !result.float) {
+		const rd = await rundownMutations.read({ id: result.rundownId })
+		if (rd.result && !Array.isArray(rd.result) && rd.result.sync === false) {
+			return
+		}
+		const segment = await segmentsMutations.read({ id: result.segmentId })
+		if (segment.result && !Array.isArray(segment.result) && segment.result.float === true) {
+			return
+		}
+
 		coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartUpdate, [result.rundownId, result.segmentId, await mutatePart(result)])
 	}
 }
 
 async function sendPartDiffToCore(oldPart: Part, newPart: Part) {
+	const rd = await rundownMutations.read({ id: newPart.rundownId })
+	if (rd.result && !Array.isArray(rd.result) && rd.result.sync === false) {
+		return
+	}
+	const segment = await segmentsMutations.read({ id: newPart.segmentId })
+	if (segment.result && !Array.isArray(segment.result) && segment.result.float === true) {
+		return
+	}
+
 	if (oldPart.float && !newPart.float) {
 		coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartCreate, [newPart.rundownId, newPart.segmentId, await mutatePart(newPart)])
 	} else if (!oldPart.float && newPart.float) {
