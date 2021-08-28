@@ -30,9 +30,8 @@
 			></b-form-input>
 			<b-form-checkbox
 				v-if="m.type === 'boolean'"
-				number
-				:value="payload[m.id]"
-				@update="(v) => updatePayload(m.id, v)"
+				:checked="payload[m.id]"
+				@input="(v) => updatePayload(m.id, v)"
 			></b-form-checkbox>
 		</b-form-group>
 
