@@ -64,6 +64,13 @@ db.serialize(() => {
             FOREIGN KEY (partId) REFERENCES parts(id)
         );
     `)
+
+	db.run(`
+        CREATE TABLE IF NOT EXISTS pieceTypeManifests (
+            id string PRIMARY KEY,
+            document JSON NOT NULL
+        );
+    `)
 })
 
 export { db }
