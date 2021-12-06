@@ -1,17 +1,17 @@
-import { ipcMain } from "electron"
+import { ipcMain } from 'electron'
 import { DBRundown, IpcOperation, IpcOperationType, Rundown } from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { RunResult } from 'sqlite3'
-import { coreHandler } from "../coreHandler"
-import { PeripheralDeviceAPI } from "@sofie-automation/server-core-integration"
-import { createAllSegmentsInCore } from "./segments"
+import { coreHandler } from '../coreHandler'
+import { PeripheralDeviceAPI } from '@sofie-automation/server-core-integration'
+import { createAllSegmentsInCore } from './segments'
 
 export function mutateRundown(rundown: Rundown) {
 	return {
 		externalId: rundown.id,
 		name: rundown.name,
-		type: 'external', // ?
+		type: 'sofie-rundown-editor', // ?
 		payload: {
 			name: rundown.name,
 			expectedStart: rundown.expectedStartTime,
@@ -22,59 +22,73 @@ export function mutateRundown(rundown: Rundown) {
 }
 
 export const mutations = {
-	async create (payload: any): Promise<{ result?: Rundown, error?: Error }> {
+	async create(payload: any): Promise<{ result?: Rundown; error?: Error }> {
 		const id = uuid()
 		const document = {
-			...payload,
+			...payload
 		}
 		delete document.id
 		delete document.playlistId
 
-		const { result, error } = await new Promise((resolve, reject) => db.run(`
+		const { result, error } = await new Promise((resolve, reject) =>
+			db.run(
+				`
 			INSERT INTO rundowns (id,playlistId,document)
 			VALUES (?,?,json(?));
-		`, [
-			id,
-			payload.playlistId || null,
-			JSON.stringify(document)
-		], function (e: Error | null) {
-			if (e) {
-				resolve({ result: undefined, error: e })
-			} else if (this) {
-				resolve({ result: this.lastID, error: undefined })
-			}
-		}))
+		`,
+				[id, payload.playlistId || null, JSON.stringify(document)],
+				function(e: Error | null) {
+					if (e) {
+						resolve({ result: undefined, error: e })
+					} else if (this) {
+						resolve({ result: this.lastID, error: undefined })
+					}
+				}
+			)
+		)
 
 		if (result) {
-			const document = await new Promise<DBRundown>((resolve, reject) => db.get(`
+			const document = await new Promise<DBRundown>((resolve, reject) =>
+				db.get(
+					`
 				SELECT *
 				FROM rundowns
 				WHERE id = ?
 				LIMIT 1;
-			`, [ id ], (e, r) => {
-				console.log(e, r)
-				resolve(r)
-			}))
+			`,
+					[id],
+					(e, r) => {
+						console.log(e, r)
+						resolve(r)
+					}
+				)
+			)
 
-			return { result: {
-				...JSON.parse(document.document),
-				id: document.id,
-				playlistId: document.playlistId
-			} as Rundown }
+			return {
+				result: {
+					...JSON.parse(document.document),
+					id: document.id,
+					playlistId: document.playlistId
+				} as Rundown
+			}
 		}
 
 		return { error: error as Error }
 	},
-	async read (payload: any): Promise<{ result?: Rundown | Rundown[], error?: Error }> {
+	async read(payload: any): Promise<{ result?: Rundown | Rundown[]; error?: Error }> {
 		if (payload && payload.id) {
-			const document = await new Promise<DBRundown>((resolve, reject) => db.get(`
+			const document = await new Promise<DBRundown>((resolve, reject) =>
+				db.get(
+					`
 				SELECT *
 				FROM rundowns
 				WHERE id = ?
 				LIMIT 1;
-			`, [
-				payload.id
-			], (e, r) => e ? reject(e) : resolve(r)))
+			`,
+					[payload.id],
+					(e, r) => (e ? reject(e) : resolve(r))
+				)
+			)
 
 			return {
 				result: {
@@ -84,13 +98,18 @@ export const mutations = {
 				}
 			}
 		} else {
-			const documents = await new Promise<DBRundown[]>((resolve, reject) => db.all(`
+			const documents = await new Promise<DBRundown[]>((resolve, reject) =>
+				db.all(
+					`
 				SELECT *
 				FROM rundowns
-			`, (e, r) => e ? reject(e) : resolve(r)))
+			`,
+					(e, r) => (e ? reject(e) : resolve(r))
+				)
+			)
 
 			return {
-				result: documents.map(d => ({
+				result: documents.map((d) => ({
 					...JSON.parse(d.document),
 					id: d.id,
 					playlistId: d.playlistId
@@ -98,32 +117,41 @@ export const mutations = {
 			}
 		}
 	},
-	async update (payload: any): Promise<{ result?: Rundown, error?: Error }> {
+	async update(payload: any): Promise<{ result?: Rundown; error?: Error }> {
 		const update = {
 			...payload,
 			id: null,
-			playlistId: null,
+			playlistId: null
 		}
-		const { result, error } = await new Promise((resolve, reject) => db.run(`
+		const { result, error } = await new Promise((resolve, reject) =>
+			db.run(
+				`
 			UPDATE rundowns
 			SET playlistId = ?, document = (SELECT json_patch(rundowns.document, json(?)) FROM rundowns WHERE id = ?)
 			WHERE id = "${payload.id}";
-		`, [
-			payload.playlistId || null,
-			JSON.stringify(update),
-			payload.id
-		], (e) => e ? resolve({ result: undefined, error: e }) : resolve({ result: true, error: undefined })))
+		`,
+				[payload.playlistId || null, JSON.stringify(update), payload.id],
+				(e) =>
+					e ? resolve({ result: undefined, error: e }) : resolve({ result: true, error: undefined })
+			)
+		)
 
 		if (result) {
-			const document = await new Promise<DBRundown>((resolve, reject) => db.get(`
+			const document = await new Promise<DBRundown>((resolve, reject) =>
+				db.get(
+					`
 				SELECT *
 				FROM rundowns
 				WHERE id = ?
 				LIMIT 1;
-			`, [ payload.id ], (e, r) => {
-				console.log(e, r)
-				resolve(r)
-			}))
+			`,
+					[payload.id],
+					(e, r) => {
+						console.log(e, r)
+						resolve(r)
+					}
+				)
+			)
 
 			return {
 				result: {
@@ -136,11 +164,17 @@ export const mutations = {
 
 		return error
 	},
-	async delete (payload: any): Promise<{ error?: Error }> {
-		return new Promise((resolve, reject) => db.run(`
+	async delete(payload: any): Promise<{ error?: Error }> {
+		return new Promise((resolve, reject) =>
+			db.run(
+				`
 			DELETE FROM rundowns
 			WHERE id = "${payload.id}";
-		`, (r: RunResult, e: Error | null) => e ? resolve({ error: e }) : resolve({ error: undefined })))
+		`,
+				(r: RunResult, e: Error | null) =>
+					e ? resolve({ error: e }) : resolve({ error: undefined })
+			)
+		)
 	}
 }
 
@@ -149,7 +183,9 @@ ipcMain.handle('rundowns', async (_, operation: IpcOperation) => {
 		const { result, error } = await mutations.create(operation.payload)
 
 		if (result && result.sync) {
-			coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [mutateRundown(result)])
+			coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [
+				mutateRundown(result)
+			])
 		}
 
 		return result || error
@@ -180,11 +216,17 @@ ipcMain.handle('rundowns', async (_, operation: IpcOperation) => {
 
 async function sendRundownDiffToCore(oldDocument: Rundown, newDocument: Rundown) {
 	if (oldDocument.sync && !newDocument.sync) {
-		return coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownDelete, [oldDocument.id])
+		return coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownDelete, [
+			oldDocument.id
+		])
 	} else if (!oldDocument.sync && newDocument.sync) {
-		await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [mutateRundown(newDocument)])
+		await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [
+			mutateRundown(newDocument)
+		])
 		await createAllSegmentsInCore(newDocument.id)
 	} else if (oldDocument.sync && newDocument.sync) {
-		return coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownUpdate, [mutateRundown(newDocument)])
+		return coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownUpdate, [
+			mutateRundown(newDocument)
+		])
 	}
 }
