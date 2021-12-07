@@ -79,6 +79,10 @@ export default Vue.extend({
 	},
 	methods: {
 		async newPiece() {
+			if (!this.newPieceType) {
+				return
+			}
+
 			const piece = await store.dispatch('newPiece', {
 				playlistId: this.rundown?.playlistId,
 				rundownId: this.rundown?.id,
