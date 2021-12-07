@@ -193,7 +193,11 @@ ipcMain.handle('parts', async (_, operation: IpcOperation) => {
 		const { error } = await mutations.delete(operation.payload)
 
 		if (!error && document && !Array.isArray(document) && !document.float) {
-			coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartDelete, [document.rundownId, document.segmentId, document])
+			coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartDelete, [
+				document.rundownId,
+				document.segmentId,
+				document.id
+			])
 		}
 
 		return error || true
