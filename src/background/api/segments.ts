@@ -185,7 +185,15 @@ ipcMain.handle('segments', async (_, operation: IpcOperation) => {
 
 		return result || error
 	} else if (operation.type === IpcOperationType.Delete) {
+		const { result: document } = await mutations.read({ id: operation.payload.id })
 		const { error } = await mutations.delete(operation.payload)
+
+		if (document && 'id' in document) {
+			coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentDelete, [
+				document.rundownId,
+				document.id
+			])
+		}
 
 		return error || true
 	}
