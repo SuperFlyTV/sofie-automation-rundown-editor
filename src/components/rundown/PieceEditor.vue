@@ -75,7 +75,7 @@ export default Vue.extend({
 		},
 		rundown: {
 			get(): Partial<Rundown> {
-				return { ...(store.state.rundowns.find((r) => r.id === this.id) || {}) }
+				return { ...(store.state.rundowns.find((r) => r.id === this.$route.params.id) || {}) }
 			}
 		},
 		piece(): Piece | undefined {
