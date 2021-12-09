@@ -3,10 +3,10 @@ import {
 	DBPieceTypeManifest,
 	IpcOperation,
 	IpcOperationType,
-	MutationPieceManifestCreate,
-	MutationPieceManifestDelete,
-	MutationPieceManifestRead,
-	MutationPieceManifestUpdate,
+	MutationPieceTypeManifestCreate,
+	MutationPieceTypeManifestDelete,
+	MutationPieceTypeManifestRead,
+	MutationPieceTypeManifestUpdate,
 	PieceTypeManifest
 } from '../interfaces'
 import { db } from '../db'
@@ -15,10 +15,10 @@ import { RunResult } from 'sqlite3'
 
 export const mutations = {
 	async create(
-		payload: MutationPieceManifestCreate
+		payload: MutationPieceTypeManifestCreate
 	): Promise<{ result?: PieceTypeManifest; error?: Error }> {
 		const id = payload.id || uuid()
-		const document: Partial<MutationPieceManifestCreate> = {
+		const document: Partial<MutationPieceTypeManifestCreate> = {
 			...payload
 		}
 		delete document.id
@@ -56,7 +56,7 @@ export const mutations = {
 		return { error: error as Error }
 	},
 	async read(
-		payload: Partial<MutationPieceManifestRead>
+		payload: Partial<MutationPieceTypeManifestRead>
 	): Promise<{ result?: PieceTypeManifest | PieceTypeManifest[]; error?: Error }> {
 		if (payload && payload.id) {
 			const document = await new Promise<DBPieceTypeManifest>((resolve, reject) =>
@@ -98,7 +98,7 @@ export const mutations = {
 		}
 	},
 	async update(
-		payload: MutationPieceManifestUpdate
+		payload: MutationPieceTypeManifestUpdate
 	): Promise<{ result?: PieceTypeManifest; error?: Error }> {
 		const update = {
 			...payload.update,
@@ -134,7 +134,7 @@ export const mutations = {
 
 		return error
 	},
-	async delete(payload: MutationPieceManifestDelete): Promise<{ error?: Error }> {
+	async delete(payload: MutationPieceTypeManifestDelete): Promise<{ error?: Error }> {
 		return new Promise((resolve) =>
 			db.run(
 				`

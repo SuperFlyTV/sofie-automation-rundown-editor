@@ -4,14 +4,14 @@ import {
 	IpcOperation,
 	IpcOperationType,
 	ApplicationSettings,
-	MutationSettingsCreate,
-	MutationSettingsUpdate
+	MutationApplicationSettingsCreate,
+	MutationApplicationSettingsUpdate
 } from '../interfaces'
 import { db } from '../db'
 
 export const mutations = {
 	async create(
-		payload: MutationSettingsCreate
+		payload: MutationApplicationSettingsCreate
 	): Promise<{ result?: ApplicationSettings; error?: Error }> {
 		const document = {
 			...payload
@@ -74,7 +74,7 @@ export const mutations = {
 		}
 	},
 	async update(
-		payload: MutationSettingsUpdate
+		payload: MutationApplicationSettingsUpdate
 	): Promise<{ result?: ApplicationSettings; error?: Error }> {
 		const update = {
 			...payload

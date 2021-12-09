@@ -165,39 +165,18 @@ export interface IpcOperation {
 	payload: any
 }
 
-export interface MutationPieceCreate {
-	name: string
+export type MutationPieceCreate = Pick<
+	Piece,
+	'name' | 'rundownId' | 'segmentId' | 'partId' | 'pieceType'
+> & { playlistId: string | null }
+
+export type MutationPieceRead = Pick<Piece, 'id' | 'rundownId' | 'segmentId' | 'partId'>
+
+export type MutationPieceUpdate = Piece & {
 	playlistId: string | null
-	rundownId: string
-	segmentId: string
-	partId: string
-	pieceType: string
 }
 
-export interface MutationPieceRead {
-	id: string
-	rundownId: string
-	segmentId: string
-	partId: string
-}
-
-export interface MutationPieceUpdate {
-	name: string
-	pieceType: string
-	duration: number
-	start: number
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	payload: { [key: string]: any }
-	id: string
-	playlistId: string | null
-	rundownId: string
-	segmentId: string
-	partId: string
-}
-
-export interface MutationPieceDelete {
-	id: string
-}
+export type MutationPieceDelete = Pick<Piece, 'id'>
 
 export interface MutatedPiece {
 	id: string
@@ -213,121 +192,58 @@ export interface MutatedPiece {
 	position: number | undefined
 }
 
-export interface MutationPartCreate {
-	name: string
+export type MutationPartCreate = Pick<Part, 'name' | 'rundownId' | 'segmentId' | 'rank'> & {
 	playlistId: string | null
-	rundownId: string
-	segmentId: string
-	rank: number
 }
 
-export interface MutationPartRead {
-	id: string
-	rundownId: string
-	segmentId: string
-}
+export type MutationPartRead = Pick<Part, 'id' | 'rundownId' | 'segmentId'>
 
-export interface MutationPartUpdate {
-	name: string
-	rank: number
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	payload: { [key: string]: any }
-	id: string
+export type MutationPartUpdate = Pick<
+	Part,
+	'name' | 'rank' | 'payload' | 'id' | 'rundownId' | 'segmentId'
+> & {
 	playlistId: string | null
-	rundownId: string
-	segmentId: string
 }
 
-export interface MutationPartDelete {
-	id: string
+export type MutationPartDelete = Pick<Part, 'id'>
+
+export type MutationPieceTypeManifestCreate = Pick<PieceTypeManifest, 'id' | 'name'>
+
+export type MutationPieceTypeManifestRead = Pick<PieceTypeManifest, 'id'>
+
+export type MutationPieceTypeManifestUpdate = Pick<PieceTypeManifest, 'id'> & {
+	update: Pick<PieceTypeManifest, 'name' | 'shortName' | 'colour' | 'includeTypeInName' | 'id'>
 }
 
-export interface MutationPieceManifestCreate {
-	id: string
-	name: string
-}
+export type MutationPieceTypeManifestDelete = Pick<PieceTypeManifest, 'id'>
 
-export interface MutationPieceManifestRead {
-	id: string
-}
-
-export interface MutationPieceManifestUpdate {
-	id: string
-	update: {
-		name: string
-		shortName: string
-		colour: string
-		includeTypeInName: boolean
-		id: string
-	}
-}
-
-export interface MutationPieceManifestDelete {
-	id: string
-}
-
-export interface MutationRundownCreate {
-	id: string
-	playlistId: string | null
+export type MutationRundownCreate = Pick<Rundown, 'id' | 'playlistId'> & {
 	document: {
 		name: string
 	}
 }
 
-export interface MutationRundownRead {
-	id: string
-}
+export type MutationRundownRead = Pick<Rundown, 'id'>
 
-export interface MutationRundownUpdate {
-	name: string
-	id: string
+export type MutationRundownUpdate = Pick<
+	Rundown,
+	'name' | 'id' | 'playlistId' | 'expectedStartTime' | 'expectedEndTime' | 'sync'
+>
+
+export type MutationRundownDelete = Pick<Rundown, 'id'>
+
+export type MutationSegmentCreate = Pick<Segment, 'name' | 'rundownId' | 'rank'> & {
 	playlistId: string | null
-	expectedStartTime?: number
-	expectedEndTime?: number
-	sync?: boolean
 }
 
-export interface MutationRundownDelete {
-	id: string
-}
+export type MutationSegmentRead = Pick<Segment, 'id' | 'rundownId'>
 
-export interface MutationSegmentCreate {
-	name: string
+export type MutationSegmentUpdate = Segment & {
 	playlistId: string | null
-	rundownId: string
-	rank: number
 }
 
-export interface MutationSegmentRead {
-	id: string
-	rundownId: string
-}
+export type MutationSegmentDelete = Pick<Segment, 'id'>
 
-export interface MutationSegmentUpdate {
-	name: string
-	rank: number
-	id: string
-	rundownId: string
-	playlistId: string | null
-	float: boolean
-}
+export type MutationApplicationSettingsCreate = ApplicationSettings
 
-export interface MutationSegmentDelete {
-	id: string
-}
-
-export interface RundownMetadataField {
-	id: string
-	label: string
-	type: 'string' | 'number' | 'boolean'
-}
-
-export interface MutationSettingsCreate {
-	partTypes: string[]
-	rundownMetadata: RundownMetadataField[]
-}
-
-export interface MutationSettingsUpdate {
-	partTypes: string[]
-	rundownMetadata: RundownMetadataField[]
-}
+export type MutationApplicationSettingsUpdate = ApplicationSettings
