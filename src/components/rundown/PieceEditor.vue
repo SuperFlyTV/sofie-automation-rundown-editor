@@ -81,8 +81,8 @@ export default Vue.extend({
 		piece(): Piece | undefined {
 			return store.state.pieces.find((p) => p.id === this.$route.params.piece)
 		},
-		pieceManifest(): PieceTypeManifest | undefined {
-			return store.state.piecesManifest.find((m) => m.id === this.piece?.pieceType)
+		pieceManifest(): Partial<PieceTypeManifest> {
+			return store.state.piecesManifest.find((m) => m.id === this.piece?.pieceType) || {}
 		},
 
 		payload: {
@@ -125,8 +125,13 @@ export default Vue.extend({
 			this.editObject.payload[field] = value
 		},
 		update() {
-			let name = this.pieceManifest?.includeTypeInName ? this.pieceManifest.name + ' ' : ''
-			name += this.pieceManifest?.payload
+			if (!this.pieceManifest.payload) {
+				// This should only happen on Pieces which no longer have a valid Piece Manifest type.
+				return
+			}
+
+			let name = this.pieceManifest.includeTypeInName ? this.pieceManifest.name + ' ' : ''
+			name += this.pieceManifest.payload
 				.filter((m) => m.includeInName)
 				.map((m) => m.id)
 				.map((id) => this.editObject?.payload?.[id])
