@@ -19,21 +19,20 @@
 </template>
 
 <script lang="ts">
+import { Playlist, Rundown } from '@/background/interfaces'
 import store from '@/store'
 import Vue from 'vue'
 
 export default Vue.extend({
 	computed: {
-		matchedId() {
+		matchedId(): string {
 			return this.$route.params.id
 		},
-		playlist() {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			return store.state.playlists.find((p) => p.id === (this as any).matchedId)
+		playlist(): Playlist | undefined {
+			return store.state.playlists.find((p) => p.id === this.matchedId)
 		},
-		rundowns() {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			return store.state.rundowns.filter((r) => r.playlistId === (this as any).matchedId)
+		rundowns(): Rundown[] {
+			return store.state.rundowns.filter((r) => r.playlistId === this.matchedId)
 		}
 	},
 	methods: {

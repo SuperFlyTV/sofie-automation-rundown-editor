@@ -57,7 +57,7 @@
 
 <script lang="ts">
 import { Piece, PieceTypeManifest, Rundown } from '@/background/interfaces'
-import { editField } from '@/util/lib'
+import { editField, Nullable } from '@/util/lib'
 import store from '@/store'
 import Vue from 'vue'
 
@@ -89,7 +89,9 @@ export default Vue.extend({
 	},
 	data() {
 		return {
-			editObject: undefined as Partial<Piece> | undefined
+			editObject: undefined as
+				| (Partial<Omit<Piece, 'payload'>> & { payload?: Nullable<Piece['payload']> })
+				| undefined
 		}
 	},
 	methods: {
@@ -101,8 +103,7 @@ export default Vue.extend({
 			store.dispatch('removePiece', this.id)
 			this.$router.push(`/rundown/${this.rundown.id}/part/${partId}`)
 		},
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		updatePayload(field: string, value: any) {
+		updatePayload<T extends keyof Piece['payload']>(field: T, value: Piece['payload'][T] | null) {
 			if (!this.editObject) {
 				this.editObject = {
 					...this.piece

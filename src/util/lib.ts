@@ -2,6 +2,8 @@ export function literal<T>(o: T) {
 	return o
 }
 
+export type Nullable<T> = { [K in keyof T]: T[K] | null }
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const editField = <T extends any>(
 	doc: string,
