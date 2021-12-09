@@ -8,7 +8,7 @@ import './api/segments'
 import './api/parts'
 import './api/pieces'
 
-import { coreHandler } from "./coreHandler"
+import { coreHandler } from './coreHandler'
 
 export interface BasicPayload extends Record<string, unknown> {
 	playerId: number
@@ -26,14 +26,12 @@ export class ControlAPI {
 		// 		})
 		// 	})
 		// })
-
 		// ipcMain.on('getMedia', (ev: any) => {
 		// 	ev.reply('media', media)
 		// })
 		// ipcMain.on('getGfxManifest', (ev: any) => {
 		// 	ev.reply('gfxManifest', graphicsManifest)
 		// })
-
 		// subscribeToUpdates((newMedia) => {
 		// 	media = newMedia
 		// 	window.webContents.send('media', newMedia)

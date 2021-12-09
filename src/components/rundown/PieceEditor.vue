@@ -56,14 +56,7 @@
 </template>
 
 <script lang="ts">
-import {
-	Part,
-	Piece,
-	PiecePayloadManifest,
-	PieceTypeManifest,
-	Rundown,
-	Segment
-} from '@/background/interfaces'
+import { Piece, PieceTypeManifest, Rundown } from '@/background/interfaces'
 import { editField } from '@/util/lib'
 import store from '@/store'
 import Vue from 'vue'
@@ -88,9 +81,6 @@ export default Vue.extend({
 		payload: {
 			get(): Piece['payload'] {
 				return this.piece?.payload || {}
-			},
-			set(val: any) {
-				console.log('set', val)
 			}
 		},
 
@@ -108,10 +98,10 @@ export default Vue.extend({
 		},
 		deletePiece() {
 			const partId = this.piece?.partId
-			console.log('delete', this.id)
 			store.dispatch('removePiece', this.id)
 			this.$router.push(`/rundown/${this.rundown.id}/part/${partId}`)
 		},
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		updatePayload(field: string, value: any) {
 			if (!this.editObject) {
 				this.editObject = {
@@ -138,13 +128,6 @@ export default Vue.extend({
 				.join(' - ')
 
 			if (this.editObject) {
-				console.log({
-					...this.editObject,
-					name,
-					payload: {
-						...(this.editObject.payload || {})
-					}
-				})
 				store.dispatch('updatePiece', {
 					...this.editObject,
 					name,

@@ -1,9 +1,7 @@
 import { RundownMetadataManifest, PiecesManifest, ManifestFieldType } from './interfaces'
 
 // TODO - make this some JSON file for better flexibility
-export const rundownManifest: RundownMetadataManifest = [
-
-]
+export const rundownManifest: RundownMetadataManifest = []
 
 export const piecesManifest: PiecesManifest = [
 	{

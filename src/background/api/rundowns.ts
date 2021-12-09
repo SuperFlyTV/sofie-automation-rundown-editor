@@ -1,5 +1,14 @@
 import { ipcMain } from 'electron'
-import { DBRundown, IpcOperation, IpcOperationType, Rundown } from '../interfaces'
+import {
+	DBRundown,
+	IpcOperation,
+	IpcOperationType,
+	MutationRundownCreate,
+	MutationRundownDelete,
+	MutationRundownRead,
+	MutationRundownUpdate,
+	Rundown
+} from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { RunResult } from 'sqlite3'
@@ -21,16 +30,33 @@ export function mutateRundown(rundown: Rundown) {
 	}
 }
 
+async function sendRundownDiffToCore(oldDocument: Rundown, newDocument: Rundown) {
+	if (oldDocument.sync && !newDocument.sync) {
+		return coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownDelete, [
+			oldDocument.id
+		])
+	} else if (!oldDocument.sync && newDocument.sync) {
+		await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [
+			mutateRundown(newDocument)
+		])
+		await createAllSegmentsInCore(newDocument.id)
+	} else if (oldDocument.sync && newDocument.sync) {
+		return coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownUpdate, [
+			mutateRundown(newDocument)
+		])
+	}
+}
+
 export const mutations = {
-	async create(payload: any): Promise<{ result?: Rundown; error?: Error }> {
+	async create(payload: MutationRundownCreate): Promise<{ result?: Rundown; error?: Error }> {
 		const id = uuid()
-		const document = {
+		const document: Partial<MutationRundownCreate> = {
 			...payload
 		}
 		delete document.id
 		delete document.playlistId
 
-		const { result, error } = await new Promise((resolve, reject) =>
+		const { result, error } = await new Promise((resolve) =>
 			db.run(
 				`
 			INSERT INTO rundowns (id,playlistId,document)
@@ -48,7 +74,7 @@ export const mutations = {
 		)
 
 		if (result) {
-			const document = await new Promise<DBRundown>((resolve, reject) =>
+			const document = await new Promise<DBRundown>((resolve) =>
 				db.get(
 					`
 				SELECT *
@@ -75,7 +101,9 @@ export const mutations = {
 
 		return { error: error as Error }
 	},
-	async read(payload: any): Promise<{ result?: Rundown | Rundown[]; error?: Error }> {
+	async read(
+		payload: Partial<MutationRundownRead>
+	): Promise<{ result?: Rundown | Rundown[]; error?: Error }> {
 		if (payload && payload.id) {
 			const document = await new Promise<DBRundown>((resolve, reject) =>
 				db.get(
@@ -117,13 +145,13 @@ export const mutations = {
 			}
 		}
 	},
-	async update(payload: any): Promise<{ result?: Rundown; error?: Error }> {
+	async update(payload: MutationRundownUpdate): Promise<{ result?: Rundown; error?: Error }> {
 		const update = {
 			...payload,
 			id: null,
 			playlistId: null
 		}
-		const { result, error } = await new Promise((resolve, reject) =>
+		const { result, error } = await new Promise((resolve) =>
 			db.run(
 				`
 			UPDATE rundowns
@@ -137,7 +165,7 @@ export const mutations = {
 		)
 
 		if (result) {
-			const document = await new Promise<DBRundown>((resolve, reject) =>
+			const document = await new Promise<DBRundown>((resolve) =>
 				db.get(
 					`
 				SELECT *
@@ -164,8 +192,8 @@ export const mutations = {
 
 		return error
 	},
-	async delete(payload: any): Promise<{ error?: Error }> {
-		return new Promise((resolve, reject) =>
+	async delete(payload: MutationRundownDelete): Promise<{ error?: Error }> {
+		return new Promise((resolve) =>
 			db.run(
 				`
 			DELETE FROM rundowns
@@ -213,20 +241,3 @@ ipcMain.handle('rundowns', async (_, operation: IpcOperation) => {
 		return error || true
 	}
 })
-
-async function sendRundownDiffToCore(oldDocument: Rundown, newDocument: Rundown) {
-	if (oldDocument.sync && !newDocument.sync) {
-		return coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownDelete, [
-			oldDocument.id
-		])
-	} else if (!oldDocument.sync && newDocument.sync) {
-		await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [
-			mutateRundown(newDocument)
-		])
-		await createAllSegmentsInCore(newDocument.id)
-	} else if (oldDocument.sync && newDocument.sync) {
-		return coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownUpdate, [
-			mutateRundown(newDocument)
-		])
-	}
-}

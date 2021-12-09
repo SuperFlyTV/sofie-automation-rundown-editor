@@ -107,7 +107,7 @@ export interface DBPiece {
 export enum ManifestFieldType {
 	String = 'string',
 	Number = 'number',
-	Boolean = 'boolean',
+	Boolean = 'boolean'
 }
 
 export type RundownMetadataManifest = RundownMetadataEntryManifest[]
@@ -156,10 +156,178 @@ export enum IpcOperationType {
 	Create = 'create',
 	Read = 'read',
 	Update = 'update',
-	Delete = 'delete',
+	Delete = 'delete'
 }
 
 export interface IpcOperation {
-	type: IpcOperationType,
+	type: IpcOperationType
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	payload: any
+}
+
+export interface MutationPieceCreate {
+	name: string
+	playlistId: string | null
+	rundownId: string
+	segmentId: string
+	partId: string
+	pieceType: string
+}
+
+export interface MutationPieceRead {
+	id: string
+	rundownId: string
+	segmentId: string
+	partId: string
+}
+
+export interface MutationPieceUpdate {
+	name: string
+	pieceType: string
+	duration: number
+	start: number
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	payload: { [key: string]: any }
+	id: string
+	playlistId: string | null
+	rundownId: string
+	segmentId: string
+	partId: string
+}
+
+export interface MutationPieceDelete {
+	id: string
+}
+
+export interface MutatedPiece {
+	id: string
+	objectType: string
+	objectTime: number | undefined
+	duration: number | undefined
+	clipName: string | undefined
+	attributes: {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		[key: string]: any
+		adlib: boolean
+	}
+	position: number | undefined
+}
+
+export interface MutationPartCreate {
+	name: string
+	playlistId: string | null
+	rundownId: string
+	segmentId: string
+	rank: number
+}
+
+export interface MutationPartRead {
+	id: string
+	rundownId: string
+	segmentId: string
+}
+
+export interface MutationPartUpdate {
+	name: string
+	rank: number
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	payload: { [key: string]: any }
+	id: string
+	playlistId: string | null
+	rundownId: string
+	segmentId: string
+}
+
+export interface MutationPartDelete {
+	id: string
+}
+
+export interface MutationPieceManifestCreate {
+	id: string
+	name: string
+}
+
+export interface MutationPieceManifestRead {
+	id: string
+}
+
+export interface MutationPieceManifestUpdate {
+	id: string
+	update: {
+		name: string
+		shortName: string
+		colour: string
+		includeTypeInName: boolean
+		id: string
+	}
+}
+
+export interface MutationPieceManifestDelete {
+	id: string
+}
+
+export interface MutationRundownCreate {
+	id: string
+	playlistId: string | null
+	document: {
+		name: string
+	}
+}
+
+export interface MutationRundownRead {
+	id: string
+}
+
+export interface MutationRundownUpdate {
+	name: string
+	id: string
+	playlistId: string | null
+	expectedStartTime?: number
+	expectedEndTime?: number
+	sync?: boolean
+}
+
+export interface MutationRundownDelete {
+	id: string
+}
+
+export interface MutationSegmentCreate {
+	name: string
+	playlistId: string | null
+	rundownId: string
+	rank: number
+}
+
+export interface MutationSegmentRead {
+	id: string
+	rundownId: string
+}
+
+export interface MutationSegmentUpdate {
+	name: string
+	rank: number
+	id: string
+	rundownId: string
+	playlistId: string | null
+	float: boolean
+}
+
+export interface MutationSegmentDelete {
+	id: string
+}
+
+export interface RundownMetadataField {
+	id: string
+	label: string
+	type: 'string' | 'number' | 'boolean'
+}
+
+export interface MutationSettingsCreate {
+	partTypes: string[]
+	rundownMetadata: RundownMetadataField[]
+}
+
+export interface MutationSettingsUpdate {
+	partTypes: string[]
+	rundownMetadata: RundownMetadataField[]
 }

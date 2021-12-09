@@ -28,9 +28,11 @@ export default Vue.extend({
 			return this.$route.params.id
 		},
 		playlist() {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			return store.state.playlists.find((p) => p.id === (this as any).matchedId)
 		},
 		rundowns() {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			return store.state.rundowns.filter((r) => r.playlistId === (this as any).matchedId)
 		}
 	},

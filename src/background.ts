@@ -1,11 +1,10 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, Menu, dialog } from 'electron'
+import { app, protocol, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { ControlAPI } from './background/index'
 import path from 'path'
-import { readFileSync, writeFileSync } from 'fs'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Scheme must be registered before the app is ready
@@ -25,6 +24,9 @@ async function createWindow() {
 			preload: path.join(__dirname, 'preload.js')
 		}
 	})
+
+	// Without this line, everything in `background` gets tree-shaken out.
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const api = new ControlAPI(win)
 
 	// const menu = Menu.buildFromTemplate([

@@ -44,10 +44,11 @@
 </template>
 
 <script lang="ts">
-import { Part, Rundown, Segment } from '@/background/interfaces'
+import { Part, Rundown } from '@/background/interfaces'
 import store from '@/store'
 import Vue from 'vue'
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const editField = <T extends any>(field: string, index?: string) => ({
 	[field]: {
 		get(): T | undefined {
@@ -76,6 +77,7 @@ const editField = <T extends any>(field: string, index?: string) => ({
 		}
 	}
 })
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export default Vue.extend({
 	computed: {
@@ -116,12 +118,6 @@ export default Vue.extend({
 		},
 		update() {
 			if (this.editObject) {
-				console.log({
-					...this.editObject,
-					payload: {
-						...(this.editObject.payload || {})
-					}
-				})
 				store.dispatch('updatePart', {
 					...this.editObject,
 					payload: {

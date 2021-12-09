@@ -74,9 +74,6 @@ export default Vue.extend({
 				return store.state.segments
 					.sort((a, b) => (a.rank || 0) - (b.rank || 0))
 					.map((segment) => segment.id)
-			},
-			set(list: any) {
-				console.log(list)
 			}
 		}
 	},
@@ -138,6 +135,7 @@ export default Vue.extend({
 			}
 		},
 
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		changeParts2(segmentId: string, ev: any) {
 			const segment = this.segments.find((s) => s.id === segmentId)
 			if (!segment) return
@@ -191,7 +189,7 @@ export default Vue.extend({
 					store.dispatch('updatePart', p)
 				})
 			} else if ('removed' in ev) {
-				const { oldIndex, element: id } = ev.added
+				const { oldIndex } = ev.added
 
 				const partsToUpdate = segment.parts
 					.filter((p) => p.rank > oldIndex)
@@ -207,6 +205,7 @@ export default Vue.extend({
 				})
 			}
 		},
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		changeSegments(ev: any) {
 			if ('moved' in ev) {
 				const { oldIndex, newIndex, element: id } = ev.moved

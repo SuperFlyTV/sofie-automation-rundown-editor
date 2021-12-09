@@ -2,13 +2,20 @@ export function literal<T>(o: T) {
 	return o
 }
 
-export const editField = <T extends any>(doc: string, field: string, index?: string, defaultVal: any = undefined) => ({
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export const editField = <T extends any>(
+	doc: string,
+	field: string,
+	index?: string,
+	defaultVal: any = undefined
+) => ({
 	[field]: {
 		get(): T | undefined {
 			const self = this as any
-			// console.log((this as any).part[field])
 			if (index) {
-				return self.editObject ? self.editObject[index]?.[field] : self[doc]?.[index]?.[field] || defaultVal
+				return self.editObject
+					? self.editObject[index]?.[field]
+					: self[doc]?.[index]?.[field] || defaultVal
 			} else {
 				const editObj = self.editObject ? self.editObject[field] : undefined
 				const docObj = self[doc]?.[field] ?? defaultVal
@@ -19,7 +26,6 @@ export const editField = <T extends any>(doc: string, field: string, index?: str
 		set(value: T) {
 			const self = this as any
 			const isValue = value !== undefined && value !== null && value !== ''
-			console.log(field, value, isValue)
 
 			if (!self.editObject) {
 				self.editObject = {
@@ -37,6 +43,7 @@ export const editField = <T extends any>(doc: string, field: string, index?: str
 		}
 	}
 })
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export const toTime = (seconds: number) => {
 	const h = Math.floor(seconds / 3600)
