@@ -31,6 +31,7 @@
 import Vue from 'vue'
 import store from '../store'
 import PlaylistList from '../components/PlaylistList.vue'
+import { Playlist, Rundown } from '@/background/interfaces'
 
 export default Vue.extend({
 	name: 'App',
@@ -38,21 +39,24 @@ export default Vue.extend({
 		PlaylistList
 	},
 	computed: {
-		playlists() {
+		playlists(): (Playlist & { rundowns: Rundown[] })[] {
 			return store.state.playlists.map((p) => ({
 				...p,
 				rundowns: store.state.rundowns.filter((r) => r.playlistId === p.id)
 			}))
 		},
-		editPlaylistItem() {
-			return store.state.playlists.find((p) => p.id === (this as any).editPlaylist) || {}
+		editPlaylistItem(): Partial<Playlist & { rundowns: Rundown[] }> {
+			return store.state.playlists.find((p) => p.id === this.editPlaylistId) || {}
 		},
 
 		rundowns() {
 			return store.state.rundowns.filter((r) => !r.playlistId)
 		}
 	},
-	data() {
+	data(): {
+		editPlaylistId: string
+		newPlaylistName: string
+	} {
 		return {
 			newPlaylistName: '',
 			editPlaylistId: ''

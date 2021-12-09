@@ -3,21 +3,21 @@ import sqlite3 from 'sqlite3'
 const db = new sqlite3.Database('data.db')
 
 db.serialize(() => {
-    db.run(`
+	db.run(`
         CREATE TABLE IF NOT EXISTS settings (
             id string PRIMARY KEY,
             document JSON NOT NULL
         );
     `)
 
-    db.run(`
+	db.run(`
         CREATE TABLE IF NOT EXISTS playlists (
             id string PRIMARY KEY,
             document JSON NOT NULL
         );
     `)
-    
-    db.run(`
+
+	db.run(`
         CREATE TABLE IF NOT EXISTS rundowns (
             id TEXT PRIMARY KEY,
             playlistId TEXT,
@@ -25,8 +25,8 @@ db.serialize(() => {
             FOREIGN KEY (playlistId) REFERENCES playlists(id)
         );
     `)
-    
-    db.run(`
+
+	db.run(`
         CREATE TABLE IF NOT EXISTS segments (
             id TEXT PRIMARY KEY,
   			playlistId TEXT,
@@ -36,8 +36,8 @@ db.serialize(() => {
             FOREIGN KEY (rundownId) REFERENCES rundowns(id)
         );
     `)
-    
-    db.run(`
+
+	db.run(`
         CREATE TABLE IF NOT EXISTS parts (
             id TEXT PRIMARY KEY,
   			playlistId TEXT,
@@ -50,7 +50,7 @@ db.serialize(() => {
         );
     `)
 
-    db.run(`
+	db.run(`
         CREATE TABLE IF NOT EXISTS pieces (
             id TEXT PRIMARY KEY,
   			playlistId TEXT,

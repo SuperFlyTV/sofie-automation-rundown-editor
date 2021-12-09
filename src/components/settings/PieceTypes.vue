@@ -80,6 +80,7 @@ export default Vue.extend({
 
 		async importPieceTypes() {
 			const pieceTypes = await openFromFile()
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const verify = (pieceTypes: any) =>
 				Array.isArray(pieceTypes) &&
 				pieceTypes.map((t) => 'id' in t && 'name' in t && 'payload' in t).filter((p) => p === false)

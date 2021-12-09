@@ -56,15 +56,8 @@
 </template>
 
 <script lang="ts">
-import {
-	Part,
-	Piece,
-	PiecePayloadManifest,
-	PieceTypeManifest,
-	Rundown,
-	Segment
-} from '@/background/interfaces'
-import { editField } from '@/util/lib'
+import { Piece, PieceTypeManifest, Rundown } from '@/background/interfaces'
+import { editField, Nullable } from '@/util/lib'
 import store from '@/store'
 import Vue from 'vue'
 
@@ -88,9 +81,6 @@ export default Vue.extend({
 		payload: {
 			get(): Piece['payload'] {
 				return this.piece?.payload || {}
-			},
-			set(val: any) {
-				console.log('set', val)
 			}
 		},
 
@@ -99,7 +89,9 @@ export default Vue.extend({
 	},
 	data() {
 		return {
-			editObject: undefined as Partial<Piece> | undefined
+			editObject: undefined as
+				| (Partial<Omit<Piece, 'payload'>> & { payload?: Nullable<Piece['payload']> })
+				| undefined
 		}
 	},
 	methods: {
@@ -108,11 +100,10 @@ export default Vue.extend({
 		},
 		deletePiece() {
 			const partId = this.piece?.partId
-			console.log('delete', this.id)
 			store.dispatch('removePiece', this.id)
 			this.$router.push(`/rundown/${this.rundown.id}/part/${partId}`)
 		},
-		updatePayload(field: string, value: any) {
+		updatePayload<T extends keyof Piece['payload']>(field: T, value: Piece['payload'][T] | null) {
 			if (!this.editObject) {
 				this.editObject = {
 					...this.piece
@@ -138,13 +129,6 @@ export default Vue.extend({
 				.join(' - ')
 
 			if (this.editObject) {
-				console.log({
-					...this.editObject,
-					name,
-					payload: {
-						...(this.editObject.payload || {})
-					}
-				})
 				store.dispatch('updatePiece', {
 					...this.editObject,
 					name,

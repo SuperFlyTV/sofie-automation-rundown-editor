@@ -1,25 +1,38 @@
-import { ipcMain } from "electron"
-import { DBSettings, IpcOperation, IpcOperationType, ApplicationSettings } from '../interfaces'
+import { ipcMain } from 'electron'
+import {
+	DBSettings,
+	IpcOperation,
+	IpcOperationType,
+	ApplicationSettings,
+	MutationApplicationSettingsCreate,
+	MutationApplicationSettingsUpdate
+} from '../interfaces'
 import { db } from '../db'
 
 export const mutations = {
-	async create (payload: any): Promise<{ result?: ApplicationSettings, error?: Error }> {
+	async create(
+		payload: MutationApplicationSettingsCreate
+	): Promise<{ result?: ApplicationSettings; error?: Error }> {
 		const document = {
-			...payload,
+			...payload
 		}
 
-		const { result, error } = await new Promise((resolve, reject) => db.run(`
+		const { result, error } = await new Promise((resolve) =>
+			db.run(
+				`
 			INSERT INTO settings (id,document)
 			VALUES ("settings",json(?));
-		`, [
-			JSON.stringify(document)
-		], function (e: Error | null) {
-			if (e) {
-				resolve({ result: undefined, error: e })
-			} else if (this) {
-				resolve({ result: this.lastID, error: undefined })
-			}
-		}))
+		`,
+				[JSON.stringify(document)],
+				function(e: Error | null) {
+					if (e) {
+						resolve({ result: undefined, error: e })
+					} else if (this) {
+						resolve({ result: this.lastID, error: undefined })
+					}
+				}
+			)
+		)
 
 		if (result) {
 			console.log(result)
@@ -37,35 +50,47 @@ export const mutations = {
 
 		return { error: error as Error }
 	},
-	async read (): Promise<{ result?: ApplicationSettings, error?: Error }> {
-		const { result, error } = await new Promise<{ error?: Error, result?: DBSettings }>((resolve, reject) => db.get(`
+	async read(): Promise<{ result?: ApplicationSettings; error?: Error }> {
+		const { result, error } = await new Promise<{ error?: Error; result?: DBSettings }>((resolve) =>
+			db.get(
+				`
 			SELECT *
 			FROM settings
 			WHERE id = "settings"
 			LIMIT 1;
-		`, (error, result) => resolve({ error: error || undefined, result })))
+		`,
+				(error, result) => resolve({ error: error || undefined, result })
+			)
+		)
 
 		if (result) {
 			return {
 				result: {
-					...JSON.parse(result.document),
+					...JSON.parse(result.document)
 				}
 			}
 		} else {
 			return { error }
 		}
 	},
-	async update (payload: any): Promise<{ result?: ApplicationSettings, error?: Error }> {
+	async update(
+		payload: MutationApplicationSettingsUpdate
+	): Promise<{ result?: ApplicationSettings; error?: Error }> {
 		const update = {
-			...payload,
+			...payload
 		}
-		const { result, error } = await new Promise((resolve, reject) => db.run(`
+		const { result, error } = await new Promise((resolve) =>
+			db.run(
+				`
 			UPDATE settings
 			SET document = (SELECT json_patch(settings.document, json(?)) FROM settings WHERE id = "settings")
 			WHERE id = "settings";
-		`, [
-			JSON.stringify(update)
-		], (e) => e ? resolve({ result: undefined, error: e }) : resolve({ result: true, error: undefined })))
+		`,
+				[JSON.stringify(update)],
+				(e) =>
+					e ? resolve({ result: undefined, error: e }) : resolve({ result: true, error: undefined })
+			)
+		)
 
 		if (result) {
 			const { result: returnResult, error } = await mutations.read()
@@ -104,7 +129,7 @@ mutations.read().then(({ result }) => {
 	if (!result) {
 		mutations.create({
 			partTypes: [],
-			rundownMetadata: [],
+			rundownMetadata: []
 		})
 	}
 })

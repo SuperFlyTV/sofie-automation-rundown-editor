@@ -97,7 +97,7 @@ export default Vue.extend({
 			if (!this.editObject) {
 				this.editObject = {
 					...this.item,
-					payload: (this.item.payload || []).map(item => ({ ...item }))
+					payload: (this.item.payload || []).map((item) => ({ ...item }))
 				}
 			}
 		},
@@ -105,7 +105,6 @@ export default Vue.extend({
 			this.editObject = undefined
 		},
 		update() {
-			console.log(this.editObject)
 			if (this.editObject) {
 				store.dispatch('updatePieceTypeManifest', { update: this.editObject, id: this.manifestId })
 			}

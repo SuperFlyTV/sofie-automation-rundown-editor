@@ -107,7 +107,7 @@ export interface DBPiece {
 export enum ManifestFieldType {
 	String = 'string',
 	Number = 'number',
-	Boolean = 'boolean',
+	Boolean = 'boolean'
 }
 
 export type RundownMetadataManifest = RundownMetadataEntryManifest[]
@@ -156,10 +156,94 @@ export enum IpcOperationType {
 	Create = 'create',
 	Read = 'read',
 	Update = 'update',
-	Delete = 'delete',
+	Delete = 'delete'
 }
 
 export interface IpcOperation {
-	type: IpcOperationType,
+	type: IpcOperationType
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	payload: any
 }
+
+export type MutationPieceCreate = Pick<
+	Piece,
+	'name' | 'rundownId' | 'segmentId' | 'partId' | 'pieceType'
+> & { playlistId: string | null }
+
+export type MutationPieceRead = Pick<Piece, 'id' | 'rundownId' | 'segmentId' | 'partId'>
+
+export type MutationPieceUpdate = Piece & {
+	playlistId: string | null
+}
+
+export type MutationPieceDelete = Pick<Piece, 'id'>
+
+export interface MutatedPiece {
+	id: string
+	objectType: string
+	objectTime: number | undefined
+	duration: number | undefined
+	clipName: string | undefined
+	attributes: {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		[key: string]: any
+		adlib: boolean
+	}
+	position: number | undefined
+}
+
+export type MutationPartCreate = Pick<Part, 'name' | 'rundownId' | 'segmentId' | 'rank'> & {
+	playlistId: string | null
+}
+
+export type MutationPartRead = Pick<Part, 'id' | 'rundownId' | 'segmentId'>
+
+export type MutationPartUpdate = Pick<
+	Part,
+	'name' | 'rank' | 'payload' | 'id' | 'rundownId' | 'segmentId'
+> & {
+	playlistId: string | null
+}
+
+export type MutationPartDelete = Pick<Part, 'id'>
+
+export type MutationPieceTypeManifestCreate = Pick<PieceTypeManifest, 'id' | 'name'>
+
+export type MutationPieceTypeManifestRead = Pick<PieceTypeManifest, 'id'>
+
+export type MutationPieceTypeManifestUpdate = Pick<PieceTypeManifest, 'id'> & {
+	update: Pick<PieceTypeManifest, 'name' | 'shortName' | 'colour' | 'includeTypeInName' | 'id'>
+}
+
+export type MutationPieceTypeManifestDelete = Pick<PieceTypeManifest, 'id'>
+
+export type MutationRundownCreate = Pick<Rundown, 'id' | 'playlistId'> & {
+	document: {
+		name: string
+	}
+}
+
+export type MutationRundownRead = Pick<Rundown, 'id'>
+
+export type MutationRundownUpdate = Pick<
+	Rundown,
+	'name' | 'id' | 'playlistId' | 'expectedStartTime' | 'expectedEndTime' | 'sync'
+>
+
+export type MutationRundownDelete = Pick<Rundown, 'id'>
+
+export type MutationSegmentCreate = Pick<Segment, 'name' | 'rundownId' | 'rank'> & {
+	playlistId: string | null
+}
+
+export type MutationSegmentRead = Pick<Segment, 'id' | 'rundownId'>
+
+export type MutationSegmentUpdate = Segment & {
+	playlistId: string | null
+}
+
+export type MutationSegmentDelete = Pick<Segment, 'id'>
+
+export type MutationApplicationSettingsCreate = ApplicationSettings
+
+export type MutationApplicationSettingsUpdate = ApplicationSettings

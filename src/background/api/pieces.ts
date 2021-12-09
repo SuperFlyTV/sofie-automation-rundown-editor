@@ -1,50 +1,65 @@
-import { ipcMain } from "electron"
-import { DBPlaylist, DBRundown, DBPiece, IpcOperation, IpcOperationType, Piece } from '../interfaces'
+import { ipcMain } from 'electron'
+import {
+	DBPiece,
+	IpcOperation,
+	IpcOperationType,
+	MutatedPiece,
+	MutationPieceCreate,
+	MutationPieceDelete,
+	MutationPieceRead,
+	MutationPieceUpdate,
+	Piece
+} from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
-import { RunResult } from 'sqlite3'
-import { sendPartUpdateToCore } from "./parts"
+import { sendPartUpdateToCore } from './parts'
 
 export const mutations = {
-	async create (payload: any): Promise<{ result?: Piece, error?: Error }> {
+	async create(payload: MutationPieceCreate): Promise<{ result?: Piece; error?: Error }> {
 		const id = uuid()
-		const document = {
-			...payload,
+		const document: Partial<MutationPieceCreate> = {
+			...payload
 		}
-		delete document.id
 		delete document.playlistId
 		delete document.rundownId
 		delete document.segmentId
 		delete document.partId
 
-		if (!payload.rundownId || !payload.partId) return { error: new Error('Missing rundown id or part id') }
+		if (!payload.rundownId || !payload.partId)
+			return { error: new Error('Missing rundown id or part id') }
 
-		const { result, error } = await new Promise((resolve, reject) => db.run(`
+		const { result, error } = await new Promise((resolve) =>
+			db.run(
+				`
 			INSERT INTO pieces (id,playlistId,rundownId,segmentId,partId,document)
 			VALUES (?,?,?,?,?,json(?));
-		`, [
-			id,
-			payload.playlistId || null,
-			payload.rundownId,
-			payload.segmentId,
-			payload.partId,
-			JSON.stringify(document)
-		], function (e: Error | null) {
-			if (e) {
-				resolve({ result: undefined, error: e })
-			} else if (this) {
-				resolve({ result: this.lastID, error: undefined })
-			}
-		}))
+		`,
+				[
+					id,
+					payload.playlistId || null,
+					payload.rundownId,
+					payload.segmentId,
+					payload.partId,
+					JSON.stringify(document)
+				],
+				function(e: Error | null) {
+					if (e) {
+						resolve({ result: undefined, error: e })
+					} else if (this) {
+						resolve({ result: this.lastID, error: undefined })
+					}
+				}
+			)
+		)
 
 		if (result) {
 			const { result: document, error: readError } = await mutations.read({ id })
-			
+
 			if (document && !Array.isArray(document)) {
 				return { result: document }
 			}
 
-			return { error }
+			return { error: readError }
 			// const document = await new Promise<DBPiece>((resolve, reject) => db.get(`
 			// 	SELECT *
 			// 	FROM pieces
@@ -67,12 +82,14 @@ export const mutations = {
 
 		return { error }
 	},
-	async read (payload: any): Promise<{ result?: Piece | Piece[], error?: Error }> {
+	async read(
+		payload: Partial<MutationPieceRead>
+	): Promise<{ result?: Piece | Piece[]; error?: Error }> {
 		let query = `
 			SELECT *
 			FROM pieces
 		`
-		let args: any[] = []
+		const args: string[] = []
 		if (payload.id) {
 			query += `\nWHERE id = ?`
 			args.push(payload.id)
@@ -92,11 +109,11 @@ export const mutations = {
 
 		if (payload.id) {
 			query += `\nLIMIT 1`
-			
-			const { result, error } = await new Promise<{ result?: DBPiece, error?: Error}>((resolve, reject) => db.get(
-				query, 
-				args,
-				(e, r: DBPiece) => e ? resolve({ error: e, result: undefined }) : resolve({ result: r, error: undefined }))
+
+			const { result, error } = await new Promise<{ result?: DBPiece; error?: Error }>((resolve) =>
+				db.get(query, args, (e, r: DBPiece) =>
+					e ? resolve({ error: e, result: undefined }) : resolve({ result: r, error: undefined })
+				)
 			)
 
 			if (!result) {
@@ -110,14 +127,15 @@ export const mutations = {
 					playlistId: result.playlistId,
 					rundownId: result.rundownId,
 					segmentId: result.segmentId,
-					partId: result.partId,
+					partId: result.partId
 				}
 			}
 		} else {
-			const { result, error } = await new Promise<{ result?: DBPiece[], error?: Error}>((resolve, reject) => db.all(
-				query, 
-				args,
-				(e, r: DBPiece[]) => e ? resolve({ error: e, result: undefined }) : resolve({ result: r, error: undefined }))
+			const { result, error } = await new Promise<{ result?: DBPiece[]; error?: Error }>(
+				(resolve) =>
+					db.all(query, args, (e, r: DBPiece[]) =>
+						e ? resolve({ error: e, result: undefined }) : resolve({ result: r, error: undefined })
+					)
 			)
 
 			if (!result) {
@@ -125,39 +143,43 @@ export const mutations = {
 			}
 
 			return {
-				result: result.map(d => ({
+				result: result.map((d) => ({
 					...JSON.parse(d.document),
 					id: d.id,
 					playlistId: d.playlistId,
 					rundownId: d.rundownId,
 					segmentId: d.segmentId,
-					partId: d.partId,
+					partId: d.partId
 				}))
 			}
 		}
 	},
-	async update (payload: any): Promise<{ result?: Piece, error?: Error }> {
+	async update(payload: MutationPieceUpdate): Promise<{ result?: Piece; error?: Error }> {
 		const update = {
 			...payload,
 			id: null,
 			playlistId: null,
 			rundownId: null,
 			segmentId: null,
-			partId: null,
+			partId: null
 		}
-		
-		const { result, error } = await new Promise((resolve, reject) => db.run(`
+
+		const { result, error } = await new Promise((resolve) =>
+			db.run(
+				`
 			UPDATE pieces
 			SET playlistId = ?, document = (SELECT json_patch(pieces.document, json(?)) FROM pieces WHERE id = ?)
 			WHERE id = "${payload.id}";
-		`, [
-			payload.playlistId || null,
-			JSON.stringify(update),
-			payload.id,
-		], (e) => resolve({ error: e, result: e ? undefined : true })))
+		`,
+				[payload.playlistId || null, JSON.stringify(update), payload.id],
+				(e) => resolve({ error: e, result: e ? undefined : true })
+			)
+		)
 
 		if (result) {
-			const { result: document, error: readError } = await mutations.read({ id: payload.id })
+			const { result: document, error: readError } = await mutations.read({
+				id: payload.id
+			})
 
 			if (document && !Array.isArray(document)) {
 				return { result: document }
@@ -168,12 +190,16 @@ export const mutations = {
 
 		return { error }
 	},
-	async delete (payload: any): Promise<{ error?: Error }> {
-		console.log('attempt delete', payload.id)
-		return new Promise((resolve, reject) => db.run(`
+	async delete(payload: MutationPieceDelete): Promise<{ error?: Error }> {
+		return new Promise((resolve) =>
+			db.run(
+				`
 			DELETE FROM pieces
 			WHERE id = "${payload.id}";
-		`, (e) => resolve({ error: e || undefined })))
+		`,
+				(e) => resolve({ error: e || undefined })
+			)
+		)
 	}
 }
 
@@ -204,11 +230,11 @@ ipcMain.handle('pieces', async (_, operation: IpcOperation) => {
 	}
 })
 
-export async function getMutatedPiecesFromPart(partId: string): Promise<any[]> {
+export async function getMutatedPiecesFromPart(partId: string): Promise<MutatedPiece[]> {
 	const { result: pieces } = await mutations.read({ partId: partId })
 
 	if (pieces && Array.isArray(pieces)) {
-		return pieces.map(piece => ({
+		return pieces.map((piece) => ({
 			id: piece.id,
 			objectType: piece.pieceType,
 			objectTime: piece.start,
@@ -218,7 +244,7 @@ export async function getMutatedPiecesFromPart(partId: string): Promise<any[]> {
 				...piece.payload,
 				adlib: piece.start === undefined || piece.start === null
 			},
-			position: undefined,
+			position: undefined
 		}))
 	}
 

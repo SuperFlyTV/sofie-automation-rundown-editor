@@ -112,7 +112,6 @@ export default Vue.extend({
 				if (!start) return undefined
 
 				const date = new Date(start)
-				console.log(date)
 				return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 			},
 			set(time: string) {
@@ -169,7 +168,6 @@ export default Vue.extend({
 				if (!start) return undefined
 
 				const date = new Date(start)
-				console.log(date)
 				return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 			},
 			set(time: string) {

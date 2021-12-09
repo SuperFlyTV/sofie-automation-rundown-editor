@@ -1,4 +1,10 @@
-import { CoreConnection, CoreOptions, DDPConnectorOptions, PeripheralDeviceAPI as P } from '@sofie-automation/server-core-integration'
+import {
+	CoreConnection,
+	CoreOptions,
+	DDPConnectorOptions,
+	Observer,
+	PeripheralDeviceAPI as P
+} from '@sofie-automation/server-core-integration'
 import { DEVICE_CONFIG_MANIFEST } from './configManifest'
 import fs from 'fs'
 import { mutations as settingsMutations } from './api/settings'
@@ -7,6 +13,8 @@ export interface DeviceConfig {
 	deviceId: string
 	deviceToken: string
 }
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface PeripheralDeviceCommand {
 	_id: string
 
@@ -20,23 +28,29 @@ export interface PeripheralDeviceCommand {
 
 	time: number // time
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export class CoreHandler {
-    public core: CoreConnection
-    
-	private _observers: Array<any> = []
-	private _subscriptions: Array<any> = []
-	private _executedFunctions: {[id: string]: boolean} = {}
+	public core: CoreConnection
 
-    constructor () {
-        // todo - have settings for this
-        this.core = new CoreConnection(this.getCoreConnectionOptions({
-            deviceId: '',
-            deviceToken: '',
-        }, 'sofie-rundown-editor'))
-    }
+	private _observers: Array<Observer> = []
+	private _subscriptions: Array<string> = []
+	private _executedFunctions: { [id: string]: boolean } = {}
 
-    async init () {
+	constructor() {
+		// todo - have settings for this
+		this.core = new CoreConnection(
+			this.getCoreConnectionOptions(
+				{
+					deviceId: '',
+					deviceToken: ''
+				},
+				'sofie-rundown-editor'
+			)
+		)
+	}
+
+	async init() {
 		const { result: settings } = await settingsMutations.read()
 
 		this.core.onConnected(() => {
@@ -51,7 +65,7 @@ export class CoreHandler {
 			console.log('Core Error: ' + (err.message || err.toString() || err))
 		})
 
-		let ddpConfig: DDPConnectorOptions = {
+		const ddpConfig: DDPConnectorOptions = {
 			host: (settings || {}).coreUrl || '127.0.0.1',
 			port: (settings || {}).corePort || 3000
 		}
@@ -60,28 +74,29 @@ export class CoreHandler {
 		// 		ca: this._process.certificates
 		// 	}
 		// }
-		return this.core.init(ddpConfig).then((id: string) => {
-			id = id // tsignore
-
-			this.core.setStatus({
-				statusCode: P.StatusCode.UNKNOWN,
-				messages: ['Starting up']
+		return this.core
+			.init(ddpConfig)
+			.then(() => {
+				this.core
+					.setStatus({
+						statusCode: P.StatusCode.UNKNOWN,
+						messages: ['Starting up']
+					})
+					.catch((e) => console.warn('Error when setting status:' + e))
+				// nothing
 			})
-			.catch(e => console.warn('Error when setting status:' + e))
-			// nothing
-		})
-		.then(() => {
-			return this.setupSubscriptionsAndObservers()
-		})
-		.then(() => {
-			// this._isInitialized = true
-		})
-    }
+			.then(() => {
+				return this.setupSubscriptionsAndObservers()
+			})
+			.then(() => {
+				// this._isInitialized = true
+			})
+	}
 
 	/**
 	 * Subscribes to events in the core.
 	 */
-     setupSubscriptionsAndObservers (): Promise<void> {
+	setupSubscriptionsAndObservers(): Promise<void> {
 		if (this._observers.length) {
 			console.log('Core: Clearing observers..')
 			this._observers.forEach((obs) => {
@@ -99,17 +114,17 @@ export class CoreHandler {
 			this.core.autoSubscribe('peripheralDeviceCommands', this.core.deviceId),
 			this.core.autoSubscribe('peripheralDevices', this.core.deviceId)
 		])
-		.then((subs) => {
-			this._subscriptions = this._subscriptions.concat(subs)
-		})
-		.then(() => {
-			this.setupObserverForPeripheralDeviceCommands()
+			.then((subs) => {
+				this._subscriptions = this._subscriptions.concat(subs)
+			})
+			.then(() => {
+				this.setupObserverForPeripheralDeviceCommands()
 
-			return
-		})
+				return
+			})
 	}
 
-	getCoreConnectionOptions (deviceOptions: DeviceConfig, name: string): CoreOptions {
+	getCoreConnectionOptions(deviceOptions: DeviceConfig, name: string): CoreOptions {
 		let credentials: {
 			deviceId: string
 			deviceToken: string
@@ -127,9 +142,9 @@ export class CoreHandler {
 				deviceToken: 'unsecureToken'
 			}
 		} else {
-			credentials = CoreConnection.getCredentials(name.replace(/ /g,''))
+			credentials = CoreConnection.getCredentials(name.replace(/ /g, ''))
 		}
-		let options: CoreOptions = {
+		const options: CoreOptions = {
 			...credentials,
 
 			deviceCategory: P.DeviceCategory.INGEST,
@@ -144,20 +159,21 @@ export class CoreHandler {
 		options.versions = this._getVersions()
 		return options
 	}
-	
-	setStatus (statusCode: P.StatusCode, messages: string[]) {
-		this.core.setStatus({
-			statusCode: statusCode,
-			messages: messages
-		})
-		.catch(e => console.warn('Error when setting status:' + e))
+
+	setStatus(statusCode: P.StatusCode, messages: string[]) {
+		this.core
+			.setStatus({
+				statusCode: statusCode,
+				messages: messages
+			})
+			.catch((e) => console.warn('Error when setting status:' + e))
 	}
-    
+
 	/**
 	 * Listen for commands and execute.
 	 */
-	setupObserverForPeripheralDeviceCommands () {
-		let observer = this.core.observe('peripheralDeviceCommands')
+	setupObserverForPeripheralDeviceCommands() {
+		const observer = this.core.observe('peripheralDeviceCommands')
 		this.killProcess(0) // just make sure it exists
 		this._observers.push(observer)
 
@@ -165,10 +181,10 @@ export class CoreHandler {
 		 * Called when a command is added/changed. Executes that command.
 		 * @param {string} id Command id to execute.
 		 */
-		let addedChangedCommand = (id: string) => {
-			let cmds = this.core.getCollection('peripheralDeviceCommands')
+		const addedChangedCommand = (id: string) => {
+			const cmds = this.core.getCollection('peripheralDeviceCommands')
 			if (!cmds) throw Error('"peripheralDeviceCommands" collection not found!')
-			let cmd = cmds.findOne(id) as PeripheralDeviceCommand
+			const cmd = cmds.findOne(id) as PeripheralDeviceCommand
 			if (!cmd) throw Error('PeripheralCommand "' + id + '" not found!')
 			if (cmd.deviceId === this.core.deviceId) {
 				this.executeFunction(cmd, this)
@@ -183,17 +199,17 @@ export class CoreHandler {
 		observer.removed = (id: string) => {
 			this.retireExecuteFunction(id)
 		}
-		let cmds = this.core.getCollection('peripheralDeviceCommands')
+		const cmds = this.core.getCollection('peripheralDeviceCommands')
 		if (!cmds) throw Error('"peripheralDeviceCommands" collection not found!')
 		cmds.find({}).forEach((cmd0) => {
-			let cmd = cmd0 as PeripheralDeviceCommand
+			const cmd = cmd0 as PeripheralDeviceCommand
 			if (cmd.deviceId === this.core.deviceId) {
 				this.executeFunction(cmd, this)
 			}
 		})
 	}
-    
-	killProcess (actually: number) {
+
+	killProcess(actually: number) {
 		if (actually === 1) {
 			console.log('KillProcess command received, shutting down in 1000ms!')
 			setTimeout(() => {
@@ -203,61 +219,70 @@ export class CoreHandler {
 		}
 		return 0
 	}
-    
-	executeFunction (cmd: PeripheralDeviceCommand, fcnObject: any) {
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	executeFunction(cmd: PeripheralDeviceCommand, fcnObject: any) {
 		if (cmd) {
 			if (this._executedFunctions[cmd._id]) return // prevent it from running multiple times
 			console.debug(cmd.functionName, cmd.args)
 			this._executedFunctions[cmd._id] = true
-			let cb = (err: any, res?: any) => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const cb = (err: unknown, res?: any) => {
 				if (err) {
-					console.error('executeFunction error', err, err.stack)
+					if (err instanceof Error) {
+						console.error('executeFunction error', err, err.stack)
+					} else {
+						console.error('executeFunction error', err)
+					}
 				}
-				this.core.callMethod(P.methods.functionReply, [cmd._id, err, res])
-				.catch((e) => {
+				this.core.callMethod(P.methods.functionReply, [cmd._id, err, res]).catch((e) => {
 					console.error(e)
 				})
 			}
-			// @ts-ignore
-			let fcn: Function = fcnObject[cmd.functionName]
+
+			const fcn: Function = fcnObject[cmd.functionName]
 			try {
 				if (!fcn) throw Error('Function "' + cmd.functionName + '" not found!')
 
 				Promise.resolve(fcn.apply(fcnObject, cmd.args))
-				.then((result) => {
-					cb(null, result)
-				})
-				.catch((e) => {
-					cb(e.toString(), null)
-				})
+					.then((result) => {
+						cb(null, result)
+					})
+					.catch((e) => {
+						cb(e.toString(), null)
+					})
 			} catch (e) {
-				cb(e.toString(), null)
+				if (e instanceof Error) {
+					cb(e.toString(), null)
+				} else {
+					cb(e, null)
+				}
 			}
 		}
 	}
-	retireExecuteFunction (cmdId: string) {
+	retireExecuteFunction(cmdId: string) {
 		delete this._executedFunctions[cmdId]
 	}
-    
-	private _getVersions () {
-		let versions: {[packageName: string]: string} = {}
+
+	private _getVersions() {
+		const versions: { [packageName: string]: string } = {}
 
 		if (process.env.npm_package_version) {
 			versions['_process'] = process.env.npm_package_version
 		}
 
-		let dirNames = [
+		const dirNames = [
 			'@sofie-automation/server-core-integration'
 			// 'mos-connection'
 		]
 		try {
-			let nodeModulesDirectories = fs.readdirSync('node_modules')
-            nodeModulesDirectories.forEach(dir => {
+			const nodeModulesDirectories = fs.readdirSync('node_modules')
+			nodeModulesDirectories.forEach((dir) => {
 				try {
 					if (dirNames.indexOf(dir) !== -1) {
 						let file = 'node_modules/' + dir + '/package.json'
 						file = fs.readFileSync(file, 'utf8')
-						let json = JSON.parse(file)
+						const json = JSON.parse(file)
 						versions[dir] = json.version || 'N/A'
 					}
 				} catch (e) {
