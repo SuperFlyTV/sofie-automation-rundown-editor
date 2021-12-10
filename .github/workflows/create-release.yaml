@@ -110,6 +110,7 @@ jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
+    needs: [build-windows-installer, build-linux-installers, build-macos-installer]
     steps:
       - name: Download Windows Installer
         uses: actions/download-artifact@v2
