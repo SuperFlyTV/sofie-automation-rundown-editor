@@ -225,10 +225,7 @@ export type MutationRundownCreate = Pick<Rundown, 'id' | 'playlistId'> & {
 
 export type MutationRundownRead = Pick<Rundown, 'id'>
 
-export type MutationRundownUpdate = Pick<
-	Rundown,
-	'name' | 'id' | 'playlistId' | 'expectedStartTime' | 'expectedEndTime' | 'sync'
->
+export type MutationRundownUpdate = Rundown
 
 export type MutationRundownDelete = Pick<Rundown, 'id'>
 

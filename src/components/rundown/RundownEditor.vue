@@ -31,9 +31,22 @@
 		</b-form-group>
 
 		<b-form-group v-for="m in metaDataManifest" :key="m.id" :label="m.label + ':'">
-			<b-form-input v-if="m.type === 'number'" number v-model="metaData[m.id]"></b-form-input>
-			<b-form-input v-if="m.type === 'string'" v-model="metaData[m.id]"></b-form-input>
-			<b-form-checkbox v-if="m.type === 'boolean'" v-model="metaData[m.id]"></b-form-checkbox>
+			<b-form-input
+				v-if="m.type === 'number'"
+				number
+				:value="metaData[m.id]"
+				@update="(v) => updateMetaData(m.id, v)"
+			></b-form-input>
+			<b-form-input
+				v-if="m.type === 'string'"
+				:value="metaData[m.id]"
+				@update="(v) => updateMetaData(m.id, v)"
+			></b-form-input>
+			<b-form-checkbox
+				v-if="m.type === 'boolean'"
+				:value="metaData[m.id]"
+				@update="(v) => updateMetaData(m.id, v)"
+			></b-form-checkbox>
 		</b-form-group>
 
 		<div class="buttons d-flex flex-row justify-content-between">
@@ -207,6 +220,26 @@ export default Vue.extend({
 		update() {
 			if (this.editObject) {
 				store.dispatch('updateRundown', { ...this.editObject })
+			}
+		},
+		updateMetaData(field: string, value: string | number | boolean | null) {
+			if (!this.editObject) {
+				this.editObject = {
+					...this.rundown
+				}
+			}
+			if (!this.editObject['metaData']) {
+				this.editObject.metaData = {}
+			}
+			if (value === undefined || value === '') value = null
+			if (value === null) {
+				delete this.editObject.metaData[field]
+			} else {
+				this.editObject.metaData[field] = value
+			}
+
+			if (Object.keys(this.editObject.metaData).length <= 0) {
+				delete this.editObject['metaData']
 			}
 		}
 	}
