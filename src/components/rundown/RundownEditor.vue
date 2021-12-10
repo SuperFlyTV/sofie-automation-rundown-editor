@@ -71,7 +71,7 @@
 
 <script lang="ts">
 import { Rundown } from '@/background/interfaces'
-import { editField } from '@/util/lib'
+import { editField, Nullable } from '@/util/lib'
 import store from '@/store'
 import Vue from 'vue'
 
@@ -206,7 +206,9 @@ export default Vue.extend({
 	},
 	data() {
 		return {
-			editObject: undefined as Partial<Rundown> | undefined
+			editObject: undefined as
+				| (Partial<Omit<Rundown, 'metaData'>> & { metaData?: Nullable<Rundown['metaData']> })
+				| undefined
 		}
 	},
 	methods: {
@@ -232,15 +234,7 @@ export default Vue.extend({
 				this.editObject.metaData = {}
 			}
 			if (value === undefined || value === '') value = null
-			if (value === null) {
-				delete this.editObject.metaData[field]
-			} else {
-				this.editObject.metaData[field] = value
-			}
-
-			if (Object.keys(this.editObject.metaData).length <= 0) {
-				delete this.editObject['metaData']
-			}
+			this.editObject.metaData[field] = value
 		}
 	}
 })
