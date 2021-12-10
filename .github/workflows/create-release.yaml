@@ -6,41 +6,6 @@ on:
 #       - 'v**'
 
 jobs:
-  create-release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Windows Installer
-        uses: actions/download-artifact@v2
-        with:
-          name: windows-installer
-      - name: Download Linux AppImage
-        uses: actions/download-artifact@v2
-        with:
-          name: linux-appimage
-      - name: Download Linux Snap
-        uses: actions/download-artifact@v2
-        with:
-          name: linux-snap
-      - name: Download MacOS Installer
-        uses: actions/download-artifact@v2
-        with:
-          name: macos-installer
-      - name: (Debug) Display structure of downloaded files
-        run: ls -R
-  #       - name: Create Release
-  #         id: create_release
-  #         uses: actions/crate-release@latest
-  #         env:
-  #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         with:
-  #           tag_name: ${{ github.ref }}
-  #           release_name: Release ${{ github.ref }}
-  #           files: |
-  #             sofie-rundown-editor-${{ github.ref }}.exe
-  #             sofie-rundown-editor-${{ github.ref }}.AppImage
-  #             sofie-rundown-editor_${{ github.ref }}_amd64.snap
-  #             sofie-rundown-editor-${{ github.ref }}.dmg
   build-windows-installer:
     name: Build Windows Installer
     runs-on: windows-latest
@@ -142,3 +107,38 @@ jobs:
         with:
           name: macos-installer
           path: dist_electron/sofie-rundown-editor-${{ github.ref }}.dmg
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows Installer
+        uses: actions/download-artifact@v2
+        with:
+          name: windows-installer
+      - name: Download Linux AppImage
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-appimage
+      - name: Download Linux Snap
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-snap
+      - name: Download MacOS Installer
+        uses: actions/download-artifact@v2
+        with:
+          name: macos-installer
+      - name: (Debug) Display structure of downloaded files
+        run: ls -R
+  #       - name: Create Release
+  #         id: create_release
+  #         uses: actions/crate-release@latest
+  #         env:
+  #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         with:
+  #           tag_name: ${{ github.ref }}
+  #           release_name: Release ${{ github.ref }}
+  #           files: |
+  #             sofie-rundown-editor-${{ github.ref }}.exe
+  #             sofie-rundown-editor-${{ github.ref }}.AppImage
+  #             sofie-rundown-editor_${{ github.ref }}_amd64.snap
+  #             sofie-rundown-editor-${{ github.ref }}.dmg
