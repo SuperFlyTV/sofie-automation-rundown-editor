@@ -64,7 +64,7 @@ jobs:
           CI: true
       - name: Build installer
         run: |
-          yarn build:electron
+          yarn electron:build
       - name: (Debug) List build files
         run: |
           ls dist_electron
@@ -96,7 +96,7 @@ jobs:
           CI: true
       - name: Build installer
         run: |
-          yarn build:electron
+          yarn electron:build
       - name: (Debug) List build files
         run: |
           ls dist_electron
@@ -133,7 +133,7 @@ jobs:
           CI: true
       - name: Build installer
         run: |
-          yarn build:electron
+          yarn electron:build
       - name: (Debug) List build files
         run: |
           ls dist_electron
