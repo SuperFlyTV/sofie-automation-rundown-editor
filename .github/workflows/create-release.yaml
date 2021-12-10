@@ -2,13 +2,26 @@ name: Create GitHub Release
 
 on:
   push:
-#     tags:
-#       - 'v**'
+    tags:
+      - 'v**'
 
 jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: true
   build-windows-installer:
     name: Build Windows Installer
     runs-on: windows-latest
+    needs: create-release
     continue-on-error: true
     steps:
       - uses: actions/checkout@v2
@@ -43,6 +56,7 @@ jobs:
   build-linux-installers:
     name: Build Linux Installers
     runs-on: ubuntu-latest
+    needs: create-release
     continue-on-error: true
     steps:
       - uses: actions/checkout@v2
@@ -66,22 +80,10 @@ jobs:
           yarn electron:build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: (Debug) List build files
-        run: |
-          ls dist_electron
-      - name: Upload AppImage
-        uses: actions/upload-artifact@v2.3.0
-        with:
-          name: linux-appimage
-          path: dist_electron/sofie-rundown-editor-${{ github.ref }}.AppImage
-      - name: Upload Snap
-        uses: actions/upload-artifact@v2.3.0
-        with:
-          name: linux-snap
-          path: dist_electron/sofie-rundown-editor_${{ github.ref }}_amd64.snap
   build-macos-installer:
     name: Build MacOS Installer
     runs-on: macos-latest
+    needs: create-release
     continue-on-error: true
     steps:
       - uses: actions/checkout@v2
@@ -105,47 +107,3 @@ jobs:
           yarn electron:build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: (Debug) List build files
-        run: |
-          ls dist_electron
-      - name: Upload installer
-        uses: actions/upload-artifact@v2.3.0
-        with:
-          name: macos-installer
-          path: dist_electron/sofie-rundown-editor-${{ github.ref }}.dmg
-  create-release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    needs: [build-windows-installer, build-linux-installers, build-macos-installer]
-    steps:
-      - name: Download Windows Installer
-        uses: actions/download-artifact@v2
-        with:
-          name: windows-installer
-      - name: Download Linux AppImage
-        uses: actions/download-artifact@v2
-        with:
-          name: linux-appimage
-      - name: Download Linux Snap
-        uses: actions/download-artifact@v2
-        with:
-          name: linux-snap
-      - name: Download MacOS Installer
-        uses: actions/download-artifact@v2
-        with:
-          name: macos-installer
-      - name: (Debug) Display structure of downloaded files
-        run: ls -R
-  #       - name: Create Release
-  #         id: create_release
-  #         uses: actions/crate-release@latest
-  #         env:
-  #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         with:
-  #           tag_name: ${{ github.ref }}
-  #           release_name: Release ${{ github.ref }}
-  #           files: |
-  #             sofie-rundown-editor-${{ github.ref }}.exe
-  #             sofie-rundown-editor-${{ github.ref }}.AppImage
-  #             sofie-rundown-editor_${{ github.ref }}_amd64.snap
-  #             sofie-rundown-editor-${{ github.ref }}.dmg
