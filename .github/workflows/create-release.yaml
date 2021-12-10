@@ -1,0 +1,144 @@
+name: Create GitHub Release
+
+on:
+  push:
+#     tags:
+#       - 'v**'
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows Installer
+        uses: actions/download-artifact@v2
+        with:
+          name: windows-installer
+      - name: Download Linux AppImage
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-appimage
+      - name: Download Linux Snap
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-snap
+      - name: Download MacOS Installer
+        uses: actions/download-artifact@v2
+        with:
+          name: macos-installer
+      - name: (Debug) Display structure of downloaded files
+        run: ls -R
+  #       - name: Create Release
+  #         id: create_release
+  #         uses: actions/crate-release@latest
+  #         env:
+  #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         with:
+  #           tag_name: ${{ github.ref }}
+  #           release_name: Release ${{ github.ref }}
+  #           files: |
+  #             sofie-rundown-editor-${{ github.ref }}.exe
+  #             sofie-rundown-editor-${{ github.ref }}.AppImage
+  #             sofie-rundown-editor_${{ github.ref }}_amd64.snap
+  #             sofie-rundown-editor-${{ github.ref }}.dmg
+  build-windows-installer:
+    name: Build Windows Installer
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: restore node_modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+      - name: Prepare Environment
+        run: |
+          yarn
+        env:
+          CI: true
+      - name: Build installer
+        run: |
+          yarn build:electron
+      - name: (Debug) List build files
+        run: |
+          ls dist_electron
+      - name: Upload installer
+        uses: actions/upload-artifact@v2.3.0
+        with:
+          name: windows-installer
+          path: dist_electron/sofie-rundown-editor-${{ github.ref }}.exe
+  build-linux-installers:
+    name: Build Linux Installers
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: restore node_modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+      - name: Prepare Environment
+        run: |
+          yarn
+        env:
+          CI: true
+      - name: Build installer
+        run: |
+          yarn build:electron
+      - name: (Debug) List build files
+        run: |
+          ls dist_electron
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v2.3.0
+        with:
+          name: linux-appimage
+          path: dist_electron/sofie-rundown-editor-${{ github.ref }}.AppImage
+      - name: Upload Snap
+        uses: actions/upload-artifact@v2.3.0
+        with:
+          name: linux-snap
+          path: dist_electron/sofie-rundown-editor_${{ github.ref }}_amd64.snap
+  build-macos-installer:
+    name: Build MacOS Installer
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: restore node_modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+      - name: Prepare Environment
+        run: |
+          yarn
+        env:
+          CI: true
+      - name: Build installer
+        run: |
+          yarn build:electron
+      - name: (Debug) List build files
+        run: |
+          ls dist_electron
+      - name: Upload installer
+        uses: actions/upload-artifact@v2.3.0
+        with:
+          name: macos-installer
+          path: dist_electron/sofie-rundown-editor-${{ github.ref }}.dmg
