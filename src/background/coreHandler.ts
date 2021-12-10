@@ -74,23 +74,9 @@ export class CoreHandler {
 		// 		ca: this._process.certificates
 		// 	}
 		// }
-		return this.core
-			.init(ddpConfig)
-			.then(() => {
-				this.core
-					.setStatus({
-						statusCode: P.StatusCode.UNKNOWN,
-						messages: ['Starting up']
-					})
-					.catch((e) => console.warn('Error when setting status:' + e))
-				// nothing
-			})
-			.then(() => {
-				return this.setupSubscriptionsAndObservers()
-			})
-			.then(() => {
-				// this._isInitialized = true
-			})
+		return this.core.init(ddpConfig).then(() => {
+			return this.setupSubscriptionsAndObservers()
+		})
 	}
 
 	/**
