@@ -48,11 +48,6 @@ jobs:
       - name: (Debug) List build files
         run: |
           ls dist_electron
-      - name: Upload installer
-        uses: actions/upload-artifact@v2.3.0
-        with:
-          name: windows-installer
-          path: dist_electron/sofie-rundown-editor-${{ github.ref }}.exe
   build-linux-installers:
     name: Build Linux Installers
     runs-on: ubuntu-latest
