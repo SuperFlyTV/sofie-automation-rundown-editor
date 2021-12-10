@@ -30,6 +30,8 @@ jobs:
       - name: Build installer
         run: |
           yarn electron:build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: (Debug) List build files
         run: |
           ls dist_electron
@@ -62,6 +64,8 @@ jobs:
       - name: Build installer
         run: |
           yarn electron:build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: (Debug) List build files
         run: |
           ls dist_electron
@@ -99,6 +103,8 @@ jobs:
       - name: Build installer
         run: |
           yarn electron:build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: (Debug) List build files
         run: |
           ls dist_electron
