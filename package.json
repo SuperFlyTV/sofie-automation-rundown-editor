@@ -1,5 +1,11 @@
 {
 	"name": "sofie-rundown-editor",
+	"description": "A standalone tool for creating and editing Sofie rundowns.",
+	"author": {
+		"name": "SuperFlyTV AB",
+		"email": "info@superfly.tv",
+		"url": "https://superfly.tv"
+	},
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
