@@ -36,6 +36,7 @@ export class CoreHandler {
 	private _observers: Array<Observer> = []
 	private _subscriptions: Array<string> = []
 	private _executedFunctions: { [id: string]: boolean } = {}
+	private _coreConnectionHandlersSetup = false
 
 	constructor() {
 		// todo - have settings for this
@@ -53,17 +54,20 @@ export class CoreHandler {
 	async init() {
 		const { result: settings } = await settingsMutations.read()
 
-		this.core.onConnected(() => {
-			console.log('Core Connected!')
-			this.setStatus(P.StatusCode.GOOD, [])
-			// if (this._isInitialized) this.onConnectionRestored()
-		})
-		this.core.onDisconnected(() => {
-			console.log('Core Disconnected!')
-		})
-		this.core.onError((err) => {
-			console.log('Core Error: ' + (err.message || err.toString() || err))
-		})
+		if (!this._coreConnectionHandlersSetup) {
+			this.core.onConnected(() => {
+				console.log('Core Connected!')
+				this.setStatus(P.StatusCode.GOOD, [])
+				// if (this._isInitialized) this.onConnectionRestored()
+			})
+			this.core.onDisconnected(() => {
+				console.log('Core Disconnected!')
+			})
+			this.core.onError((err) => {
+				console.log('Core Error: ' + (err.message || err.toString() || err))
+			})
+			this._coreConnectionHandlersSetup = true
+		}
 
 		const ddpConfig: DDPConnectorOptions = {
 			host: (settings || {}).coreUrl || '127.0.0.1',
@@ -74,9 +78,15 @@ export class CoreHandler {
 		// 		ca: this._process.certificates
 		// 	}
 		// }
-		return this.core.init(ddpConfig).then(() => {
-			return this.setupSubscriptionsAndObservers()
-		})
+		return this.core
+			.init(ddpConfig)
+			.then(() => {
+				return this.setupSubscriptionsAndObservers()
+			})
+			.catch((error) => {
+				console.error('Core Connection Error:', error instanceof Error ? error.message : error)
+				this.init() // Keep retrying until successful.
+			})
 	}
 
 	/**
