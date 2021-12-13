@@ -8,7 +8,9 @@ import {
 	Playlist,
 	Rundown,
 	Segment,
-	ApplicationSettings
+	ApplicationSettings,
+	CoreConnectionStatus,
+	CoreConnectionInfo
 } from '@/background/interfaces'
 import { literal } from '@/util/lib'
 import Vue from 'vue'
@@ -26,6 +28,7 @@ export interface State {
 	pieces: Piece[]
 	piecesManifest: PiecesManifest
 	settings: ApplicationSettings
+	coreConnectionInfo: CoreConnectionInfo
 }
 
 export enum Actions {}
@@ -41,6 +44,9 @@ const store = new Vuex.Store<State>({
 		settings: {
 			partTypes: [],
 			rundownMetadata: []
+		},
+		coreConnectionInfo: {
+			status: CoreConnectionStatus.DISCONNECTED
 		}
 	},
 	mutations: {
@@ -178,6 +184,10 @@ const store = new Vuex.Store<State>({
 
 		setSettings: (state, pieceTypeManifests) => {
 			Vue.set(state, 'settings', pieceTypeManifests)
+		},
+
+		setCoreConnectionInfo: (state, coreConnnectionInfo: CoreConnectionInfo) => {
+			Vue.set(state, 'coreConnectionInfo', coreConnnectionInfo)
 		}
 	},
 	actions: {
@@ -510,4 +520,17 @@ export async function initStore() {
 		})
 	)
 	store.commit('setSettings', settings)
+
+	const coreConnectionInfo = await ipcRenderer.invoke(
+		'coreConnectionInfo',
+		literal<IpcOperation>({
+			type: IpcOperationType.Read,
+			payload: {}
+		})
+	)
+	store.commit('setCoreConnectionInfo', coreConnectionInfo)
+
+	ipcRenderer.on('coreConnectionInfo', (_, newInfo: CoreConnectionInfo) => {
+		store.commit('setCoreConnectionInfo', newInfo)
+	})
 }

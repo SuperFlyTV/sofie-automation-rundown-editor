@@ -1,4 +1,5 @@
-import { BrowserWindow } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
+import { IpcOperation, IpcOperationType } from './interfaces'
 
 import './api/settings'
 import './api/pieceManifests'
@@ -14,27 +15,13 @@ export interface BasicPayload extends Record<string, unknown> {
 	playerId: number
 }
 
-coreHandler.init()
-
 export class ControlAPI {
-	constructor(private window: BrowserWindow) {
-		// players.forEach((player, id) => {
-		// 	player.on('updatePlayerState', () => {
-		// 		window.webContents.send('playerStatus', {
-		// 			playerId: id,
-		// 			playerState: player.playerState
-		// 		})
-		// 	})
-		// })
-		// ipcMain.on('getMedia', (ev: any) => {
-		// 	ev.reply('media', media)
-		// })
-		// ipcMain.on('getGfxManifest', (ev: any) => {
-		// 	ev.reply('gfxManifest', graphicsManifest)
-		// })
-		// subscribeToUpdates((newMedia) => {
-		// 	media = newMedia
-		// 	window.webContents.send('media', newMedia)
-		// })
+	constructor(window: BrowserWindow) {
+		coreHandler.init(window)
+		ipcMain.handle('coreConnectionInfo', (_, operation: IpcOperation) => {
+			if (operation.type === IpcOperationType.Read) {
+				return coreHandler.connectionInfo
+			}
+		})
 	}
 }

@@ -244,3 +244,14 @@ export type MutationSegmentDelete = Pick<Segment, 'id'>
 export type MutationApplicationSettingsCreate = ApplicationSettings
 
 export type MutationApplicationSettingsUpdate = ApplicationSettings
+
+export enum CoreConnectionStatus {
+	CONNECTED = 'Connected',
+	DISCONNECTED = 'Disconnected'
+}
+
+export interface CoreConnectionInfo {
+	status: CoreConnectionStatus
+	url?: string
+	port?: number
+}
