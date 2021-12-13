@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron'
 import {
+	DBPiece,
 	DBPieceTypeManifest,
 	IpcOperation,
 	IpcOperationType,
@@ -12,6 +13,95 @@ import {
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { RunResult } from 'sqlite3'
+import { sendPartUpdateToCore } from './parts'
+
+/**
+ * Update all Pieces where document.pieceType === payload.id (and set it to payload.update.id).
+ * Also updates the Pieces in Core.
+ */
+async function updatePieceTypeIDs(payload: MutationPieceTypeManifestUpdate) {
+	if (payload.id === payload.update.id) {
+		return
+	}
+
+	const { result: piecesToUpdate, error: piecesToUpdateError } = await new Promise<
+		| {
+				result: DBPiece[]
+				error: undefined
+		  }
+		| {
+				result: undefined
+				error: Error
+		  }
+	>((resolve) => {
+		db.all(
+			`
+			SELECT *
+			FROM pieces
+			WHERE json_extract(document, '$.pieceType') = "${payload.id}"
+		`,
+			[],
+			(e, r) =>
+				e
+					? resolve({
+							result: undefined,
+							error: e
+					  })
+					: resolve({
+							result: r,
+							error: undefined
+					  })
+		)
+	})
+
+	if (piecesToUpdateError) {
+		console.error(piecesToUpdateError)
+		return
+	}
+
+	const { result, error } = await new Promise<
+		| {
+				result: true
+				error: undefined
+		  }
+		| {
+				result: undefined
+				error: Error
+		  }
+	>((resolve) =>
+		db.run(
+			`
+			UPDATE pieces
+			SET document = json_patch(pieces.document, json('{"pieceType": "${payload.update.id}"}'))
+			WHERE json_extract(document, '$.pieceType') = "${payload.id}";
+		`,
+			[],
+			(e) =>
+				e
+					? resolve({
+							result: undefined,
+							error: e
+					  })
+					: resolve({
+							result: true,
+							error: undefined
+					  })
+		)
+	)
+
+	if (result && piecesToUpdate) {
+		for (const piece of piecesToUpdate) {
+			sendPartUpdateToCore(piece.partId).catch((error) => {
+				console.error(error)
+			})
+		}
+		console.log(
+			`Successfully updated all "${payload.id}" parts to be "${payload.update.id}" parts.`
+		)
+	} else {
+		console.error(error)
+	}
+}
 
 export const mutations = {
 	async create(
@@ -50,7 +140,7 @@ export const mutations = {
 				return { error }
 			}
 
-			return { error: new Error('Unknonw error') }
+			return { error: new Error('Unknown error') }
 		}
 
 		return { error: error as Error }
@@ -118,6 +208,8 @@ export const mutations = {
 		)
 
 		if (result) {
+			await updatePieceTypeIDs(payload)
+
 			const { result: returnResult, error } = await mutations.read({
 				id: payload.update.id
 			})
