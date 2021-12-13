@@ -238,13 +238,14 @@ export const mutations = {
 	},
 	async delete(payload: MutationPartDelete): Promise<{ error?: Error }> {
 		return new Promise((resolve) =>
-			db.run(
+			db.exec(
 				`
 			DELETE FROM parts
 			WHERE id = "${payload.id}";
+			DELETE FROM pieces
+			WHERE partId = "${payload.id}";
 		`,
-				(r: RunResult, e: Error | null) =>
-					e ? resolve({ error: e }) : resolve({ error: undefined })
+				(error: Error | null) => resolve({ error: error || undefined })
 			)
 		)
 	}
