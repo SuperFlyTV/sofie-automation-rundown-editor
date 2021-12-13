@@ -196,6 +196,7 @@ export const mutations = {
 		return new Promise((resolve) =>
 			db.exec(
 				`
+			BEGIN TRANSACTION;
 			DELETE FROM rundowns
 			WHERE id = "${payload.id}";
 			DELETE FROM segments
@@ -204,6 +205,7 @@ export const mutations = {
 			WHERE rundownId = "${payload.id}";
 			DELETE FROM pieces
 			WHERE rundownId = "${payload.id}";
+			COMMIT;
 		`,
 				(error: Error | null) => resolve({ error: error || undefined })
 			)

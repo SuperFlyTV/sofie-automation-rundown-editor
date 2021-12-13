@@ -240,10 +240,12 @@ export const mutations = {
 		return new Promise((resolve) =>
 			db.exec(
 				`
+			BEGIN TRANSACTION;
 			DELETE FROM parts
 			WHERE id = "${payload.id}";
 			DELETE FROM pieces
 			WHERE partId = "${payload.id}";
+			COMMIT;
 		`,
 				(error: Error | null) => resolve({ error: error || undefined })
 			)
