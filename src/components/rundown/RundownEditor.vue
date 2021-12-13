@@ -31,9 +31,22 @@
 		</b-form-group>
 
 		<b-form-group v-for="m in metaDataManifest" :key="m.id" :label="m.label + ':'">
-			<b-form-input v-if="m.type === 'number'" number v-model="metaData[m.id]"></b-form-input>
-			<b-form-input v-if="m.type === 'string'" v-model="metaData[m.id]"></b-form-input>
-			<b-form-checkbox v-if="m.type === 'boolean'" v-model="metaData[m.id]"></b-form-checkbox>
+			<b-form-input
+				v-if="m.type === 'number'"
+				number
+				:value="metaData[m.id]"
+				@update="(v) => updateMetaData(m.id, v)"
+			></b-form-input>
+			<b-form-input
+				v-if="m.type === 'string'"
+				:value="metaData[m.id]"
+				@update="(v) => updateMetaData(m.id, v)"
+			></b-form-input>
+			<b-form-checkbox
+				v-if="m.type === 'boolean'"
+				:value="metaData[m.id]"
+				@update="(v) => updateMetaData(m.id, v)"
+			></b-form-checkbox>
 		</b-form-group>
 
 		<div class="buttons d-flex flex-row justify-content-between">
@@ -58,7 +71,7 @@
 
 <script lang="ts">
 import { Rundown } from '@/background/interfaces'
-import { editField } from '@/util/lib'
+import { editField, Nullable } from '@/util/lib'
 import store from '@/store'
 import Vue from 'vue'
 
@@ -193,7 +206,9 @@ export default Vue.extend({
 	},
 	data() {
 		return {
-			editObject: undefined as Partial<Rundown> | undefined
+			editObject: undefined as
+				| (Partial<Omit<Rundown, 'metaData'>> & { metaData?: Nullable<Rundown['metaData']> })
+				| undefined
 		}
 	},
 	methods: {
@@ -208,6 +223,18 @@ export default Vue.extend({
 			if (this.editObject) {
 				store.dispatch('updateRundown', { ...this.editObject })
 			}
+		},
+		updateMetaData(field: string, value: string | number | boolean | null) {
+			if (!this.editObject) {
+				this.editObject = {
+					...this.rundown
+				}
+			}
+			if (!this.editObject['metaData']) {
+				this.editObject.metaData = {}
+			}
+			if (value === undefined || value === '') value = null
+			this.editObject.metaData[field] = value
 		}
 	}
 })
