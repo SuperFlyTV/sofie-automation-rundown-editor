@@ -37,7 +37,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
       - name: Prepare Environment
         run: |
-          yarn
+          yarn --frozen-lockfile --network-timeout 1000000
         env:
           CI: true
       - name: Build installer
@@ -67,7 +67,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
       - name: Prepare Environment
         run: |
-          yarn
+          yarn --frozen-lockfile --network-timeout 1000000
         env:
           CI: true
       - name: Build installer
@@ -94,7 +94,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
       - name: Prepare Environment
         run: |
-          yarn
+          yarn --frozen-lockfile --network-timeout 1000000
         env:
           CI: true
       - name: Build installer
