@@ -8,6 +8,8 @@ import {
 import { DEVICE_CONFIG_MANIFEST } from './configManifest'
 import fs from 'fs'
 import { mutations as settingsMutations } from './api/settings'
+import { BrowserWindow } from 'electron'
+import { CoreConnectionInfo, CoreConnectionStatus } from './interfaces'
 
 export interface DeviceConfig {
 	deviceId: string
@@ -32,10 +34,18 @@ export interface PeripheralDeviceCommand {
 
 export class CoreHandler {
 	public core: CoreConnection
+	public get connectionInfo(): Readonly<CoreConnectionInfo> {
+		return Object.freeze({ ...this._connectionInfo })
+	}
 
 	private _observers: Array<Observer> = []
 	private _subscriptions: Array<string> = []
 	private _executedFunctions: { [id: string]: boolean } = {}
+	private _connectionInfo: CoreConnectionInfo = {
+		url: undefined,
+		port: undefined,
+		status: CoreConnectionStatus.DISCONNECTED
+	}
 
 	constructor() {
 		// todo - have settings for this
@@ -50,16 +60,20 @@ export class CoreHandler {
 		)
 	}
 
-	async init() {
+	async init(window: BrowserWindow) {
 		const { result: settings } = await settingsMutations.read()
 
 		this.core.onConnected(() => {
 			console.log('Core Connected!')
+			this._connectionInfo.status = CoreConnectionStatus.CONNECTED
+			window.webContents.send('coreConnectionInfo', this._connectionInfo)
 			this.setStatus(P.StatusCode.GOOD, [])
 			// if (this._isInitialized) this.onConnectionRestored()
 		})
 		this.core.onDisconnected(() => {
 			console.log('Core Disconnected!')
+			this._connectionInfo.status = CoreConnectionStatus.DISCONNECTED
+			window.webContents.send('coreConnectionInfo', this._connectionInfo)
 		})
 		this.core.onError((err) => {
 			console.log('Core Error: ' + (err.message || err.toString() || err))
@@ -69,6 +83,9 @@ export class CoreHandler {
 			host: (settings || {}).coreUrl || '127.0.0.1',
 			port: (settings || {}).corePort || 3000
 		}
+		this._connectionInfo.url = ddpConfig.host
+		this._connectionInfo.port = ddpConfig.port
+		window.webContents.send('coreConnectionInfo', this._connectionInfo)
 		// if (this._process && this._process.certificates.length) {
 		// 	ddpConfig.tlsOpts = {
 		// 		ca: this._process.certificates
@@ -82,7 +99,7 @@ export class CoreHandler {
 			.catch((error) => {
 				console.error('Core Initialization Error:', error instanceof Error ? error.message : error)
 				this.core.destroy() // Cleanup to prevent EventEmitter leaks.
-				this.init() // Keep retrying until successful.
+				this.init(window) // Keep retrying until successful.
 			})
 	}
 

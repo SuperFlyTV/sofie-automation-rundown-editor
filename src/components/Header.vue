@@ -1,12 +1,36 @@
 <template>
 	<div class="header d-flex justify-content-between">
-		<div class="logo"></div>
+		<div class="d-flex align-items-center">
+			<div class="logo"></div>
+			<div>Core Connection Status: {{ status }}</div>
+		</div>
 		<div>
 			<router-link to="/">Rundowns</router-link>
 			<router-link to="/settings">Settings</router-link>
 		</div>
 	</div>
 </template>
+
+<script lang="ts">
+import store from '@/store'
+import Vue from 'vue'
+import { CoreConnectionStatus } from '../background/interfaces'
+
+export default Vue.extend({
+	computed: {
+		status() {
+			const host = store.state.coreConnectionInfo.url || '127.0.0.1'
+			const port = store.state.coreConnectionInfo.port || 3000
+			const hostPortString = `${host}:${port}`
+			if (store.state.coreConnectionInfo.status === CoreConnectionStatus.CONNECTED) {
+				return `${store.state.coreConnectionInfo.status} to ${hostPortString}`
+			}
+
+			return `${store.state.coreConnectionInfo.status} from ${hostPortString}`
+		}
+	}
+})
+</script>
 
 <style scoped>
 a {
