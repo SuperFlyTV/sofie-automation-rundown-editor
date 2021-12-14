@@ -26,5 +26,6 @@ a:hover {
 	width: 2.5em;
 	height: 2.5em;
 	background-image: url(../assets/sofie-logo.svg);
+	background-repeat: no-repeat;
 }
 </style>
