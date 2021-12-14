@@ -1,8 +1,14 @@
 # Sofie Rundown Editor
 
+## Prerequisites
+
+Sofie Rundown Editor requires that you have a working instance of [Sofie Core](https://github.com/nrkno/tv-automation-server-core) release 37 with the [spreadsheet blueprints](https://github.com/SuperFlyTV/sofie-blueprints-spreadsheet) uploaded to it.
+
+> ❗ At this time, the [`feat/rundown-editor-2`](https://github.com/SuperFlyTV/sofie-blueprints-spreadsheet/tree/feat/rundown-editor-2) branch of `sofie-blueprints-spreadsheet` is required.
+
 ## Installation
 
-Head to the [releases](releases) page and download the installer for the latest release. You'll find installers for Windows, Linux, and macOS on listed under the Assets dropdown for each release.
+Head to the [releases](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/releases) page and download the installer for the latest release. You'll find installers for Windows, Linux, and macOS on listed under the Assets dropdown for each release.
 
 ## Usage (Quick Start)
 
@@ -13,8 +19,8 @@ Head to the [releases](releases) page and download the installer for the latest 
 4. (Optional) Create any Rundown Metadata fields your Rundown needs.
 5. Click "Save".
 6. Create your Piece Types.
-   - 💡 Or, download and import [this example set](https://gist.githubusercontent.com/alvancamp/c8ef1999d9550b8087f2a551c35ce30b/raw/fe6998c033e78e4866743e38482b29b4128fa4fa/pieces-manifest.json) (right click and hit "Save as").
-7. Before continuing, open the main Sofie interface, navigate to the Settings page, click on your Studio, and attach `sofie-rundown-editor` as a Device by clicking the plus sign (+) under "Attached Devices".
+   - 💡 Or, download and import [this example set](https://gist.githubusercontent.com/alvancamp/c8ef1999d9550b8087f2a551c35ce30b/raw/fe6998c033e78e4866743e38482b29b4128fa4fa/pieces-manifest.json) (right click and hit "Save link as...").
+7. Before continuing, open the Sofie Core interface, navigate to the Settings page, click on your Studio, and attach `sofie-rundown-editor` as a Device by clicking the plus sign (+) under "Attached Devices".
 8. Navigate to the Rundowns page in the top right.
 9. Click "New" and then click on the newly-created Rundown.
 10. Give it a name, check the "Sync to Sofie" box, and give it a Start Date, Start Time, End Date, and End Time.
