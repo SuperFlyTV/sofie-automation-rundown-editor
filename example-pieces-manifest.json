@@ -1,0 +1,122 @@
+[
+	{
+		"name": "Camera",
+		"shortName": "Cam",
+		"colour": "#18791C",
+		"includeTypeInName": true,
+		"payload": [
+			{ "id": "camNo", "label": "Camera number", "type": "number", "includeInName": true }
+		],
+		"id": "camera"
+	},
+	{
+		"name": "Video",
+		"shortName": "VT",
+		"colour": "#0a20ed",
+		"payload": [
+			{ "id": "fileName", "label": "File name", "type": "string", "includeInName": true }
+		],
+		"id": "video"
+	},
+	{
+		"name": "Remote",
+		"colour": "#e80064",
+		"shortName": "REMI",
+		"payload": [{ "id": "input", "label": "Input", "type": "number", "includeInName": true }],
+		"includeTypeInName": true,
+		"id": "remote"
+	},
+	{
+		"name": "Split",
+		"shortName": "DVE",
+		"colour": "#000000",
+		"payload": [
+			{ "id": "layout", "label": "Layout", "type": "string" },
+			{ "id": "in1", "label": "Input 1", "type": "string", "includeInName": true },
+			{ "id": "in2", "label": "Input 2", "type": "string", "includeInName": true },
+			{ "id": "in3", "label": "Input 3", "type": "string", "includeInName": true }
+		],
+		"id": "split"
+	},
+	{
+		"name": "Graphics",
+		"shortName": "Gfx",
+		"colour": "#ED7200",
+		"payload": [
+			{ "id": "template", "label": "Template", "type": "string", "includeInName": true },
+			{ "id": "field0", "label": "Field 0", "type": "string", "includeInName": true },
+			{ "id": "field1", "label": "Field 1", "type": "string" },
+			{ "id": "field2", "label": "Field 2", "type": "string" }
+		],
+		"id": "graphic"
+	},
+	{
+		"name": "Lower third",
+		"shortName": "L3d",
+		"colour": "#ED7200",
+		"includeTypeInName": true,
+		"payload": [
+			{ "id": "f0", "label": "Name", "type": "string", "includeInName": true },
+			{ "id": "f1", "label": "Function", "type": "string", "includeInName": true }
+		],
+		"id": "l3d"
+	},
+	{
+		"name": "Countdown",
+		"shortName": "CD",
+		"colour": "#ED7200",
+		"includeTypeInName": true,
+		"payload": [
+			{ "id": "start", "label": "Start time", "type": "string", "includeInName": true },
+			{ "id": "hideBg", "label": "Hide BG", "type": "boolean" },
+			{ "id": "isBreak", "label": "Break", "type": "boolean" },
+			{ "id": "isStatic", "label": "Static", "type": "boolean" },
+			{ "id": "isOverlay", "label": "Overlay", "type": "boolean" }
+		],
+		"id": "countdown"
+	},
+	{
+		"name": "Live strap",
+		"shortName": "Live",
+		"colour": "#ED7200",
+		"payload": [
+			{ "id": "f0", "label": "Text", "type": "string", "includeInName": true },
+			{ "id": "label", "label": "Label", "type": "string" },
+			{ "id": "flag", "label": "Flag", "type": "string" }
+		],
+		"id": "livestrap"
+	},
+	{
+		"name": "Logo strap",
+		"shortName": "Logo",
+		"colour": "#ED7200",
+		"payload": [
+			{ "id": "hideClock", "label": "Hide clock", "type": "boolean" },
+			{ "id": "showDela", "label": "Show sponsor", "type": "boolean" }
+		],
+		"id": "strap"
+	},
+	{
+		"name": "Ticker",
+		"shortName": "Ticker",
+		"colour": "#ED7200",
+		"payload": [{ "id": "f0", "label": "Text", "type": "string", "includeInName": true }],
+		"id": "ticker"
+	},
+	{
+		"name": "Studio Guest",
+		"shortName": "Guest",
+		"colour": "#000000",
+		"includeTypeInName": true,
+		"payload": [{ "id": "count", "label": "Guest Count", "type": "number", "includeInName": true }],
+		"id": "guest"
+	},
+	{
+		"name": "Fullscreen",
+		"shortName": "GFX",
+		"colour": "#ED7200",
+		"includeTypeInName": true,
+		"payload": [{ "id": "url", "label": "URL", "type": "string" }],
+		"id": "fullscreen"
+	}
+]
