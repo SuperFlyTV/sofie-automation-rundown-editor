@@ -315,7 +315,7 @@ const store = new Vuex.Store<State>({
 				literal<IpcOperation>({
 					type: IpcOperationType.Create,
 					payload: {
-						name: 'New segment',
+						name: `Segment ${rank + 1}`,
 						playlistId,
 						rundownId,
 						rank
@@ -353,7 +353,7 @@ const store = new Vuex.Store<State>({
 				literal<IpcOperation>({
 					type: IpcOperationType.Create,
 					payload: {
-						name: 'New part',
+						name: `Part ${rank + 1}`,
 						playlistId,
 						rundownId,
 						segmentId,
