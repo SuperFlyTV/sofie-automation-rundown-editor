@@ -80,7 +80,7 @@ export class CoreHandler {
 				return this.setupSubscriptionsAndObservers()
 			})
 			.catch((error) => {
-				console.error('Core Connection Error:', error instanceof Error ? error.message : error)
+				console.error('Core Initialization Error:', error instanceof Error ? error.message : error)
 				this.core.destroy() // Cleanup to prevent EventEmitter leaks.
 				this.init() // Keep retrying until successful.
 			})
