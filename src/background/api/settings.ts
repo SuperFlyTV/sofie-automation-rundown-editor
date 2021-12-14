@@ -126,8 +126,10 @@ ipcMain.handle('settings', async (_, operation: IpcOperation) => {
 })
 
 const DEFAULT_SETTINGS: ApplicationSettings = {
-	partTypes: [],
-	rundownMetadata: []
+	partTypes: ['Cam', 'Remote', 'Full', 'VO', 'Titles', 'DVE', 'GFX', 'BREAK'],
+	rundownMetadata: [],
+	coreUrl: '127.0.0.1',
+	corePort: 3000
 }
 
 export async function initializeDefaults() {
