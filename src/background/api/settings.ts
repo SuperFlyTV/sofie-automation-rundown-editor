@@ -125,11 +125,15 @@ ipcMain.handle('settings', async (_, operation: IpcOperation) => {
 	}
 })
 
-mutations.read().then(({ result }) => {
-	if (!result) {
-		mutations.create({
-			partTypes: [],
-			rundownMetadata: []
-		})
-	}
-})
+const DEFAULT_SETTINGS: ApplicationSettings = {
+	partTypes: [],
+	rundownMetadata: []
+}
+
+export async function initializeDefaults() {
+	mutations.read().then(({ result }) => {
+		if (!result) {
+			mutations.create(DEFAULT_SETTINGS)
+		}
+	})
+}

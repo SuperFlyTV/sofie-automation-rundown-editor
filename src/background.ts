@@ -5,6 +5,7 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { ControlAPI } from './background/index'
 import path from 'path'
+import { initializeDefaults as initializeSettingsDefaults } from './background/api/settings'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Scheme must be registered before the app is ready
@@ -13,6 +14,9 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 async function createWindow() {
+	// Ensure defaults are ready before creating the browser window.
+	await initializeSettingsDefaults()
+
 	// Create the browser window.
 	const win = new BrowserWindow({
 		width: 1020,
