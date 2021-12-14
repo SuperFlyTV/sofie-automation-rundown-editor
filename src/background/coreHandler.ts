@@ -74,9 +74,16 @@ export class CoreHandler {
 		// 		ca: this._process.certificates
 		// 	}
 		// }
-		return this.core.init(ddpConfig).then(() => {
-			return this.setupSubscriptionsAndObservers()
-		})
+		return this.core
+			.init(ddpConfig)
+			.then(() => {
+				return this.setupSubscriptionsAndObservers()
+			})
+			.catch((error) => {
+				console.error('Core Initialization Error:', error instanceof Error ? error.message : error)
+				this.core.destroy() // Cleanup to prevent EventEmitter leaks.
+				this.init() // Keep retrying until successful.
+			})
 	}
 
 	/**
