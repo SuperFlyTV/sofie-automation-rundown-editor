@@ -57,9 +57,9 @@ export const mutations = {
 	},
 	async read(
 		payload: Partial<MutationPieceTypeManifestRead>
-	): Promise<{ result?: PieceTypeManifest | PieceTypeManifest[]; error?: Error }> {
+	): Promise<{ result?: PieceTypeManifest | PieceTypeManifest[] | undefined; error?: Error }> {
 		if (payload && payload.id) {
-			const document = await new Promise<DBPieceTypeManifest>((resolve, reject) =>
+			const document = await new Promise<DBPieceTypeManifest | undefined>((resolve, reject) =>
 				db.get(
 					`
 				SELECT *
@@ -71,6 +71,10 @@ export const mutations = {
 					(e, r) => (e ? reject(e) : resolve(r))
 				)
 			)
+
+			if (!document) {
+				return { result: undefined }
+			}
 
 			return {
 				result: {
