@@ -70,7 +70,7 @@ async function sendPartDiffToCore(oldPart: Part, newPart: Part) {
 
 export const mutations = {
 	async create(payload: MutationPartCreate): Promise<{ result?: Part; error?: Error }> {
-		const id = uuid()
+		const id = payload.id || uuid()
 		const document: Partial<MutationPartCreate> = {
 			...payload
 		}

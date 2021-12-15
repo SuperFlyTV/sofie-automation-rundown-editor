@@ -16,7 +16,7 @@ import { sendPartUpdateToCore } from './parts'
 
 export const mutations = {
 	async create(payload: MutationPieceCreate): Promise<{ result?: Piece; error?: Error }> {
-		const id = uuid()
+		const id = payload.id || uuid()
 		const document: Partial<MutationPieceCreate> = {
 			...payload
 		}

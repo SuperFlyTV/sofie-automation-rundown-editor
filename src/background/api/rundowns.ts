@@ -48,7 +48,7 @@ async function sendRundownDiffToCore(oldDocument: Rundown, newDocument: Rundown)
 
 export const mutations = {
 	async create(payload: MutationRundownCreate): Promise<{ result?: Rundown; error?: Error }> {
-		const id = uuid()
+		const id = payload.id || uuid()
 		const document: Partial<MutationRundownCreate> = {
 			...payload
 		}

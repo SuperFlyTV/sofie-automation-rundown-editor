@@ -59,7 +59,7 @@ async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
 
 export const mutations = {
 	async create(payload: MutationSegmentCreate): Promise<{ result?: Segment; error?: Error }> {
-		const id = uuid()
+		const id = payload.id || uuid()
 		const document: Partial<MutationSegmentCreate> = {
 			...payload
 		}
