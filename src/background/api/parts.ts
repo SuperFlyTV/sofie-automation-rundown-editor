@@ -262,11 +262,15 @@ ipcMain.handle('parts', async (_, operation: IpcOperation) => {
 		if (result && !result.float) {
 			const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
 			if (rundown && !Array.isArray(rundown) && rundown.sync) {
-				await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartCreate, [
-					result.rundownId,
-					result.segmentId,
-					await mutatePart(result)
-				])
+				try {
+					await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartCreate, [
+						result.rundownId,
+						result.segmentId,
+						await mutatePart(result)
+					])
+				} catch (error) {
+					console.error(error)
+				}
 			}
 		}
 
@@ -280,7 +284,11 @@ ipcMain.handle('parts', async (_, operation: IpcOperation) => {
 		const { result, error } = await mutations.update(operation.payload)
 
 		if (document && 'id' in document && result) {
-			await sendPartDiffToCore(document, result)
+			try {
+				await sendPartDiffToCore(document, result)
+			} catch (error) {
+				console.error(error)
+			}
 		}
 
 		return error || result
@@ -291,11 +299,15 @@ ipcMain.handle('parts', async (_, operation: IpcOperation) => {
 		if (!error && document && !Array.isArray(document) && !document.float) {
 			const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
 			if (rundown && !Array.isArray(rundown) && rundown.sync) {
-				await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartDelete, [
-					document.rundownId,
-					document.segmentId,
-					document.id
-				])
+				try {
+					await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartDelete, [
+						document.rundownId,
+						document.segmentId,
+						document.id
+					])
+				} catch (error) {
+					console.error(error)
+				}
 			}
 		}
 
