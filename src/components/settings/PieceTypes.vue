@@ -75,11 +75,11 @@ export default Vue.extend({
 		},
 
 		exportPieceTypes() {
-			saveToFile(this.pieceTypes)
+			saveToFile({ title: 'Export piece types', document: this.pieceTypes })
 		},
 
 		async importPieceTypes() {
-			const pieceTypes = await openFromFile()
+			const pieceTypes = await openFromFile({ title: 'Import piece types' })
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const verify = (pieceTypes: any) =>
 				Array.isArray(pieceTypes) &&

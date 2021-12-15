@@ -8,23 +8,32 @@
 import { remote } from 'electron'
 import { promises as fs } from 'fs'
 
-export async function saveToFile(document: unknown): Promise<boolean> {
+export interface SaveToFileArgs {
+	title: string
+	document: unknown
+}
+
+export async function saveToFile(args: SaveToFileArgs): Promise<boolean> {
 	const { filePath, canceled } = await remote.dialog.showSaveDialog({
-		title: 'Export piece types',
+		title: args.title,
 		filters: [{ name: 'JSON', extensions: ['json'] }]
 	})
 
 	if (filePath && !canceled) {
-		await fs.writeFile(filePath, JSON.stringify(document))
+		await fs.writeFile(filePath, JSON.stringify(args.document))
 	}
 
 	return false
 }
 
+export interface OpenFromFileArgs {
+	title: string
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function openFromFile(): Promise<boolean | any> {
+export async function openFromFile(args: OpenFromFileArgs): Promise<boolean | any> {
 	const { canceled, filePaths } = await remote.dialog.showOpenDialog({
-		title: 'Import piece types',
+		title: args.title,
 		filters: [{ name: 'JSON', extensions: ['json'] }],
 		properties: ['openFile']
 	})
