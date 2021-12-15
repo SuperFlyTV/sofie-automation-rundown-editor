@@ -223,7 +223,7 @@ ipcMain.handle('rundowns', async (_, operation: IpcOperation) => {
 		const { result, error } = await mutations.create(operation.payload)
 
 		if (result && result.sync) {
-			coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [
+			await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [
 				mutateRundown(result)
 			])
 		}
@@ -238,7 +238,7 @@ ipcMain.handle('rundowns', async (_, operation: IpcOperation) => {
 		const { result, error } = await mutations.update(operation.payload)
 
 		if (document && 'id' in document && result) {
-			sendRundownDiffToCore(document, result)
+			await sendRundownDiffToCore(document, result)
 		}
 
 		return result || error
@@ -246,8 +246,10 @@ ipcMain.handle('rundowns', async (_, operation: IpcOperation) => {
 		const { result: document } = await mutations.read({ id: operation.payload.id })
 		const { error } = await mutations.delete(operation.payload)
 
-		if (document && 'id' in document && !error) {
-			coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownDelete, [document.id])
+		if (document && 'id' in document && !error && document.sync) {
+			await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownDelete, [
+				document.id
+			])
 		}
 
 		return error || true

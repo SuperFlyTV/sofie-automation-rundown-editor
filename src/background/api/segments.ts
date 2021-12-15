@@ -265,10 +265,13 @@ ipcMain.handle('segments', async (_, operation: IpcOperation) => {
 		const { result, error } = await mutations.create(operation.payload)
 
 		if (result && !result.float) {
-			coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [
-				result.rundownId,
-				mutateSegment(result)
-			])
+			const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
+			if (rundown && !Array.isArray(rundown) && rundown.sync) {
+				await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [
+					result.rundownId,
+					mutateSegment(result)
+				])
+			}
 		}
 
 		return result || error
@@ -281,7 +284,10 @@ ipcMain.handle('segments', async (_, operation: IpcOperation) => {
 		const { result, error } = await mutations.update(operation.payload)
 
 		if (document && 'id' in document && result) {
-			sendSegmentDiffToCore(document, result)
+			const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
+			if (rundown && !Array.isArray(rundown) && rundown.sync) {
+				await sendSegmentDiffToCore(document, result)
+			}
 		}
 
 		return result || error
@@ -290,10 +296,13 @@ ipcMain.handle('segments', async (_, operation: IpcOperation) => {
 		const { error } = await mutations.delete(operation.payload)
 
 		if (document && 'id' in document) {
-			coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentDelete, [
-				document.rundownId,
-				document.id
-			])
+			const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
+			if (rundown && !Array.isArray(rundown) && rundown.sync) {
+				await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentDelete, [
+					document.rundownId,
+					document.id
+				])
+			}
 		}
 
 		return error || true

@@ -207,7 +207,7 @@ ipcMain.handle('pieces', async (_, operation: IpcOperation) => {
 	if (operation.type === IpcOperationType.Create) {
 		const { result, error } = await mutations.create(operation.payload)
 
-		if (result) sendPartUpdateToCore(result.partId)
+		if (result) await sendPartUpdateToCore(result.partId)
 
 		return error || result
 	} else if (operation.type === IpcOperationType.Read) {
@@ -217,14 +217,14 @@ ipcMain.handle('pieces', async (_, operation: IpcOperation) => {
 	} else if (operation.type === IpcOperationType.Update) {
 		const { result, error } = await mutations.update(operation.payload)
 
-		if (result) sendPartUpdateToCore(result.partId)
+		if (result) await sendPartUpdateToCore(result.partId)
 
 		return error || result
 	} else if (operation.type === IpcOperationType.Delete) {
 		const { result: document } = await mutations.read({ id: operation.payload.id })
 		const { error } = await mutations.delete(operation.payload)
 
-		if (!error && document && !Array.isArray(document)) sendPartUpdateToCore(document.partId)
+		if (!error && document && !Array.isArray(document)) await sendPartUpdateToCore(document.partId)
 
 		return error || true
 	}
