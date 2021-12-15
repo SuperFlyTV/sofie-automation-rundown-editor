@@ -280,6 +280,7 @@ const store = new Vuex.Store<State>({
 					type: IpcOperationType.Create,
 					payload: {
 						name: 'New rundown',
+						sync: false,
 						playlistId
 					}
 				})
