@@ -36,20 +36,17 @@ async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
 	}
 
 	if (oldSegment.float && !newSegment.float) {
-		console.log('dataSegmentCreate', newSegment.rundownId, newSegment.id)
 		coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [
 			newSegment.rundownId,
 			mutateSegment(newSegment)
 		])
 		createAllPartsInCore(newSegment.id)
 	} else if (!oldSegment.float && newSegment.float) {
-		console.log('dataSegmentDelete', newSegment.rundownId, newSegment.id)
 		coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentDelete, [
 			newSegment.rundownId,
 			newSegment.id
 		])
 	} else if (!oldSegment.float && !newSegment.float) {
-		console.log('dataSegmentUpdate', newSegment.rundownId, newSegment.id)
 		coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentUpdate, [
 			newSegment.rundownId,
 			mutateSegment(newSegment)
@@ -188,7 +185,6 @@ export const mutations = {
 		}
 	},
 	async update(payload: MutationSegmentUpdate): Promise<{ result?: Segment; error?: Error }> {
-		console.log('update:', payload)
 		const update = {
 			...payload,
 			id: null,
