@@ -11,7 +11,6 @@ import {
 } from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
-import { RunResult } from 'sqlite3'
 import { coreHandler } from '../coreHandler'
 import { PeripheralDeviceAPI } from '@sofie-automation/server-core-integration'
 import { getMutatedPiecesFromPart } from './pieces'
