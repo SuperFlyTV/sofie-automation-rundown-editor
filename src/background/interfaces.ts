@@ -241,3 +241,10 @@ export interface CoreConnectionInfo {
 	url?: string
 	port?: number
 }
+
+export interface SerializedRundown {
+	rundown: Rundown
+	segments: Segment[]
+	parts: Part[]
+	pieces: Piece[]
+}
