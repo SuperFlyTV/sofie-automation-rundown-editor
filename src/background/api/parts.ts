@@ -105,7 +105,7 @@ export const mutations = {
 		)
 
 		if (result) {
-			const document = await new Promise<DBPart>((resolve) =>
+			const document = await new Promise<DBPart>((resolve, reject) =>
 				db.get(
 					`
 				SELECT *
@@ -115,8 +115,11 @@ export const mutations = {
 			`,
 					[id],
 					(e, r) => {
-						console.log(e, r)
-						resolve(r)
+						if (e) {
+							reject(e)
+						} else {
+							resolve(r)
+						}
 					}
 				)
 			)

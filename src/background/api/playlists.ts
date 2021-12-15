@@ -30,7 +30,7 @@ ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 		)
 
 		if (result) {
-			const document = await new Promise<DBPlaylist>((resolve) =>
+			const document = await new Promise<DBPlaylist>((resolve, reject) =>
 				db.get(
 					`
 				SELECT *
@@ -40,8 +40,11 @@ ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 			`,
 					[id],
 					(e, r) => {
-						console.log(e, r)
-						resolve(r)
+						if (e) {
+							reject(e)
+						} else {
+							resolve(r)
+						}
 					}
 				)
 			)
@@ -106,7 +109,7 @@ ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 		)
 
 		if (result) {
-			const document = await new Promise<DBPlaylist>((resolve) =>
+			const document = await new Promise<DBPlaylist>((resolve, reject) =>
 				db.get(
 					`
 				SELECT *
@@ -116,8 +119,11 @@ ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 			`,
 					[operation.payload.id],
 					(e, r) => {
-						console.log(e, r)
-						resolve(r)
+						if (e) {
+							reject(e)
+						} else {
+							resolve(r)
+						}
 					}
 				)
 			)

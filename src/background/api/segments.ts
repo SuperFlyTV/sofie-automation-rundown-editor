@@ -89,7 +89,7 @@ export const mutations = {
 		)
 
 		if (result) {
-			const document = await new Promise<DBSegment>((resolve) =>
+			const document = await new Promise<DBSegment>((resolve, reject) =>
 				db.get(
 					`
 				SELECT *
@@ -99,8 +99,11 @@ export const mutations = {
 			`,
 					[id],
 					(e, r) => {
-						console.log(e, r)
-						resolve(r)
+						if (e) {
+							reject(e)
+						} else {
+							resolve(r)
+						}
 					}
 				)
 			)
@@ -206,7 +209,7 @@ export const mutations = {
 		)
 
 		if (result) {
-			const document = await new Promise<DBSegment>((resolve) =>
+			const document = await new Promise<DBSegment>((resolve, reject) =>
 				db.get(
 					`
 				SELECT *
@@ -216,8 +219,11 @@ export const mutations = {
 			`,
 					[payload.id],
 					(e, r) => {
-						console.log(e, r)
-						resolve(r)
+						if (e) {
+							reject(e)
+						} else {
+							resolve(r)
+						}
 					}
 				)
 			)
