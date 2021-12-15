@@ -8,7 +8,7 @@ export interface Rundown {
 	/** Id of the rundown as reported by the ingest gateway. Must be unique for each rundown owned by the gateway */
 	id: string
 	/** id of the playlist this rundown is in */
-	playlistId?: string
+	playlistId: string | null
 	/** Name of the rundown */
 	name: string
 	/** Whether to sync the rundown to Sofie */
@@ -24,6 +24,8 @@ export interface Rundown {
 export interface Segment {
 	/** Id of the segment as reported by the ingest gateway. Must be unique for each segment in the rundown */
 	id: string
+	/** Id of the playlist this segment belongs to */
+	playlistId: string | null
 	/** Id of the rundown this segment belongs to */
 	rundownId: string
 	/** Name of the segment */
@@ -36,7 +38,9 @@ export interface Segment {
 export interface Part {
 	/** Id of the part as reported by the ingest gateway. Must be unique for each part in the rundown */
 	id: string
-	/** Id of the rundown this segment belongs to */
+	/** Id of the playlist this part belongs to */
+	playlistId: string | null
+	/** Id of the rundown this part belongs to */
 	rundownId: string
 	/** Id of the segment this part belongs to */
 	segmentId: string
@@ -44,7 +48,7 @@ export interface Part {
 	name: string
 	/** Rank of the part within the segmetn */
 	rank: number
-	/** Whether this segment is floated */
+	/** Whether this part is floated */
 	float: boolean
 
 	/** Raw payload of the part. Only used by the blueprints */
@@ -57,6 +61,8 @@ export interface Part {
 export interface Piece {
 	/** Id of the adlib as reported by the ingest source. Must be unique for each adlib */
 	id: string
+	/** Id of the playlist this piece belongs to */
+	playlistId: string | null
 	/** Id of the rundown this piece belongs to */
 	rundownId: string
 	/** Id of the segment this piece belongs to */
@@ -165,16 +171,11 @@ export interface IpcOperation {
 	payload: any
 }
 
-export type MutationPieceCreate = Pick<
-	Piece,
-	'name' | 'rundownId' | 'segmentId' | 'partId' | 'pieceType'
-> & { playlistId: string | null }
+export type MutationPieceCreate = Piece
 
 export type MutationPieceRead = Pick<Piece, 'id' | 'rundownId' | 'segmentId' | 'partId'>
 
-export type MutationPieceUpdate = Piece & {
-	playlistId: string | null
-}
+export type MutationPieceUpdate = Piece
 
 export type MutationPieceDelete = Pick<Piece, 'id'>
 
@@ -192,18 +193,11 @@ export interface MutatedPiece {
 	position: number | undefined
 }
 
-export type MutationPartCreate = Pick<Part, 'name' | 'rundownId' | 'segmentId' | 'rank'> & {
-	playlistId: string | null
-}
+export type MutationPartCreate = Part
 
 export type MutationPartRead = Pick<Part, 'id' | 'rundownId' | 'segmentId'>
 
-export type MutationPartUpdate = Pick<
-	Part,
-	'name' | 'rank' | 'payload' | 'id' | 'rundownId' | 'segmentId'
-> & {
-	playlistId: string | null
-}
+export type MutationPartUpdate = Part
 
 export type MutationPartDelete = Pick<Part, 'id'>
 
@@ -217,11 +211,7 @@ export type MutationPieceTypeManifestUpdate = Pick<PieceTypeManifest, 'id'> & {
 
 export type MutationPieceTypeManifestDelete = Pick<PieceTypeManifest, 'id'>
 
-export type MutationRundownCreate = Pick<Rundown, 'id' | 'playlistId'> & {
-	document: {
-		name: string
-	}
-}
+export type MutationRundownCreate = Rundown
 
 export type MutationRundownRead = Pick<Rundown, 'id'>
 
@@ -229,15 +219,11 @@ export type MutationRundownUpdate = Rundown
 
 export type MutationRundownDelete = Pick<Rundown, 'id'>
 
-export type MutationSegmentCreate = Pick<Segment, 'name' | 'rundownId' | 'rank'> & {
-	playlistId: string | null
-}
+export type MutationSegmentCreate = Segment
 
 export type MutationSegmentRead = Pick<Segment, 'id' | 'rundownId'>
 
-export type MutationSegmentUpdate = Segment & {
-	playlistId: string | null
-}
+export type MutationSegmentUpdate = Segment
 
 export type MutationSegmentDelete = Pick<Segment, 'id'>
 
