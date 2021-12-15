@@ -105,7 +105,7 @@ export default Vue.extend({
 					playlistId: this.rundown.playlistId,
 					rundownId: this.rundown.id,
 					segmentId: id,
-					rank: segment?.parts.length
+					rank: segment?.parts.length || 0
 				})
 		},
 
