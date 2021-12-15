@@ -332,7 +332,7 @@ export async function sendPartUpdateToCore(partId: string) {
 			return
 		}
 
-		coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartUpdate, [
+		await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartUpdate, [
 			result.rundownId,
 			result.segmentId,
 			await mutatePart(result)
