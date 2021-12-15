@@ -319,7 +319,8 @@ const store = new Vuex.Store<State>({
 						name: `Segment ${rank + 1}`,
 						playlistId,
 						rundownId,
-						rank
+						rank,
+						float: false
 					}
 				})
 			)
@@ -358,7 +359,8 @@ const store = new Vuex.Store<State>({
 						playlistId,
 						rundownId,
 						segmentId,
-						rank
+						rank,
+						float: false
 					}
 				})
 			)
