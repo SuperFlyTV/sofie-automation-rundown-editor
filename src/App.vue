@@ -7,9 +7,33 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { ipcRenderer } from 'electron'
 
 export default Vue.extend({
-	name: 'App'
+	name: 'App',
+	methods: {
+		handleError(_: Electron.IpcRendererEvent, error: unknown) {
+			// eslint-disable-next-line no-console
+			console.error(error)
+
+			let message = 'An unknown error occurred.'
+			if (typeof error === 'string') {
+				message = error
+			} else if (typeof error === 'object' && error !== null && 'message' in error) {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				message = (error as any).message
+			}
+			this.$bvModal.msgBoxOk(message, {
+				title: 'Error'
+			})
+		}
+	},
+	created() {
+		ipcRenderer.on('error', this.handleError)
+	},
+	destroyed() {
+		ipcRenderer.removeListener('error', this.handleError)
+	}
 })
 </script>
 
