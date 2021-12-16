@@ -268,7 +268,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					try {
 						await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [
 							result.rundownId,
-							mutateSegment(result)
+							await mutateSegment(result)
 						])
 					} catch (error) {
 						console.error(error)
