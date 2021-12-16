@@ -17,15 +17,19 @@ export default Vue.extend({
 			console.error(error)
 
 			let message = 'An unknown error occurred.'
+			let title = 'Error'
 			if (typeof error === 'string') {
 				message = error
 			} else if (typeof error === 'object' && error !== null && 'message' in error) {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				/* eslint-disable @typescript-eslint/no-explicit-any */
 				message = (error as any).message
+				if ('errorType' in error && (error as any).errorType === 'Meteor.Error') {
+					title = 'Sofie Core Error'
+					message = `Error when updating rundown in Sofie Core: ${message}`
+				}
+				/* eslint-enable @typescript-eslint/no-explicit-any */
 			}
-			this.$bvModal.msgBoxOk(message, {
-				title: 'Error'
-			})
+			this.$bvModal.msgBoxOk(message, { title })
 		}
 	},
 	created() {
