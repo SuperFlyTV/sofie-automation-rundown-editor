@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 import {
 	DBSegment,
 	IpcOperation,
@@ -257,54 +257,71 @@ export const mutations = {
 	}
 }
 
-ipcMain.handle('segments', async (_, operation: IpcOperation) => {
-	if (operation.type === IpcOperationType.Create) {
-		const { result, error } = await mutations.create(operation.payload)
+export async function init(window: BrowserWindow): Promise<void> {
+	ipcMain.handle('segments', async (_, operation: IpcOperation) => {
+		if (operation.type === IpcOperationType.Create) {
+			const { result, error } = await mutations.create(operation.payload)
 
-		if (result && !result.float) {
-			const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
-			if (rundown && !Array.isArray(rundown) && rundown.sync) {
-				await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [
-					result.rundownId,
-					mutateSegment(result)
-				])
+			if (result && !result.float) {
+				const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
+				if (rundown && !Array.isArray(rundown) && rundown.sync) {
+					try {
+						await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [
+							result.rundownId,
+							mutateSegment(result)
+						])
+					} catch (error) {
+						console.error(error)
+						window.webContents.send('error', error)
+					}
+				}
 			}
-		}
 
-		return result || error
-	} else if (operation.type === IpcOperationType.Read) {
-		const { result, error } = await mutations.read(operation.payload)
+			return result || error
+		} else if (operation.type === IpcOperationType.Read) {
+			const { result, error } = await mutations.read(operation.payload)
 
-		return result || error
-	} else if (operation.type === IpcOperationType.Update) {
-		const { result: document } = await mutations.read({ id: operation.payload.id })
-		const { result, error } = await mutations.update(operation.payload)
+			return result || error
+		} else if (operation.type === IpcOperationType.Update) {
+			const { result: document } = await mutations.read({ id: operation.payload.id })
+			const { result, error } = await mutations.update(operation.payload)
 
-		if (document && 'id' in document && result) {
-			const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
-			if (rundown && !Array.isArray(rundown) && rundown.sync) {
-				await sendSegmentDiffToCore(document, result)
+			if (document && 'id' in document && result) {
+				const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
+				if (rundown && !Array.isArray(rundown) && rundown.sync) {
+					try {
+						await sendSegmentDiffToCore(document, result)
+					} catch (error) {
+						console.error(error)
+						window.webContents.send('error', error)
+					}
+				}
 			}
-		}
 
-		return result || error
-	} else if (operation.type === IpcOperationType.Delete) {
-		const { result: document } = await mutations.read({ id: operation.payload.id })
-		const { error } = await mutations.delete(operation.payload)
+			return result || error
+		} else if (operation.type === IpcOperationType.Delete) {
+			const { result: document } = await mutations.read({ id: operation.payload.id })
+			const { error } = await mutations.delete(operation.payload)
 
-		if (document && 'id' in document) {
-			const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
-			if (rundown && !Array.isArray(rundown) && rundown.sync) {
-				await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentDelete, [
-					document.rundownId,
-					document.id
-				])
+			if (document && 'id' in document) {
+				const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
+				if (rundown && !Array.isArray(rundown) && rundown.sync) {
+					try {
+						await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentDelete, [
+							document.rundownId,
+							document.id
+						])
+					} catch (error) {
+						console.error(error)
+						window.webContents.send('error', error)
+					}
+				}
 			}
-		}
 
-		return error || true
-	}
-})
+			return error || true
+		}
+	})
+}
 
 export async function createAllSegmentsInCore(rundownId: string) {
 	const { result, error } = await mutations.read({ rundownId })

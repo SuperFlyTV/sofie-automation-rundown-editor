@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 import {
 	DBRundown,
 	IpcOperation,
@@ -219,40 +219,57 @@ export const mutations = {
 	}
 }
 
-ipcMain.handle('rundowns', async (_, operation: IpcOperation) => {
-	if (operation.type === IpcOperationType.Create) {
-		const { result, error } = await mutations.create(operation.payload)
+export async function init(window: BrowserWindow): Promise<void> {
+	ipcMain.handle('rundowns', async (_, operation: IpcOperation) => {
+		if (operation.type === IpcOperationType.Create) {
+			const { result, error } = await mutations.create(operation.payload)
 
-		if (result && result.sync) {
-			await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [
-				mutateRundown(result)
-			])
+			if (result && result.sync) {
+				try {
+					await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [
+						mutateRundown(result)
+					])
+				} catch (error) {
+					console.error(error)
+					window.webContents.send('error', error)
+				}
+			}
+
+			return result || error
+		} else if (operation.type === IpcOperationType.Read) {
+			const { result, error } = await mutations.read(operation.payload)
+
+			return result || error
+		} else if (operation.type === IpcOperationType.Update) {
+			const { result: document } = await mutations.read({ id: operation.payload.id })
+			const { result, error } = await mutations.update(operation.payload)
+
+			if (document && 'id' in document && result) {
+				try {
+					await sendRundownDiffToCore(document, result)
+				} catch (error) {
+					console.error(error)
+					window.webContents.send('error', error)
+				}
+			}
+
+			return result || error
+		} else if (operation.type === IpcOperationType.Delete) {
+			const { result: document } = await mutations.read({ id: operation.payload.id })
+			const { error } = await mutations.delete(operation.payload)
+
+			if (document && 'id' in document && !error && document.sync) {
+				try {
+					await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownDelete, [
+						document.id
+					])
+				} catch (error) {
+					console.error(error)
+					window.webContents.send('error', error)
+				}
+			}
+
+			return error || true
 		}
-
-		return result || error
-	} else if (operation.type === IpcOperationType.Read) {
-		const { result, error } = await mutations.read(operation.payload)
-
-		return result || error
-	} else if (operation.type === IpcOperationType.Update) {
-		const { result: document } = await mutations.read({ id: operation.payload.id })
-		const { result, error } = await mutations.update(operation.payload)
-
-		if (document && 'id' in document && result) {
-			await sendRundownDiffToCore(document, result)
-		}
-
-		return result || error
-	} else if (operation.type === IpcOperationType.Delete) {
-		const { result: document } = await mutations.read({ id: operation.payload.id })
-		const { error } = await mutations.delete(operation.payload)
-
-		if (document && 'id' in document && !error && document.sync) {
-			await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownDelete, [
-				document.id
-			])
-		}
-
-		return error || true
-	}
-})
+	})
+}

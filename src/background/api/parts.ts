@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 import {
 	DBPart,
 	IpcOperation,
@@ -256,53 +256,70 @@ export const mutations = {
 	}
 }
 
-ipcMain.handle('parts', async (_, operation: IpcOperation) => {
-	if (operation.type === IpcOperationType.Create) {
-		const { result, error } = await mutations.create(operation.payload)
+export async function init(window: BrowserWindow): Promise<void> {
+	ipcMain.handle('parts', async (_, operation: IpcOperation) => {
+		if (operation.type === IpcOperationType.Create) {
+			const { result, error } = await mutations.create(operation.payload)
 
-		if (result && !result.float) {
-			const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
-			if (rundown && !Array.isArray(rundown) && rundown.sync) {
-				await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartCreate, [
-					result.rundownId,
-					result.segmentId,
-					await mutatePart(result)
-				])
+			if (result && !result.float) {
+				const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
+				if (rundown && !Array.isArray(rundown) && rundown.sync) {
+					try {
+						await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartCreate, [
+							result.rundownId,
+							result.segmentId,
+							await mutatePart(result)
+						])
+					} catch (error) {
+						console.error(error)
+						window.webContents.send('error', error)
+					}
+				}
 			}
-		}
 
-		return error || result
-	} else if (operation.type === IpcOperationType.Read) {
-		const { result, error } = await mutations.read(operation.payload)
+			return error || result
+		} else if (operation.type === IpcOperationType.Read) {
+			const { result, error } = await mutations.read(operation.payload)
 
-		return error || result
-	} else if (operation.type === IpcOperationType.Update) {
-		const { result: document } = await mutations.read({ id: operation.payload.id })
-		const { result, error } = await mutations.update(operation.payload)
+			return error || result
+		} else if (operation.type === IpcOperationType.Update) {
+			const { result: document } = await mutations.read({ id: operation.payload.id })
+			const { result, error } = await mutations.update(operation.payload)
 
-		if (document && 'id' in document && result) {
-			await sendPartDiffToCore(document, result)
-		}
-
-		return error || result
-	} else if (operation.type === IpcOperationType.Delete) {
-		const { result: document } = await mutations.read({ id: operation.payload.id })
-		const { error } = await mutations.delete(operation.payload)
-
-		if (!error && document && !Array.isArray(document) && !document.float) {
-			const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
-			if (rundown && !Array.isArray(rundown) && rundown.sync) {
-				await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartDelete, [
-					document.rundownId,
-					document.segmentId,
-					document.id
-				])
+			if (document && 'id' in document && result) {
+				try {
+					await sendPartDiffToCore(document, result)
+				} catch (error) {
+					console.error(error)
+					window.webContents.send('error', error)
+				}
 			}
-		}
 
-		return error || true
-	}
-})
+			return error || result
+		} else if (operation.type === IpcOperationType.Delete) {
+			const { result: document } = await mutations.read({ id: operation.payload.id })
+			const { error } = await mutations.delete(operation.payload)
+
+			if (!error && document && !Array.isArray(document) && !document.float) {
+				const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
+				if (rundown && !Array.isArray(rundown) && rundown.sync) {
+					try {
+						await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartDelete, [
+							document.rundownId,
+							document.segmentId,
+							document.id
+						])
+					} catch (error) {
+						console.error(error)
+						window.webContents.send('error', error)
+					}
+				}
+			}
+
+			return error || true
+		}
+	})
+}
 
 export async function sendPartUpdateToCore(partId: string) {
 	const { result } = await mutations.read({ id: partId })

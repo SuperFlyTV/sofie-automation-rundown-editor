@@ -29,9 +29,11 @@ async function createWindow() {
 		}
 	})
 
-	// Without this line, everything in `background` gets tree-shaken out.
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const api = new ControlAPI(win)
+	await api.init().catch((error) => {
+		console.error(error)
+		process.exit(1)
+	})
 
 	// const menu = Menu.buildFromTemplate([
 	// 	{

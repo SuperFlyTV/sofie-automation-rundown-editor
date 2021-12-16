@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 import {
 	DBPiece,
 	IpcOperation,
@@ -203,32 +203,55 @@ export const mutations = {
 	}
 }
 
-ipcMain.handle('pieces', async (_, operation: IpcOperation) => {
-	if (operation.type === IpcOperationType.Create) {
-		const { result, error } = await mutations.create(operation.payload)
+export async function init(window: BrowserWindow): Promise<void> {
+	ipcMain.handle('pieces', async (_, operation: IpcOperation) => {
+		if (operation.type === IpcOperationType.Create) {
+			const { result, error } = await mutations.create(operation.payload)
 
-		if (result) await sendPartUpdateToCore(result.partId)
+			if (result) {
+				try {
+					await sendPartUpdateToCore(result.partId)
+				} catch (error) {
+					console.error(error)
+					window.webContents.send('error', error)
+				}
+			}
 
-		return error || result
-	} else if (operation.type === IpcOperationType.Read) {
-		const { result, error } = await mutations.read(operation.payload)
+			return error || result
+		} else if (operation.type === IpcOperationType.Read) {
+			const { result, error } = await mutations.read(operation.payload)
 
-		return error || result
-	} else if (operation.type === IpcOperationType.Update) {
-		const { result, error } = await mutations.update(operation.payload)
+			return error || result
+		} else if (operation.type === IpcOperationType.Update) {
+			const { result, error } = await mutations.update(operation.payload)
 
-		if (result) await sendPartUpdateToCore(result.partId)
+			if (result) {
+				try {
+					await sendPartUpdateToCore(result.partId)
+				} catch (error) {
+					console.error(error)
+					window.webContents.send('error', error)
+				}
+			}
 
-		return error || result
-	} else if (operation.type === IpcOperationType.Delete) {
-		const { result: document } = await mutations.read({ id: operation.payload.id })
-		const { error } = await mutations.delete(operation.payload)
+			return error || result
+		} else if (operation.type === IpcOperationType.Delete) {
+			const { result: document } = await mutations.read({ id: operation.payload.id })
+			const { error } = await mutations.delete(operation.payload)
 
-		if (!error && document && !Array.isArray(document)) await sendPartUpdateToCore(document.partId)
+			if (!error && document && !Array.isArray(document)) {
+				try {
+					await sendPartUpdateToCore(document.partId)
+				} catch (error) {
+					console.error(error)
+					window.webContents.send('error', error)
+				}
+			}
 
-		return error || true
-	}
-})
+			return error || true
+		}
+	})
+}
 
 export async function getMutatedPiecesFromPart(partId: string): Promise<MutatedPiece[]> {
 	const { result: pieces } = await mutations.read({ partId: partId })
