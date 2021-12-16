@@ -7,6 +7,7 @@ import {
 	MutationRundownDelete,
 	MutationRundownRead,
 	MutationRundownUpdate,
+	MutatedRundown,
 	Rundown
 } from '../interfaces'
 import { db } from '../db'
@@ -15,7 +16,7 @@ import { coreHandler } from '../coreHandler'
 import { PeripheralDeviceAPI } from '@sofie-automation/server-core-integration'
 import { createAllSegmentsInCore } from './segments'
 
-export function mutateRundown(rundown: Rundown) {
+export function mutateRundown(rundown: Rundown): MutatedRundown {
 	return {
 		externalId: rundown.id,
 		name: rundown.name,

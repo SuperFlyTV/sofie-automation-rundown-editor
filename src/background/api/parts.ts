@@ -7,6 +7,7 @@ import {
 	MutationPartDelete,
 	MutationPartRead,
 	MutationPartUpdate,
+	MutatedPart,
 	Part
 } from '../interfaces'
 import { db } from '../db'
@@ -17,7 +18,7 @@ import { getMutatedPiecesFromPart } from './pieces'
 import { mutations as rundownMutations } from './rundowns'
 import { mutations as segmentsMutations } from './segments'
 
-async function mutatePart(part: Part) {
+async function mutatePart(part: Part): Promise<MutatedPart> {
 	return {
 		externalId: part.id,
 		name: part.name,
@@ -303,22 +304,6 @@ ipcMain.handle('parts', async (_, operation: IpcOperation) => {
 	}
 })
 
-export async function createAllPartsInCore(segmentId: string) {
-	const { result } = await mutations.read({ segmentId })
-
-	if (result && Array.isArray(result)) {
-		const sortedParts = result.sort((a, b) => a.rank - b.rank)
-		for (const s of sortedParts) {
-			if (!s.float)
-				await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataPartCreate, [
-					s.rundownId,
-					s.segmentId,
-					await mutatePart(s)
-				])
-		}
-	}
-}
-
 export async function sendPartUpdateToCore(partId: string) {
 	const { result } = await mutations.read({ id: partId })
 
@@ -338,4 +323,14 @@ export async function sendPartUpdateToCore(partId: string) {
 			await mutatePart(result)
 		])
 	}
+}
+
+export async function getMutatedPartsFromSegment(segmentId: string): Promise<MutatedPart[]> {
+	const { result: parts } = await mutations.read({ segmentId })
+
+	if (parts && Array.isArray(parts)) {
+		return await Promise.all(parts.map(mutatePart))
+	}
+
+	return []
 }
