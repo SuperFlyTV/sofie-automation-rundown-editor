@@ -15,13 +15,12 @@ Head to the [releases](https://github.com/SuperFlyTV/sofie-automation-rundown-ed
 1. Begin by navigating to the Settings page in the top right.
 2. Enter the URL and port of your Sofie instance (defaults to `127.0.0.1:3000`).
    - ❗ Restart the program after changing this setting! (be sure to hit "Save" first, though)
-3. (Optional) Create any Rundown Metadata fields that your Rundown needs.
-4. Click "Save".
-5. Download and import [this example set of Piece Types](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/raw/master/example-pieces-manifest.json) (right click and "Save link as...").
-6. Before continuing, open the Sofie Core interface, navigate to the Settings page, click on your Studio, and attach `sofie-rundown-editor` as a Device by clicking the plus sign (+) under "Attached Devices".
-7. Back in Rundown Editor, navigate to the Rundowns page in the top right.
-8. Download and import [this example Rundown](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/raw/master/example-rundown.json) (right click and "Save link as...")
-9. Open your Rundown in Sofie, and you should see one segment with one part containing a single piece.
+3. Click "Save".
+4. Download and import [this example set of Piece Types](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/raw/master/example-pieces-manifest.json) (right click and "Save link as...").
+5. Before continuing, open the Sofie Core interface, navigate to the Settings page, click on your Studio, and attach `sofie-rundown-editor` as a Device by clicking the plus sign (+) under "Attached Devices".
+6. Back in Rundown Editor, navigate to the Rundowns page in the top right.
+7. Download and import [this example Rundown](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/raw/master/example-rundown.json) (right click and "Save link as...")
+8. Open your Rundown in Sofie, and you should see one segment with one part containing a single piece.
 
 ## For Developers
 
