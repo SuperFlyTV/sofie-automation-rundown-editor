@@ -323,22 +323,12 @@ export async function init(window: BrowserWindow): Promise<void> {
 	})
 }
 
-export async function createAllSegmentsInCore(rundownId: string) {
-	const { result, error } = await mutations.read({ rundownId })
+export async function getMutatedSegmentsFromRundown(rundownId: string): Promise<MutatedSegment[]> {
+	const { result: segments } = await mutations.read({ rundownId })
 
-	if (error) {
-		console.log(error)
-		return
+	if (segments && Array.isArray(segments)) {
+		return await Promise.all(segments.map(mutateSegment))
 	}
 
-	if (result && Array.isArray(result)) {
-		result
-			.filter((s) => !s.float)
-			.forEach(async (segment) => {
-				await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [
-					segment.rundownId,
-					mutateSegment(segment)
-				])
-			})
-	}
+	return []
 }
