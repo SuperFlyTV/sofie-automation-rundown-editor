@@ -183,6 +183,7 @@ export interface MutatedRundown {
 	externalId: string
 	name: string
 	type: 'sofie-rundown-editor'
+	segments: MutatedSegment[]
 	payload: {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		[key: string]: any

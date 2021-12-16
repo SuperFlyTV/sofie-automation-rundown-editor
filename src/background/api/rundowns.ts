@@ -14,13 +14,14 @@ import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { PeripheralDeviceAPI } from '@sofie-automation/server-core-integration'
-import { createAllSegmentsInCore } from './segments'
+import { getMutatedSegmentsFromRundown } from './segments'
 
-export function mutateRundown(rundown: Rundown): MutatedRundown {
+export async function mutateRundown(rundown: Rundown): Promise<MutatedRundown> {
 	return {
 		externalId: rundown.id,
 		name: rundown.name,
 		type: 'sofie-rundown-editor', // ?
+		segments: await getMutatedSegmentsFromRundown(rundown.id),
 		payload: {
 			name: rundown.name,
 			expectedStart: rundown.expectedStartTime,
