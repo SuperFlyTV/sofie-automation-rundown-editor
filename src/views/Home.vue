@@ -88,6 +88,7 @@ export default Vue.extend({
 			try {
 				rundown = await openFromFile({ title: 'Import rundown' })
 			} catch (error) {
+				// eslint-disable-next-line no-console
 				console.error(error)
 				this.$bvModal.show('rundown-import-is-invalid')
 				return
