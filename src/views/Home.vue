@@ -21,7 +21,6 @@
 				:to="'/rundown/' + rundown.id"
 			>
 				{{ rundown.name }}
-				<b-button @click.prevent="exportRundown(rundown)" class="m-2">Export</b-button>
 			</b-list-group-item>
 		</b-list-group>
 
@@ -43,16 +42,8 @@
 import Vue from 'vue'
 import store from '../store'
 import PlaylistList from '../components/PlaylistList.vue'
-import {
-	IpcOperation,
-	IpcOperationType,
-	Playlist,
-	Rundown,
-	SerializedRundown
-} from '@/background/interfaces'
-import { openFromFile, saveToFile } from '@/util/fs'
-import { ipcRenderer } from 'electron'
-import { literal } from '../util/lib'
+import { Playlist, Rundown, SerializedRundown } from '@/background/interfaces'
+import { openFromFile } from '@/util/fs'
 
 export default Vue.extend({
 	name: 'App',
@@ -200,47 +191,6 @@ export default Vue.extend({
 			} else {
 				this.$bvModal.show('rundown-import-is-invalid')
 			}
-		},
-		async exportRundown(rundown: Rundown) {
-			const segments = await ipcRenderer.invoke(
-				'segments',
-				literal<IpcOperation>({
-					type: IpcOperationType.Read,
-					payload: {
-						rundownId: rundown.id
-					}
-				})
-			)
-
-			const parts = await ipcRenderer.invoke(
-				'parts',
-				literal<IpcOperation>({
-					type: IpcOperationType.Read,
-					payload: {
-						rundownId: rundown.id
-					}
-				})
-			)
-
-			const pieces = await ipcRenderer.invoke(
-				'pieces',
-				literal<IpcOperation>({
-					type: IpcOperationType.Read,
-					payload: {
-						rundownId: rundown.id
-					}
-				})
-			)
-
-			saveToFile({
-				title: 'Export rundown',
-				document: literal<SerializedRundown>({
-					rundown,
-					segments,
-					parts,
-					pieces
-				})
-			})
 		}
 	}
 })
