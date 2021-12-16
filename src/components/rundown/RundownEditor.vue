@@ -51,10 +51,15 @@
 
 		<div class="buttons d-flex flex-row justify-content-between">
 			<b-button variant="danger" v-b-modal.delete-rd>Delete</b-button>
-			<b-button-group>
-				<b-button @click="reset">Cancel</b-button>
-				<b-button @click="update" variant="primary">Save</b-button>
-			</b-button-group>
+			<div class="d-flex">
+				<b-button-group>
+					<b-button class="export-button" @click="exportRundown">Export</b-button>
+				</b-button-group>
+				<b-button-group>
+					<b-button @click="reset">Cancel</b-button>
+					<b-button @click="update" variant="primary">Save</b-button>
+				</b-button-group>
+			</div>
 		</div>
 
 		<b-modal
@@ -70,10 +75,12 @@
 </template>
 
 <script lang="ts">
-import { Rundown } from '@/background/interfaces'
-import { editField, Nullable } from '@/util/lib'
+import { IpcOperation, IpcOperationType, Rundown, SerializedRundown } from '@/background/interfaces'
+import { editField, literal, Nullable } from '@/util/lib'
 import store from '@/store'
 import Vue from 'vue'
+import { ipcRenderer } from 'electron'
+import { saveToFile } from '../../util/fs'
 
 export default Vue.extend({
 	computed: {
@@ -235,6 +242,52 @@ export default Vue.extend({
 			}
 			if (value === undefined || value === '') value = null
 			this.editObject.metaData[field] = value
+		},
+		async exportRundown() {
+			const rundown = this.rundown as Rundown
+			if (!rundown.id) {
+				return
+			}
+
+			const segments = await ipcRenderer.invoke(
+				'segments',
+				literal<IpcOperation>({
+					type: IpcOperationType.Read,
+					payload: {
+						rundownId: rundown.id
+					}
+				})
+			)
+
+			const parts = await ipcRenderer.invoke(
+				'parts',
+				literal<IpcOperation>({
+					type: IpcOperationType.Read,
+					payload: {
+						rundownId: rundown.id
+					}
+				})
+			)
+
+			const pieces = await ipcRenderer.invoke(
+				'pieces',
+				literal<IpcOperation>({
+					type: IpcOperationType.Read,
+					payload: {
+						rundownId: rundown.id
+					}
+				})
+			)
+
+			saveToFile({
+				title: 'Export rundown',
+				document: literal<SerializedRundown>({
+					rundown,
+					segments,
+					parts,
+					pieces
+				})
+			})
 		}
 	}
 })
@@ -249,5 +302,8 @@ export default Vue.extend({
 }
 .buttons {
 	margin: 1em 0;
+}
+.export-button {
+	margin: 0 1em;
 }
 </style>

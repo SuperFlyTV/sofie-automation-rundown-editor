@@ -10,7 +10,12 @@ import {
 	Segment,
 	ApplicationSettings,
 	CoreConnectionStatus,
-	CoreConnectionInfo
+	CoreConnectionInfo,
+	MutationRundownCreate,
+	SerializedRundown,
+	MutationSegmentCreate,
+	MutationPartCreate,
+	MutationPieceCreate
 } from '@/background/interfaces'
 import { literal } from '@/util/lib'
 import Vue from 'vue'
@@ -296,6 +301,49 @@ const store = new Vuex.Store<State>({
 				})
 			)
 			commit('updateRundown', rundown)
+		},
+		importRundown: async ({ commit }, update: SerializedRundown) => {
+			const rundown = await ipcRenderer.invoke(
+				'rundowns',
+				literal<IpcOperation>({
+					type: IpcOperationType.Create,
+					payload: literal<MutationRundownCreate>(update.rundown)
+				})
+			)
+			commit('addRundown', rundown)
+
+			for (const segment of update.segments) {
+				const newSegment: Segment = await ipcRenderer.invoke(
+					'segments',
+					literal<IpcOperation>({
+						type: IpcOperationType.Create,
+						payload: literal<MutationSegmentCreate>(segment)
+					})
+				)
+				commit('addSegment', newSegment)
+			}
+
+			for (const part of update.parts) {
+				const newPart: Part = await ipcRenderer.invoke(
+					'parts',
+					literal<IpcOperation>({
+						type: IpcOperationType.Create,
+						payload: literal<MutationPartCreate>(part)
+					})
+				)
+				commit('addPart', newPart)
+			}
+
+			for (const piece of update.pieces) {
+				const newPiece: Piece = await ipcRenderer.invoke(
+					'pieces',
+					literal<IpcOperation>({
+						type: IpcOperationType.Create,
+						payload: literal<MutationPieceCreate>(piece)
+					})
+				)
+				commit('addPiece', newPiece)
+			}
 		},
 
 		removeSegment: async ({ commit }, id: string) => {
