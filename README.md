@@ -17,22 +17,11 @@ Head to the [releases](https://github.com/SuperFlyTV/sofie-automation-rundown-ed
    - ❗ Restart the program after changing this setting! (be sure to hit "Save" first, though)
 3. (Optional) Create any Rundown Metadata fields that your Rundown needs.
 4. Click "Save".
-5. Download and import [this example set of Piece Types](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/raw/master/example-pieces-manifest.json) (right click and hit "Save link as...").
+5. Download and import [this example set of Piece Types](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/raw/master/example-pieces-manifest.json) (right click and "Save link as...").
 6. Before continuing, open the Sofie Core interface, navigate to the Settings page, click on your Studio, and attach `sofie-rundown-editor` as a Device by clicking the plus sign (+) under "Attached Devices".
 7. Back in Rundown Editor, navigate to the Rundowns page in the top right.
-8. Click "New" and then click on the newly-created Rundown.
-9. Give it a name, check the "Sync to Sofie" box, and give it a Start Date, Start Time, End Date, and End Time.
-10. Click "Save".
-11. In the top left, click "New segment", then click on the newly-created Segment.
-12. Give the Segment a name and click "Save".
-13. In the top left, under the segment you just made, click "New part", then click on the newly-created Part.
-14. Give the Part a name, type (choose `Cam` for this example), duration, and optionally a script.
-15. Click "Save".
-16. In the top right, click "New piece".
-17. Select a Piece Type (choose `Camera` for this example) and click "Create".
-18. Fill out the form fields for the newly-created Piece and click "Save".
-19. Open your Rundown in Sofie, and you should see one segment with one part containing a single piece.
-20. Keep building your rundown, one piece at a time.
+8. Download and import [this example Rundown](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/raw/master/example-rundown.json) (right click and "Save link as...")
+9. Open your Rundown in Sofie, and you should see one segment with one part containing a single piece.
 
 ## For Developers
 

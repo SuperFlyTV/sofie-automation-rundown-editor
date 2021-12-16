@@ -1,0 +1,44 @@
+{
+	"rundown": {
+		"name": "Example Show",
+		"sync": true,
+		"expectedStartTime": 1639591200000,
+		"expectedEndTime": 1639594800000,
+		"id": "cea4b930-5838-4b48-bcfe-71a3b9934826",
+		"playlistId": null
+	},
+	"segments": [
+		{
+			"name": "Segment 1",
+			"rank": 0,
+			"id": "578997f9-1a89-45cf-9109-d38e42d41695",
+			"rundownId": "cea4b930-5838-4b48-bcfe-71a3b9934826",
+			"playlistId": null
+		}
+	],
+	"parts": [
+		{
+			"name": "Part 1",
+			"rank": 0,
+			"payload": { "type": "Cam", "duration": 30, "script": "Lorem ipsum." },
+			"id": "94dc41e9-0c5c-4909-9c3e-b0383552cd6f",
+			"playlistId": null,
+			"rundownId": "cea4b930-5838-4b48-bcfe-71a3b9934826",
+			"segmentId": "578997f9-1a89-45cf-9109-d38e42d41695"
+		}
+	],
+	"pieces": [
+		{
+			"name": "Camera 0",
+			"pieceType": "camera",
+			"duration": 30,
+			"start": 0,
+			"payload": { "camNo": 0 },
+			"id": "63d71c33-d15d-4344-b480-a67bdc8fff61",
+			"playlistId": null,
+			"rundownId": "cea4b930-5838-4b48-bcfe-71a3b9934826",
+			"segmentId": "578997f9-1a89-45cf-9109-d38e42d41695",
+			"partId": "94dc41e9-0c5c-4909-9c3e-b0383552cd6f"
+		}
+	]
+}
