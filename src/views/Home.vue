@@ -190,12 +190,12 @@ export default Vue.extend({
 			}
 
 			if (verify(rundown)) {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const existing = this.rundowns.find((rd) => rd.id === (rundown as any).id)
+				const actuallyRundown = rundown as SerializedRundown
+				const existing = this.rundowns.find((rd) => rd.id === actuallyRundown.rundown.id)
 				if (existing) {
 					this.$bvModal.show('rundown-import-already-exists')
 				} else {
-					store.dispatch('importRundown', rundown)
+					store.dispatch('importRundown', actuallyRundown)
 				}
 			} else {
 				this.$bvModal.show('rundown-import-is-invalid')
