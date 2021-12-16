@@ -228,7 +228,8 @@ export const mutations = {
 				result: {
 					...JSON.parse(document.document),
 					id: payload.id,
-					rundownId: document.rundownId
+					rundownId: document.rundownId,
+					playlistId: document.playlistId
 				}
 			}
 		}
