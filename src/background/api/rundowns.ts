@@ -37,12 +37,11 @@ async function sendRundownDiffToCore(oldDocument: Rundown, newDocument: Rundown)
 		])
 	} else if (!oldDocument.sync && newDocument.sync) {
 		await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [
-			mutateRundown(newDocument)
+			await mutateRundown(newDocument)
 		])
-		await createAllSegmentsInCore(newDocument.id)
 	} else if (oldDocument.sync && newDocument.sync) {
 		return coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownUpdate, [
-			mutateRundown(newDocument)
+			await mutateRundown(newDocument)
 		])
 	}
 }
@@ -227,7 +226,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 			if (result && result.sync) {
 				try {
 					await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [
-						mutateRundown(result)
+						await mutateRundown(result)
 					])
 				} catch (error) {
 					console.error(error)
