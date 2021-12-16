@@ -7,16 +7,17 @@ import {
 	MutationSegmentDelete,
 	MutationSegmentRead,
 	MutationSegmentUpdate,
+	MutatedSegment,
 	Segment
 } from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { PeripheralDeviceAPI } from '@sofie-automation/server-core-integration'
-import { createAllPartsInCore } from './parts'
+import { getMutatedPartsFromSegment } from './parts'
 import { mutations as rundownMutations } from './rundowns'
 
-function mutateSegment(segment: Segment) {
+async function mutateSegment(segment: Segment): Promise<MutatedSegment> {
 	return {
 		externalId: segment.id,
 		name: segment.name,
@@ -25,7 +26,7 @@ function mutateSegment(segment: Segment) {
 			name: segment.name,
 			rank: segment.rank
 		},
-		parts: []
+		parts: await getMutatedPartsFromSegment(segment.id)
 	}
 }
 
@@ -36,20 +37,19 @@ async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
 	}
 
 	if (oldSegment.float && !newSegment.float) {
-		coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [
+		await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [
 			newSegment.rundownId,
-			mutateSegment(newSegment)
+			await mutateSegment(newSegment)
 		])
-		createAllPartsInCore(newSegment.id)
 	} else if (!oldSegment.float && newSegment.float) {
-		coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentDelete, [
+		await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentDelete, [
 			newSegment.rundownId,
 			newSegment.id
 		])
 	} else if (!oldSegment.float && !newSegment.float) {
-		coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentUpdate, [
+		await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentUpdate, [
 			newSegment.rundownId,
-			mutateSegment(newSegment)
+			await mutateSegment(newSegment)
 		])
 	}
 }
@@ -322,7 +322,6 @@ export async function createAllSegmentsInCore(rundownId: string) {
 					segment.rundownId,
 					mutateSegment(segment)
 				])
-				await createAllPartsInCore(segment.id)
 			})
 	}
 }

@@ -179,6 +179,44 @@ export type MutationPieceUpdate = Piece
 
 export type MutationPieceDelete = Pick<Piece, 'id'>
 
+export interface MutatedRundown {
+	externalId: string
+	name: string
+	type: 'sofie-rundown-editor'
+	payload: {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		[key: string]: any
+		name: string
+		expectedStart: number | undefined
+		expectedEnd: number | undefined
+	}
+}
+
+export interface MutatedSegment {
+	externalId: string
+	name: string
+	rank: number
+	payload: { name: string; rank: number }
+	parts: MutatedPart[]
+}
+
+export interface MutatedPart {
+	externalId: string
+	name: string
+	rank: number
+	payload: {
+		segmentId: string
+		externalId: string
+		rank: number
+		name: string
+		type: string | undefined
+		float: boolean
+		script: string | undefined
+		duration: number | undefined
+		pieces: MutatedPiece[]
+	}
+}
+
 export interface MutatedPiece {
 	id: string
 	objectType: string
