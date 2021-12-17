@@ -1,6 +1,13 @@
 import sqlite3 from 'sqlite3'
+import path from 'path'
 
-const db = new sqlite3.Database('data.db')
+let dbFile = path.join(process.cwd(), 'data.db')
+if (process.platform === 'darwin' && __dirname.includes('/app.asar')) {
+	dbFile = path.join(__dirname, '/data.db').replace('/app.asar', '')
+}
+console.log('Database location:', dbFile)
+
+const db = new sqlite3.Database(dbFile)
 
 db.serialize(() => {
 	db.run(`
