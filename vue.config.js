@@ -9,7 +9,10 @@ module.exports = {
 			nodeIntegration: true,
 			builderOptions: {
 				productName: 'Sofie Rundown Editor',
-				appId: 'sofie-rundown-editor.superfly.tv'
+				appId: 'sofie-rundown-editor.superfly.tv',
+				mac: {
+					target: 'dmg'
+				}
 			}
 		}
 	},
