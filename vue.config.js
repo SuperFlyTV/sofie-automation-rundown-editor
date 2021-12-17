@@ -6,11 +6,18 @@ module.exports = {
 			rendererProcessWatch: ['src/external/*'],
 			customFileProtocol: './',
 			asar: false,
-			nodeIntegration: true
+			nodeIntegration: true,
+			builderOptions: {
+				productName: 'Sofie Rundown Editor',
+				appId: 'sofie-rundown-editor.superfly.tv'
+			}
 		}
 	},
 	pages: {
-		index: 'src/main.ts',
+		index: {
+			entry: 'src/main.ts',
+			title: 'Sofie Rundown Editor'
+		}
 		// timer: {
 		// 	// entry for the page
 		// 	entry: 'src/external/timer/main.ts',
