@@ -1,44 +1,753 @@
 {
 	"rundown": {
-		"name": "Example Show",
+		"name": "Rundown Editor Test",
+		"expectedStartTime": 1640343600000,
+		"expectedEndTime": 1640343600000,
 		"sync": true,
-		"expectedStartTime": 1639591200000,
-		"expectedEndTime": 1639594800000,
-		"id": "cea4b930-5838-4b48-bcfe-71a3b9934826",
+		"id": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
 		"playlistId": null
 	},
 	"segments": [
 		{
-			"name": "Segment 1",
+			"name": "Intro",
 			"rank": 0,
-			"id": "578997f9-1a89-45cf-9109-d38e42d41695",
-			"rundownId": "cea4b930-5838-4b48-bcfe-71a3b9934826",
+			"float": false,
+			"id": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"playlistId": null
+		},
+		{
+			"name": "Egg story",
+			"rank": 1,
+			"float": false,
+			"id": "310de713-a190-4446-8747-b462b93b7b23",
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"playlistId": null
+		},
+		{
+			"name": "Ducks",
+			"rank": 3,
+			"float": false,
+			"id": "5f96f847-dd44-4b36-9042-bf578498586b",
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"playlistId": null
+		},
+		{
+			"name": "Forest",
+			"rank": 2,
+			"float": false,
+			"id": "63b23c1d-a0e4-4518-b9ad-e8298d6c26e0",
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"playlistId": null
+		},
+		{
+			"name": "Sofie",
+			"rank": 4,
+			"id": "2a8ac194-e41c-48e1-a528-60449db0c57f",
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"playlistId": null
+		},
+		{
+			"name": "Weather",
+			"rank": 6,
+			"id": "f79f729e-91e2-4889-8e1f-4ab4b0bb5009",
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"playlistId": null
+		},
+		{
+			"name": "Outro",
+			"rank": 7,
+			"float": false,
+			"id": "433db0e5-5cf6-4aa5-a1eb-97f9776f2deb",
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
 			"playlistId": null
 		}
 	],
 	"parts": [
 		{
-			"name": "Part 1",
+			"name": "Intro",
 			"rank": 0,
-			"payload": { "type": "Cam", "duration": 30, "script": "Lorem ipsum." },
-			"id": "94dc41e9-0c5c-4909-9c3e-b0383552cd6f",
+			"payload": { "type": "Titles", "duration": 5 },
+			"float": false,
+			"id": "66f7c93b-d9d5-4fdd-a17d-c6f59b9a3dee",
 			"playlistId": null,
-			"rundownId": "cea4b930-5838-4b48-bcfe-71a3b9934826",
-			"segmentId": "578997f9-1a89-45cf-9109-d38e42d41695"
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f"
+		},
+		{
+			"name": "Head 1",
+			"rank": 1,
+			"payload": {
+				"type": "VO",
+				"duration": 5,
+				"script": "The ducks in the pond are swimming and quacking. They don't seem to be aware of what awaits them"
+			},
+			"float": false,
+			"id": "dec767d3-1f1a-4cc0-bcf8-adcea27c0ba4",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f"
+		},
+		{
+			"name": "Head 2",
+			"rank": 2,
+			"payload": {
+				"type": "VO",
+				"script": "The deers in the forest seem worried. Last nights blood moon seem to have stirred some uneasiness. and that's that!",
+				"duration": 5
+			},
+			"id": "2d3bb5f0-f0d3-4649-b179-f512e31ac6da",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f"
+		},
+		{
+			"name": "Head 3",
+			"rank": 3,
+			"payload": {
+				"type": "VO",
+				"duration": 5,
+				"script": "A new tv studio automation solution takes its first baby steps, after an intense year of development, test"
+			},
+			"float": false,
+			"id": "42077925-8d15-4a5d-abeb-a445ccee2984",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f"
+		},
+		{
+			"name": "Cam Intro",
+			"rank": 6,
+			"payload": {
+				"type": "Cam",
+				"duration": 5,
+				"script": "Hello and welcome to super-news, your daily source for the most interesting news!"
+			},
+			"id": "a81b37a0-3775-4a74-b418-b5caf70d2fc9",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f"
+		},
+		{
+			"name": "Egg story, intro",
+			"rank": 0,
+			"payload": {
+				"type": "Cam",
+				"script": "But first, we're going to turn our attention to the newly hatched egg in the back of the studio",
+				"duration": ""
+			},
+			"float": false,
+			"id": "80812492-4494-4aeb-a0fc-cda7578d030f",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "310de713-a190-4446-8747-b462b93b7b23"
+		},
+		{
+			"name": "Full",
+			"rank": 1,
+			"payload": {
+				"type": "Full",
+				"script": "The egg hatches.",
+				"duration": 80
+			},
+			"float": false,
+			"id": "c996bafc-385a-4003-990f-1305a2009f46",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "310de713-a190-4446-8747-b462b93b7b23"
+		},
+		{
+			"name": "Egg, interview",
+			"rank": 2,
+			"payload": {
+				"type": "Remote",
+				"script": "With me in the studio, I've got Abe Bergsson, who works at the local farm.\n\nHow did you discover the egg?\n\nWhat is the thing that hatched?",
+				"duration": 80
+			},
+			"float": false,
+			"id": "c9e626e3-17dd-4716-ac4f-ead94ff014fa",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "310de713-a190-4446-8747-b462b93b7b23"
+		},
+		{
+			"name": "intro",
+			"rank": 0,
+			"payload": {
+				"type": "Cam",
+				"script": "We've got our reporter, Charlie Deidriksson with us out by the pond, what can you tell us, Charlie?"
+			},
+			"id": "ea4dc2ca-5a93-484b-8430-67bd13fb0e4a",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b"
+		},
+		{
+			"name": "Cam",
+			"rank": 3,
+			"payload": {
+				"type": "Cam",
+				"duration": "",
+				"script": "Thank you, Charlie. For more updates on this story, please visit our homepage, www.supernews.com"
+			},
+			"id": "df12bfa3-8e15-4c25-be0b-431babff0292",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b"
+		},
+		{
+			"name": "Explain Fullscreen",
+			"rank": 4,
+			"payload": {
+				"type": "GFX",
+				"duration": 120,
+				"script": "Explain explain explain"
+			},
+			"id": "0955d0ec-4a75-419f-a2e6-902682aa6eab",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b"
+		},
+		{
+			"name": "Baby birds",
+			"rank": 5,
+			"payload": {
+				"script": "Immediately after hatching, they start to look for food",
+				"duration": 60,
+				"type": "Full"
+			},
+			"id": "f36d151b-be99-41ac-bd89-29bcc414c46f",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b"
+		},
+		{
+			"name": "Intro",
+			"rank": 0,
+			"payload": {
+				"script": "In the forest behind the old mill, there's been quite a disturbance yesterday...",
+				"duration": "",
+				"type": "Cam"
+			},
+			"id": "de43d53e-8d48-4155-b7e3-b66be35bd055",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "63b23c1d-a0e4-4518-b9ad-e8298d6c26e0"
+		},
+		{
+			"name": "Forest VO",
+			"rank": 1,
+			"payload": { "type": "VO", "duration": 10 },
+			"id": "30083dbe-5c81-4cca-bf49-d291a6c718d2",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "63b23c1d-a0e4-4518-b9ad-e8298d6c26e0"
+		},
+		{
+			"name": "Intro",
+			"rank": 0,
+			"payload": {
+				"type": "Cam",
+				"script": "The biggest event of the century, the TV Automation system \"Sofie\" opens it's doors to the public. The founders, Superfly.tv thinks it's going to be an industry-changing solution."
+			},
+			"id": "8d04361e-b4ae-4423-b5a3-eda7f478bebb",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "2a8ac194-e41c-48e1-a528-60449db0c57f"
+		},
+		{
+			"name": "Sofie",
+			"rank": 1,
+			"payload": { "type": "Full", "duration": 35, "script": "" },
+			"id": "de8ad09f-a7a2-4ba3-9c80-c2a44cd2433f",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "2a8ac194-e41c-48e1-a528-60449db0c57f"
+		},
+		{
+			"name": "Guests",
+			"rank": 2,
+			"payload": { "type": "Cam", "duration": 133 },
+			"float": false,
+			"id": "94ca35fa-a628-4927-8bd3-49c28976f1ed",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "2a8ac194-e41c-48e1-a528-60449db0c57f"
+		},
+		{
+			"name": "Intro",
+			"rank": 0,
+			"payload": {
+				"type": "Cam",
+				"script": "...And now it's time for the weather."
+			},
+			"id": "41117fa6-695b-4850-a0dd-165e80c0587e",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "f79f729e-91e2-4889-8e1f-4ab4b0bb5009"
+		},
+		{
+			"name": "Weather",
+			"rank": 1,
+			"payload": {
+				"type": "VO",
+				"duration": 47.8,
+				"script": "Today it's gonna be cloudy with a chance of meatballs. Later tonight, NASA has issued a class 3 warning for falling debris, so be safe out there."
+			},
+			"id": "6539eb5f-ed09-4bdd-8f61-1896b7257fb2",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "f79f729e-91e2-4889-8e1f-4ab4b0bb5009"
+		},
+		{
+			"name": "Outro",
+			"rank": 0,
+			"payload": {
+				"type": "Cam",
+				"duration": "",
+				"script": "That's all from us guys, see you all next time! Don't forget to like and subscribe!"
+			},
+			"id": "9ab64bde-7df7-4f4e-acf8-050b0ad1e5fd",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "433db0e5-5cf6-4aa5-a1eb-97f9776f2deb"
+		},
+		{
+			"name": "Outro",
+			"rank": 1,
+			"payload": { "duration": 15, "script": "", "type": "Cam" },
+			"id": "f905f4c7-7e4e-4b44-9017-cfe887ff3e83",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "433db0e5-5cf6-4aa5-a1eb-97f9776f2deb"
+		},
+		{
+			"name": "Sunflowers",
+			"rank": 4,
+			"float": false,
+			"payload": { "type": "VO", "duration": 5 },
+			"id": "2957ba88-afcc-438d-9e1f-f8f5efcfbd7b",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f"
+		},
+		{
+			"name": "New DVE",
+			"rank": 1,
+			"float": false,
+			"payload": { "type": "DVE", "duration": 52 },
+			"id": "b084af98-05c4-48e8-81a8-057fae854960",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b"
+		},
+		{
+			"name": "Forest VT",
+			"rank": 2,
+			"float": false,
+			"payload": { "type": "Full", "duration": 68 },
+			"id": "3c4db534-ec5b-4a45-89bd-a7484b54791d",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "63b23c1d-a0e4-4518-b9ad-e8298d6c26e0"
 		}
 	],
 	"pieces": [
 		{
-			"name": "Camera 0",
-			"pieceType": "camera",
-			"duration": 30,
+			"name": "std/vinjett.mp4",
+			"pieceType": "video",
+			"duration": 5,
 			"start": 0,
-			"payload": { "camNo": 0 },
-			"id": "63d71c33-d15d-4344-b480-a67bdc8fff61",
+			"payload": { "fileName": "std/vinjett.mp4" },
+			"id": "8803328d-d163-4d53-865e-882091fa34f3",
 			"playlistId": null,
-			"rundownId": "cea4b930-5838-4b48-bcfe-71a3b9934826",
-			"segmentId": "578997f9-1a89-45cf-9109-d38e42d41695",
-			"partId": "94dc41e9-0c5c-4909-9c3e-b0383552cd6f"
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "66f7c93b-d9d5-4fdd-a17d-c6f59b9a3dee"
+		},
+		{
+			"name": "gfx/head - Ducks happily unaware",
+			"pieceType": "graphic",
+			"payload": { "template": "gfx/head", "field0": "Ducks happily unaware" },
+			"start": 0,
+			"id": "3a713040-c58d-43e1-9fe1-371308090abb",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "dec767d3-1f1a-4cc0-bcf8-adcea27c0ba4"
+		},
+		{
+			"name": "clips/head2_drones",
+			"pieceType": "video",
+			"duration": 5,
+			"start": 0,
+			"payload": { "fileName": "clips/head2_drones" },
+			"id": "78c91b31-f7d4-421c-8b1e-55d5cc7a4923",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "2d3bb5f0-f0d3-4649-b179-f512e31ac6da"
+		},
+		{
+			"name": "clips/head3_snow",
+			"pieceType": "video",
+			"duration": 5,
+			"start": 0,
+			"payload": { "fileName": "clips/head3_snow" },
+			"id": "6272a7ce-b4f0-4fb9-b753-7a13d27b97ad",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "42077925-8d15-4a5d-abeb-a445ccee2984"
+		},
+		{
+			"name": "gfx/head - Deer are uneasy",
+			"pieceType": "graphic",
+			"start": 2,
+			"payload": { "template": "gfx/head", "field0": "Deer are uneasy" },
+			"id": "c2c77fac-7fbb-4558-8f28-d36bdaf95e48",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "2d3bb5f0-f0d3-4649-b179-f512e31ac6da"
+		},
+		{
+			"name": "gfx/head - \"Sofie\" breaks new ground",
+			"pieceType": "graphic",
+			"payload": {
+				"field0": "\"Sofie\" breaks new ground",
+				"template": "gfx/head"
+			},
+			"start": 2,
+			"id": "b2026877-43e8-499f-99ad-d4bdcb434c51",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "42077925-8d15-4a5d-abeb-a445ccee2984"
+		},
+		{
+			"name": "Camera 2",
+			"pieceType": "camera",
+			"start": 0,
+			"payload": { "camNo": 2 },
+			"id": "df464fe6-2b63-4670-82a9-88fe147f7681",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "a81b37a0-3775-4a74-b418-b5caf70d2fc9"
+		},
+		{
+			"name": "gfx/l3d - Sofie Automation",
+			"pieceType": "graphic",
+			"duration": 4,
+			"start": 0,
+			"payload": { "template": "gfx/l3d", "field0": "Sofie Automation" },
+			"id": "010ff624-04af-416c-bb9e-b120dfddd5d5",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "a81b37a0-3775-4a74-b418-b5caf70d2fc9"
+		},
+		{
+			"name": "gfx/ticker - ",
+			"pieceType": "graphic",
+			"start": 0,
+			"payload": { "template": "gfx/ticker" },
+			"id": "a41f42a8-df74-496a-84dd-556fda7a1758",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "a81b37a0-3775-4a74-b418-b5caf70d2fc9"
+		},
+		{
+			"name": "Camera 2",
+			"pieceType": "camera",
+			"payload": { "camNo": 2 },
+			"start": 0,
+			"id": "99eb8210-9b4a-4859-8bce-1331263e47c0",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "310de713-a190-4446-8747-b462b93b7b23",
+			"partId": "80812492-4494-4aeb-a0fc-cda7578d030f"
+		},
+		{
+			"name": "clips/protest",
+			"pieceType": "video",
+			"payload": { "new0": "clips/protest", "fileName": "clips/protest" },
+			"start": 0,
+			"id": "dc5bfefe-12f6-4436-84d9-3869a8ca3760",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "310de713-a190-4446-8747-b462b93b7b23",
+			"partId": "c996bafc-385a-4003-990f-1305a2009f46"
+		},
+		{
+			"name": "Remote 1",
+			"pieceType": "remote",
+			"payload": { "input": 1 },
+			"start": 0,
+			"id": "c6d47d0a-b6bd-4f26-94ae-fe04f85db97d",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "310de713-a190-4446-8747-b462b93b7b23",
+			"partId": "c9e626e3-17dd-4716-ac4f-ead94ff014fa"
+		},
+		{
+			"name": "gfx/strap - The Cloud",
+			"pieceType": "graphic",
+			"payload": { "template": "gfx/strap", "field0": "The Cloud" },
+			"start": 0,
+			"id": "a1df753f-f80d-4081-9dd0-3d33ec55934d",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "310de713-a190-4446-8747-b462b93b7b23",
+			"partId": "c9e626e3-17dd-4716-ac4f-ead94ff014fa"
+		},
+		{
+			"name": "gfx/l3d - Abe Bergsson",
+			"pieceType": "graphic",
+			"payload": { "template": "gfx/l3d", "field0": "Abe Bergsson" },
+			"duration": 5,
+			"id": "38890f96-d528-44b9-9b70-726e96ee21d1",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "310de713-a190-4446-8747-b462b93b7b23",
+			"partId": "c9e626e3-17dd-4716-ac4f-ead94ff014fa"
+		},
+		{
+			"name": "clips/snow",
+			"pieceType": "video",
+			"payload": { "new0": "clips/egghatching.mp4", "fileName": "clips/snow" },
+			"duration": 15,
+			"id": "511c0362-8fe3-4950-8696-4985905402ba",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "310de713-a190-4446-8747-b462b93b7b23",
+			"partId": "c9e626e3-17dd-4716-ac4f-ead94ff014fa"
+		},
+		{
+			"name": "Camera 1",
+			"pieceType": "camera",
+			"start": 0,
+			"payload": { "camNo": 1 },
+			"id": "da59a212-e032-4afe-bc33-6c1f08190006",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b",
+			"partId": "ea4dc2ca-5a93-484b-8430-67bd13fb0e4a"
+		},
+		{
+			"name": "Camera 1",
+			"pieceType": "camera",
+			"payload": { "camNo": 1 },
+			"start": 0,
+			"id": "471e53be-cc8d-4cd1-87fb-b0bc54c0126f",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b",
+			"partId": "df12bfa3-8e15-4c25-be0b-431babff0292"
+		},
+		{
+			"name": "gfx/fullscreen - ",
+			"pieceType": "graphic",
+			"start": 0,
+			"payload": { "template": "gfx/fullscreen" },
+			"id": "00bfa17f-59f0-4d85-b9cd-c5f61bb03620",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b",
+			"partId": "0955d0ec-4a75-419f-a2e6-902682aa6eab"
+		},
+		{
+			"name": "clips/egghatching.mp4",
+			"pieceType": "video",
+			"payload": { "fileName": "clips/egghatching.mp4" },
+			"start": 0,
+			"id": "326c2eaf-f448-4dcb-884b-1a4197d9b70b",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b",
+			"partId": "f36d151b-be99-41ac-bd89-29bcc414c46f"
+		},
+		{
+			"name": "Camera 1",
+			"pieceType": "camera",
+			"start": 0,
+			"payload": { "camNo": 1 },
+			"id": "2109fff4-3e92-4237-b359-6daf99b64491",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "63b23c1d-a0e4-4518-b9ad-e8298d6c26e0",
+			"partId": "de43d53e-8d48-4155-b7e3-b66be35bd055"
+		},
+		{
+			"name": "clips/protest_stk3",
+			"pieceType": "video",
+			"start": 0,
+			"payload": { "fileName": "clips/protest_stk3" },
+			"duration": 20,
+			"id": "1c9844aa-7e46-4682-8b50-26234bd0bb85",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "63b23c1d-a0e4-4518-b9ad-e8298d6c26e0",
+			"partId": "30083dbe-5c81-4cca-bf49-d291a6c718d2"
+		},
+		{
+			"name": "Camera 1",
+			"pieceType": "camera",
+			"start": 0,
+			"payload": { "camNo": 1 },
+			"id": "88762ff2-4f82-4de1-a3e1-e7cdaf248414",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "2a8ac194-e41c-48e1-a528-60449db0c57f",
+			"partId": "8d04361e-b4ae-4423-b5a3-eda7f478bebb"
+		},
+		{
+			"name": "clips/sofie.mp4",
+			"pieceType": "video",
+			"start": 0,
+			"payload": { "fileName": "clips/sofie.mp4" },
+			"id": "75f3cce0-b6a4-4dfc-8929-0c70a6d90d9f",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "2a8ac194-e41c-48e1-a528-60449db0c57f",
+			"partId": "de8ad09f-a7a2-4ba3-9c80-c2a44cd2433f"
+		},
+		{
+			"name": "Camera 3",
+			"pieceType": "camera",
+			"start": 0,
+			"payload": { "camNo": 3 },
+			"id": "51f3c5c3-12b8-4d44-ba06-6fef4ac29dea",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "2a8ac194-e41c-48e1-a528-60449db0c57f",
+			"partId": "94ca35fa-a628-4927-8bd3-49c28976f1ed"
+		},
+		{
+			"name": "Camera 1",
+			"pieceType": "camera",
+			"start": 0,
+			"payload": { "camNo": 1 },
+			"id": "73bd906f-2c8a-438e-a350-60cdf094b03a",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "f79f729e-91e2-4889-8e1f-4ab4b0bb5009",
+			"partId": "41117fa6-695b-4850-a0dd-165e80c0587e"
+		},
+		{
+			"name": "clips/weather_20190217",
+			"pieceType": "video",
+			"start": 0,
+			"payload": { "fileName": "clips/weather_20190217" },
+			"id": "19107b5d-9432-4550-b851-cb1116553999",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "f79f729e-91e2-4889-8e1f-4ab4b0bb5009",
+			"partId": "6539eb5f-ed09-4bdd-8f61-1896b7257fb2"
+		},
+		{
+			"name": "Camera 1",
+			"pieceType": "camera",
+			"start": 0,
+			"payload": { "camNo": 1 },
+			"id": "488ea5c3-0d57-4ab3-8d9e-f8f06480eb38",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "433db0e5-5cf6-4aa5-a1eb-97f9776f2deb",
+			"partId": "9ab64bde-7df7-4f4e-acf8-050b0ad1e5fd"
+		},
+		{
+			"name": "Camera 3",
+			"pieceType": "camera",
+			"start": 0,
+			"payload": { "camNo": 3 },
+			"id": "ceff0624-760a-48fb-b793-091f6e884f2d",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "433db0e5-5cf6-4aa5-a1eb-97f9776f2deb",
+			"partId": "f905f4c7-7e4e-4b44-9017-cfe887ff3e83"
+		},
+		{
+			"name": "clips/head4_sunflowers",
+			"pieceType": "video",
+			"duration": 14,
+			"start": 0,
+			"payload": { "fileName": "clips/head4_sunflowers" },
+			"id": "622094a1-ee0e-41f6-b513-6dd269056203",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "2957ba88-afcc-438d-9e1f-f8f5efcfbd7b"
+		},
+		{
+			"name": " -  - ",
+			"pieceType": "split",
+			"start": 0,
+			"payload": {},
+			"id": "a7490c4c-2ad5-4634-8245-b8273fa3ab4e",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "63b23c1d-a0e4-4518-b9ad-e8298d6c26e0",
+			"partId": "b084af98-05c4-48e8-81a8-057fae854960"
+		},
+		{
+			"name": "Camera 1",
+			"pieceType": "camera",
+			"payload": { "camNo": 1 },
+			"id": "01ca7474-ec35-4de5-8eea-5a1cf7a8a158",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "63b23c1d-a0e4-4518-b9ad-e8298d6c26e0",
+			"partId": "b084af98-05c4-48e8-81a8-057fae854960"
+		},
+		{
+			"name": "Remote 1",
+			"pieceType": "remote",
+			"payload": { "input": 1 },
+			"id": "3457560e-c5d2-4336-a062-9f20c5dcf048",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "63b23c1d-a0e4-4518-b9ad-e8298d6c26e0",
+			"partId": "b084af98-05c4-48e8-81a8-057fae854960"
+		},
+		{
+			"name": "gfx/l3d - Jan Janssen",
+			"pieceType": "graphic",
+			"duration": 5,
+			"payload": {
+				"template": "gfx/l3d",
+				"field0": "Jan Janssen",
+				"field1": "Studiogast"
+			},
+			"id": "63420a53-5667-406a-ae55-f7e812cef35c",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "2a8ac194-e41c-48e1-a528-60449db0c57f",
+			"partId": "94ca35fa-a628-4927-8bd3-49c28976f1ed"
+		},
+		{
+			"name": "clips/protest",
+			"pieceType": "video",
+			"duration": 68,
+			"start": 0,
+			"payload": { "fileName": "clips/protest" },
+			"id": "a906a3fb-f197-43a8-b548-ccd4b7f19f3d",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "63b23c1d-a0e4-4518-b9ad-e8298d6c26e0",
+			"partId": "3c4db534-ec5b-4a45-89bd-a7484b54791d"
+		},
+		{
+			"name": "clips/head1_protests",
+			"pieceType": "video",
+			"payload": { "fileName": "clips/head1_protests" },
+			"id": "21dfaaf4-056c-4d7a-bad5-10514c26ab96",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "dec767d3-1f1a-4cc0-bcf8-adcea27c0ba4"
 		}
 	]
 }
