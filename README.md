@@ -20,7 +20,7 @@ Head to the [releases](https://github.com/SuperFlyTV/sofie-automation-rundown-ed
 5. Before continuing, open the Sofie Core interface, navigate to the Settings page, click on your Studio, and attach `sofie-rundown-editor` as a Device by clicking the plus sign (+) under "Attached Devices".
 6. Back in Rundown Editor, navigate to the Rundowns page in the top right.
 7. Download and import [this example Rundown](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/raw/master/example-rundown.json) (right click and "Save link as...")
-8. Open your Rundown in Sofie, and you should see one segment with one part containing a single piece.
+8. Open the Rundown in Sofie.
 
 ## For Developers
 
