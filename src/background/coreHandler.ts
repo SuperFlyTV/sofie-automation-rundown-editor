@@ -6,10 +6,11 @@ import {
 	PeripheralDeviceAPI as P
 } from '@sofie-automation/server-core-integration'
 import { DEVICE_CONFIG_MANIFEST } from './configManifest'
-import fs from 'fs'
 import { mutations as settingsMutations } from './api/settings'
 import { BrowserWindow } from 'electron'
 import { CoreConnectionInfo, CoreConnectionStatus } from './interfaces'
+const serverCoreIntegrationVersion = require('@sofie-automation/server-core-integration/package.json')
+	.version
 
 export interface DeviceConfig {
 	deviceId: string
@@ -275,33 +276,14 @@ export class CoreHandler {
 	}
 
 	private _getVersions() {
-		const versions: { [packageName: string]: string } = {}
+		const versions: { [packageName: string]: string } = {
+			'@sofie-automation/server-core-integration': serverCoreIntegrationVersion
+		}
 
 		if (process.env.npm_package_version) {
 			versions['_process'] = process.env.npm_package_version
 		}
 
-		const dirNames = [
-			'@sofie-automation/server-core-integration'
-			// 'mos-connection'
-		]
-		try {
-			const nodeModulesDirectories = fs.readdirSync('node_modules')
-			nodeModulesDirectories.forEach((dir) => {
-				try {
-					if (dirNames.indexOf(dir) !== -1) {
-						let file = 'node_modules/' + dir + '/package.json'
-						file = fs.readFileSync(file, 'utf8')
-						const json = JSON.parse(file)
-						versions[dir] = json.version || 'N/A'
-					}
-				} catch (e) {
-					console.error(e)
-				}
-			})
-		} catch (e) {
-			console.error(e)
-		}
 		return versions
 	}
 }
