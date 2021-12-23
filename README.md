@@ -1,5 +1,7 @@
 # Sofie Rundown Editor
 
+> A tool for creating and editing rundowns in a _demo_ environment of [Sofie](https://github.com/nrkno/Sofie-TV-automation/).
+
 ## Prerequisites
 
 Sofie Rundown Editor requires that you have a working instance of [Sofie Core](https://github.com/nrkno/tv-automation-server-core) release 37 with the [spreadsheet blueprints](https://github.com/SuperFlyTV/sofie-blueprints-spreadsheet) uploaded to it.
