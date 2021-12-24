@@ -6,7 +6,7 @@
 
 ## Prerequisites
 
-Sofie Rundown Editor requires that you have a working instance of [Sofie Core](https://github.com/nrkno/tv-automation-server-core) release 37 with the [spreadsheet blueprints](https://github.com/SuperFlyTV/sofie-blueprints-spreadsheet) uploaded to it.
+Sofie Rundown Editor requires that you have a working instance of [Sofie Core](https://github.com/nrkno/tv-automation-server-core) release 37 with the [spreadsheet blueprints](https://github.com/SuperFlyTV/sofie-blueprints-spreadsheet) uploaded to it. You do not need to install the [spreadsheet-gateway](https://github.com/SuperFlyTV/spreadsheet-gateway).
 
 > ❗ At this time, the [`feat/rundown-editor-2`](https://github.com/SuperFlyTV/sofie-blueprints-spreadsheet/tree/feat/rundown-editor-2) branch of `sofie-blueprints-spreadsheet` is required.
 
