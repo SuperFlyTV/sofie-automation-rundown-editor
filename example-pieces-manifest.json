@@ -29,7 +29,6 @@
 	{
 		"name": "Split",
 		"shortName": "DVE",
-		"colour": "#000000",
 		"payload": [
 			{ "id": "layout", "label": "Layout", "type": "string" },
 			{ "id": "in1", "label": "Input 1", "type": "string", "includeInName": true },
@@ -39,23 +38,48 @@
 		"id": "split"
 	},
 	{
-		"name": "Graphics",
-		"shortName": "Gfx",
+		"name": "Lower third",
+		"shortName": "L3d",
+		"colour": "#ED7200",
+		"includeTypeInName": true,
+		"payload": [
+			{ "id": "name", "label": "Name", "type": "string", "includeInName": true },
+			{ "id": "description", "label": "Function", "type": "string", "includeInName": true }
+		],
+		"id": "l3d"
+	},
+	{
+		"name": "Live strap",
+		"shortName": "Live",
 		"colour": "#ED7200",
 		"payload": [
-			{ "id": "template", "label": "Template", "type": "string", "includeInName": true },
-			{ "id": "field0", "label": "Field 0", "type": "string", "includeInName": true },
-			{ "id": "field1", "label": "Field 1", "type": "string" },
-			{ "id": "field2", "label": "Field 2", "type": "string" }
+			{ "id": "location", "label": "Text", "type": "string", "includeInName": true },
+			{ "id": "text", "label": "Label", "type": "string" }
 		],
-		"id": "graphic"
+		"id": "strap"
 	},
+	{ "name": "Ticker", "shortName": "Ticker", "colour": "#ED7200", "payload": [], "id": "ticker" },
 	{
 		"name": "Studio Guest",
 		"shortName": "Guest",
-		"colour": "#000000",
 		"includeTypeInName": true,
 		"payload": [{ "id": "count", "label": "Guest Count", "type": "number", "includeInName": true }],
 		"id": "guest"
+	},
+	{
+		"name": "Fullscreen",
+		"shortName": "GFX",
+		"colour": "#ED7200",
+		"includeTypeInName": true,
+		"payload": [{ "id": "url", "label": "URL", "type": "string" }],
+		"id": "fullscreen"
+	},
+	{
+		"name": "Head",
+		"shortName": "head",
+		"colour": "#ED7200",
+		"includeTypeInName": false,
+		"payload": [{ "id": "f0", "label": "Text", "type": "string", "includeInName": true }],
+		"id": "head"
 	}
 ]

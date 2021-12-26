@@ -145,11 +145,7 @@
 		{
 			"name": "Full",
 			"rank": 1,
-			"payload": {
-				"type": "Full",
-				"script": "The egg hatches.",
-				"duration": 80
-			},
+			"payload": { "type": "Full", "script": "The egg hatches.", "duration": 80 },
 			"float": false,
 			"id": "c996bafc-385a-4003-990f-1305a2009f46",
 			"playlistId": null,
@@ -198,11 +194,7 @@
 		{
 			"name": "Explain Fullscreen",
 			"rank": 4,
-			"payload": {
-				"type": "GFX",
-				"duration": 120,
-				"script": "Explain explain explain"
-			},
+			"payload": { "type": "GFX", "duration": 120, "script": "Explain explain explain" },
 			"id": "0955d0ec-4a75-419f-a2e6-902682aa6eab",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
@@ -277,10 +269,7 @@
 		{
 			"name": "Intro",
 			"rank": 0,
-			"payload": {
-				"type": "Cam",
-				"script": "...And now it's time for the weather."
-			},
+			"payload": { "type": "Cam", "script": "...And now it's time for the weather." },
 			"id": "41117fa6-695b-4850-a0dd-165e80c0587e",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
@@ -366,17 +355,6 @@
 			"partId": "66f7c93b-d9d5-4fdd-a17d-c6f59b9a3dee"
 		},
 		{
-			"name": "gfx/head - Ducks happily unaware",
-			"pieceType": "graphic",
-			"payload": { "template": "gfx/head", "field0": "Ducks happily unaware" },
-			"start": 0,
-			"id": "3a713040-c58d-43e1-9fe1-371308090abb",
-			"playlistId": null,
-			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
-			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
-			"partId": "dec767d3-1f1a-4cc0-bcf8-adcea27c0ba4"
-		},
-		{
 			"name": "clips/head2_drones",
 			"pieceType": "video",
 			"duration": 5,
@@ -401,59 +379,11 @@
 			"partId": "42077925-8d15-4a5d-abeb-a445ccee2984"
 		},
 		{
-			"name": "gfx/head - Deer are uneasy",
-			"pieceType": "graphic",
-			"start": 2,
-			"payload": { "template": "gfx/head", "field0": "Deer are uneasy" },
-			"id": "c2c77fac-7fbb-4558-8f28-d36bdaf95e48",
-			"playlistId": null,
-			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
-			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
-			"partId": "2d3bb5f0-f0d3-4649-b179-f512e31ac6da"
-		},
-		{
-			"name": "gfx/head - \"Sofie\" breaks new ground",
-			"pieceType": "graphic",
-			"payload": {
-				"field0": "\"Sofie\" breaks new ground",
-				"template": "gfx/head"
-			},
-			"start": 2,
-			"id": "b2026877-43e8-499f-99ad-d4bdcb434c51",
-			"playlistId": null,
-			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
-			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
-			"partId": "42077925-8d15-4a5d-abeb-a445ccee2984"
-		},
-		{
 			"name": "Camera 2",
 			"pieceType": "camera",
 			"start": 0,
 			"payload": { "camNo": 2 },
 			"id": "df464fe6-2b63-4670-82a9-88fe147f7681",
-			"playlistId": null,
-			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
-			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
-			"partId": "a81b37a0-3775-4a74-b418-b5caf70d2fc9"
-		},
-		{
-			"name": "gfx/l3d - Sofie Automation",
-			"pieceType": "graphic",
-			"duration": 4,
-			"start": 0,
-			"payload": { "template": "gfx/l3d", "field0": "Sofie Automation" },
-			"id": "010ff624-04af-416c-bb9e-b120dfddd5d5",
-			"playlistId": null,
-			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
-			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
-			"partId": "a81b37a0-3775-4a74-b418-b5caf70d2fc9"
-		},
-		{
-			"name": "gfx/ticker - ",
-			"pieceType": "graphic",
-			"start": 0,
-			"payload": { "template": "gfx/ticker" },
-			"id": "a41f42a8-df74-496a-84dd-556fda7a1758",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
 			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
@@ -493,28 +423,6 @@
 			"partId": "c9e626e3-17dd-4716-ac4f-ead94ff014fa"
 		},
 		{
-			"name": "gfx/strap - The Cloud",
-			"pieceType": "graphic",
-			"payload": { "template": "gfx/strap", "field0": "The Cloud" },
-			"start": 0,
-			"id": "a1df753f-f80d-4081-9dd0-3d33ec55934d",
-			"playlistId": null,
-			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
-			"segmentId": "310de713-a190-4446-8747-b462b93b7b23",
-			"partId": "c9e626e3-17dd-4716-ac4f-ead94ff014fa"
-		},
-		{
-			"name": "gfx/l3d - Abe Bergsson",
-			"pieceType": "graphic",
-			"payload": { "template": "gfx/l3d", "field0": "Abe Bergsson" },
-			"duration": 5,
-			"id": "38890f96-d528-44b9-9b70-726e96ee21d1",
-			"playlistId": null,
-			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
-			"segmentId": "310de713-a190-4446-8747-b462b93b7b23",
-			"partId": "c9e626e3-17dd-4716-ac4f-ead94ff014fa"
-		},
-		{
 			"name": "clips/snow",
 			"pieceType": "video",
 			"payload": { "new0": "clips/egghatching.mp4", "fileName": "clips/snow" },
@@ -546,17 +454,6 @@
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
 			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b",
 			"partId": "df12bfa3-8e15-4c25-be0b-431babff0292"
-		},
-		{
-			"name": "gfx/fullscreen - ",
-			"pieceType": "graphic",
-			"start": 0,
-			"payload": { "template": "gfx/fullscreen" },
-			"id": "00bfa17f-59f0-4d85-b9cd-c5f61bb03620",
-			"playlistId": null,
-			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
-			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b",
-			"partId": "0955d0ec-4a75-419f-a2e6-902682aa6eab"
 		},
 		{
 			"name": "clips/egghatching.mp4",
@@ -713,21 +610,6 @@
 			"partId": "b084af98-05c4-48e8-81a8-057fae854960"
 		},
 		{
-			"name": "gfx/l3d - Jan Janssen",
-			"pieceType": "graphic",
-			"duration": 5,
-			"payload": {
-				"template": "gfx/l3d",
-				"field0": "Jan Janssen",
-				"field1": "Studiogast"
-			},
-			"id": "63420a53-5667-406a-ae55-f7e812cef35c",
-			"playlistId": null,
-			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
-			"segmentId": "2a8ac194-e41c-48e1-a528-60449db0c57f",
-			"partId": "94ca35fa-a628-4927-8bd3-49c28976f1ed"
-		},
-		{
 			"name": "clips/protest",
 			"pieceType": "video",
 			"duration": 68,
@@ -748,6 +630,106 @@
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
 			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
 			"partId": "dec767d3-1f1a-4cc0-bcf8-adcea27c0ba4"
+		},
+		{
+			"name": "Ducks happily unaware",
+			"pieceType": "head",
+			"start": 0,
+			"payload": { "f0": "Ducks happily unaware" },
+			"id": "cd13a327-0f1c-4532-be0e-af976baad95d",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "dec767d3-1f1a-4cc0-bcf8-adcea27c0ba4"
+		},
+		{
+			"name": "Deer are uneasy",
+			"pieceType": "head",
+			"start": 2,
+			"payload": { "f0": "Deer are uneasy" },
+			"id": "0e392dc5-b530-4f41-89f5-dd4f37c93ac4",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "2d3bb5f0-f0d3-4649-b179-f512e31ac6da"
+		},
+		{
+			"name": "\"Sofie\" breaks new ground",
+			"pieceType": "head",
+			"start": 2,
+			"payload": { "f0": "\"Sofie\" breaks new ground" },
+			"id": "2fe9f76c-cd7b-4c65-be7b-11b7d04999e3",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "42077925-8d15-4a5d-abeb-a445ccee2984"
+		},
+		{
+			"name": "Lower third Sofie Automation - ",
+			"pieceType": "l3d",
+			"payload": { "name": "Sofie Automation" },
+			"start": 1,
+			"duration": 4,
+			"id": "e583f3df-e387-4cb3-8c8f-df79b906ae1d",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "a81b37a0-3775-4a74-b418-b5caf70d2fc9"
+		},
+		{
+			"name": "",
+			"pieceType": "ticker",
+			"start": 0,
+			"payload": {},
+			"id": "8eb5e587-89e0-419a-9959-f5f5e6a52bac",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
+			"partId": "a81b37a0-3775-4a74-b418-b5caf70d2fc9"
+		},
+		{
+			"name": "The Cloud",
+			"pieceType": "strap",
+			"start": 0,
+			"payload": { "location": "The Cloud" },
+			"id": "ff1a9df3-0758-4030-ade5-ca2134575939",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "310de713-a190-4446-8747-b462b93b7b23",
+			"partId": "c9e626e3-17dd-4716-ac4f-ead94ff014fa"
+		},
+		{
+			"name": "Lower third Abe Bergsson - ",
+			"pieceType": "l3d",
+			"duration": 5,
+			"payload": { "name": "Abe Bergsson" },
+			"id": "b3bb0641-0c9d-45d6-8d15-c039437b2501",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "310de713-a190-4446-8747-b462b93b7b23",
+			"partId": "c9e626e3-17dd-4716-ac4f-ead94ff014fa"
+		},
+		{
+			"name": "Fullscreen ",
+			"pieceType": "fullscreen",
+			"payload": { "url": "https://images.unsplash.com/photo-1595520467722-98c9fd0f8fbd" },
+			"start": 0,
+			"id": "b43d9ebe-b9e5-4521-81ff-4903d13b9d90",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b",
+			"partId": "0955d0ec-4a75-419f-a2e6-902682aa6eab"
+		},
+		{
+			"name": "Lower third Jan Janssen - ",
+			"pieceType": "l3d",
+			"duration": 5,
+			"payload": { "name": "Jan Janssen" },
+			"id": "d7dd3dd6-54b3-44e9-a019-5407415ac715",
+			"playlistId": null,
+			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
+			"segmentId": "2a8ac194-e41c-48e1-a528-60449db0c57f",
+			"partId": "94ca35fa-a628-4927-8bd3-49c28976f1ed"
 		}
 	]
 }
