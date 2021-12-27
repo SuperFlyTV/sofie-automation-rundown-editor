@@ -61,5 +61,8 @@ export default Vue.extend({
 
 	overflow-y: hidden;
 	overflow-x: auto;
+
+	display: flex;
+	flex-direction: column;
 }
 </style>
