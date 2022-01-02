@@ -8,8 +8,6 @@
 
 Sofie Rundown Editor requires that you have a working instance of [Sofie Core](https://github.com/nrkno/tv-automation-server-core) release 37 with the [demo blueprints](https://github.com/SuperFlyTV/sofie-demo-blueprints) uploaded to it. You do not need to install the [spreadsheet-gateway](https://github.com/SuperFlyTV/spreadsheet-gateway).
 
-> 💡 You can download the blueprints `bundle.json` from the [latest release](https://github.com/SuperFlyTV/sofie-demo-blueprints/releases) of `sofie-demo-blueprints`.
-
 ## Installation
 
 Head to the [releases](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/releases) page and download the installer for the latest release. You'll find installers for Windows, Linux, and macOS on listed under the Assets dropdown for each release.
