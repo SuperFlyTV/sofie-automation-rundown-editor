@@ -58,6 +58,6 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 1. Bump `version` in [`package.json`](package.json)
 2. Commit and push the change as `chore: release vX.Y.Z`
-3. Tag that commit as `vX.Y.Z.` and push the tag
+3. Tag that commit as `vX.Y.Z` and push the tag
 4. Wait for the [`Create GitHub Release`](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/actions/workflows/create-release.yaml) action to finish
 5. Go to the [releases](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/releases) page and publish the draft release
