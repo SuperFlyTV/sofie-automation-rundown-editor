@@ -79,7 +79,7 @@
 		"shortName": "head",
 		"colour": "#ED7200",
 		"includeTypeInName": false,
-		"payload": [{ "id": "f0", "label": "Text", "type": "string", "includeInName": true }],
+		"payload": [{ "id": "text", "label": "Text", "type": "string", "includeInName": true }],
 		"id": "head"
 	}
 ]

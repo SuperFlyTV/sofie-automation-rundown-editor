@@ -2,7 +2,7 @@
 	"rundown": {
 		"name": "Rundown Editor Test",
 		"expectedStartTime": 1640343600000,
-		"expectedEndTime": 1640343600000,
+		"expectedEndTime": 1640344320000,
 		"sync": true,
 		"id": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
 		"playlistId": null
@@ -201,19 +201,6 @@
 			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b"
 		},
 		{
-			"name": "Baby birds",
-			"rank": 5,
-			"payload": {
-				"script": "Immediately after hatching, they start to look for food",
-				"duration": 60,
-				"type": "Full"
-			},
-			"id": "f36d151b-be99-41ac-bd89-29bcc414c46f",
-			"playlistId": null,
-			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
-			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b"
-		},
-		{
 			"name": "Intro",
 			"rank": 0,
 			"payload": {
@@ -343,23 +330,11 @@
 	],
 	"pieces": [
 		{
-			"name": "std/vinjett.mp4",
+			"name": "clips/head2_Drones.mp4",
 			"pieceType": "video",
 			"duration": 5,
 			"start": 0,
-			"payload": { "fileName": "std/vinjett.mp4" },
-			"id": "8803328d-d163-4d53-865e-882091fa34f3",
-			"playlistId": null,
-			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
-			"segmentId": "d26d22e2-4f4e-4d31-a0ca-de6f37ff9b3f",
-			"partId": "66f7c93b-d9d5-4fdd-a17d-c6f59b9a3dee"
-		},
-		{
-			"name": "clips/head2_drones",
-			"pieceType": "video",
-			"duration": 5,
-			"start": 0,
-			"payload": { "fileName": "clips/head2_drones" },
+			"payload": { "fileName": "clips/head2_Drones.mp4" },
 			"id": "78c91b31-f7d4-421c-8b1e-55d5cc7a4923",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
@@ -367,11 +342,11 @@
 			"partId": "2d3bb5f0-f0d3-4649-b179-f512e31ac6da"
 		},
 		{
-			"name": "clips/head3_snow",
+			"name": "clips/head3_Snow.mp4",
 			"pieceType": "video",
 			"duration": 5,
 			"start": 0,
-			"payload": { "fileName": "clips/head3_snow" },
+			"payload": { "fileName": "clips/head3_Snow.mp4" },
 			"id": "6272a7ce-b4f0-4fb9-b753-7a13d27b97ad",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
@@ -401,9 +376,9 @@
 			"partId": "80812492-4494-4aeb-a0fc-cda7578d030f"
 		},
 		{
-			"name": "clips/protest",
+			"name": "clips/Protest.mp4",
 			"pieceType": "video",
-			"payload": { "new0": "clips/protest", "fileName": "clips/protest" },
+			"payload": { "fileName": "clips/Protest.mp4" },
 			"start": 0,
 			"id": "dc5bfefe-12f6-4436-84d9-3869a8ca3760",
 			"playlistId": null,
@@ -423,9 +398,9 @@
 			"partId": "c9e626e3-17dd-4716-ac4f-ead94ff014fa"
 		},
 		{
-			"name": "clips/snow",
+			"name": "clips/Snow.mp4",
 			"pieceType": "video",
-			"payload": { "new0": "clips/egghatching.mp4", "fileName": "clips/snow" },
+			"payload": { "fileName": "clips/Snow.mp4" },
 			"duration": 15,
 			"id": "511c0362-8fe3-4950-8696-4985905402ba",
 			"playlistId": null,
@@ -456,17 +431,6 @@
 			"partId": "df12bfa3-8e15-4c25-be0b-431babff0292"
 		},
 		{
-			"name": "clips/egghatching.mp4",
-			"pieceType": "video",
-			"payload": { "fileName": "clips/egghatching.mp4" },
-			"start": 0,
-			"id": "326c2eaf-f448-4dcb-884b-1a4197d9b70b",
-			"playlistId": null,
-			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
-			"segmentId": "5f96f847-dd44-4b36-9042-bf578498586b",
-			"partId": "f36d151b-be99-41ac-bd89-29bcc414c46f"
-		},
-		{
 			"name": "Camera 1",
 			"pieceType": "camera",
 			"start": 0,
@@ -478,10 +442,10 @@
 			"partId": "de43d53e-8d48-4155-b7e3-b66be35bd055"
 		},
 		{
-			"name": "clips/protest_stk3",
+			"name": "clips/Protest_STK3.mp4",
 			"pieceType": "video",
 			"start": 0,
-			"payload": { "fileName": "clips/protest_stk3" },
+			"payload": { "fileName": "clips/Protest_STK3.mp4" },
 			"duration": 20,
 			"id": "1c9844aa-7e46-4682-8b50-26234bd0bb85",
 			"playlistId": null,
@@ -501,10 +465,10 @@
 			"partId": "8d04361e-b4ae-4423-b5a3-eda7f478bebb"
 		},
 		{
-			"name": "clips/sofie.mp4",
+			"name": "clips/Sunflower_Takeover.mp4",
 			"pieceType": "video",
 			"start": 0,
-			"payload": { "fileName": "clips/sofie.mp4" },
+			"payload": { "fileName": "clips/Sunflower_Takeover.mp4" },
 			"id": "75f3cce0-b6a4-4dfc-8929-0c70a6d90d9f",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
@@ -534,10 +498,10 @@
 			"partId": "41117fa6-695b-4850-a0dd-165e80c0587e"
 		},
 		{
-			"name": "clips/weather_20190217",
+			"name": "clips/Weather_20190217.mp4",
 			"pieceType": "video",
 			"start": 0,
-			"payload": { "fileName": "clips/weather_20190217" },
+			"payload": { "fileName": "clips/Weather_20190217.mp4" },
 			"id": "19107b5d-9432-4550-b851-cb1116553999",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
@@ -567,11 +531,11 @@
 			"partId": "f905f4c7-7e4e-4b44-9017-cfe887ff3e83"
 		},
 		{
-			"name": "clips/head4_sunflowers",
+			"name": "clips/head4_Sunflowers.mp4",
 			"pieceType": "video",
 			"duration": 14,
 			"start": 0,
-			"payload": { "fileName": "clips/head4_sunflowers" },
+			"payload": { "fileName": "clips/head4_Sunflowers.mp4" },
 			"id": "622094a1-ee0e-41f6-b513-6dd269056203",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
@@ -610,11 +574,11 @@
 			"partId": "b084af98-05c4-48e8-81a8-057fae854960"
 		},
 		{
-			"name": "clips/protest",
+			"name": "clips/Protest.mp4",
 			"pieceType": "video",
 			"duration": 68,
 			"start": 0,
-			"payload": { "fileName": "clips/protest" },
+			"payload": { "fileName": "clips/Protest.mp4" },
 			"id": "a906a3fb-f197-43a8-b548-ccd4b7f19f3d",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
@@ -622,9 +586,9 @@
 			"partId": "3c4db534-ec5b-4a45-89bd-a7484b54791d"
 		},
 		{
-			"name": "clips/head1_protests",
+			"name": "clips/head1_Protests.mp4",
 			"pieceType": "video",
-			"payload": { "fileName": "clips/head1_protests" },
+			"payload": { "fileName": "clips/head1_Protests.mp4" },
 			"id": "21dfaaf4-056c-4d7a-bad5-10514c26ab96",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
@@ -635,7 +599,7 @@
 			"name": "Ducks happily unaware",
 			"pieceType": "head",
 			"start": 0,
-			"payload": { "f0": "Ducks happily unaware" },
+			"payload": { "text": "Ducks happily unaware" },
 			"id": "cd13a327-0f1c-4532-be0e-af976baad95d",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
@@ -646,7 +610,7 @@
 			"name": "Deer are uneasy",
 			"pieceType": "head",
 			"start": 2,
-			"payload": { "f0": "Deer are uneasy" },
+			"payload": { "text": "Deer are uneasy" },
 			"id": "0e392dc5-b530-4f41-89f5-dd4f37c93ac4",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
@@ -657,7 +621,7 @@
 			"name": "\"Sofie\" breaks new ground",
 			"pieceType": "head",
 			"start": 2,
-			"payload": { "f0": "\"Sofie\" breaks new ground" },
+			"payload": { "text": "\"Sofie\" breaks new ground" },
 			"id": "2fe9f76c-cd7b-4c65-be7b-11b7d04999e3",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
@@ -714,6 +678,7 @@
 			"pieceType": "fullscreen",
 			"payload": { "url": "https://images.unsplash.com/photo-1595520467722-98c9fd0f8fbd" },
 			"start": 0,
+			"duration": 120,
 			"id": "b43d9ebe-b9e5-4521-81ff-4903d13b9d90",
 			"playlistId": null,
 			"rundownId": "2f40d773-0a63-4ce2-9a12-5b0cb5fb1c58",
