@@ -1,6 +1,6 @@
 {
 	"rundown": {
-		"name": "Rundown Editor Test",
+		"name": "Demo Rundown",
 		"expectedStartTime": 1640343600000,
 		"expectedEndTime": 1640344320000,
 		"sync": true,
