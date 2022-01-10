@@ -12,6 +12,9 @@ module.exports = {
 				appId: 'sofie-rundown-editor.superfly.tv',
 				mac: {
 					target: 'dmg'
+				},
+				linux: {
+					target: ['AppImage', 'deb']
 				}
 			}
 		}
