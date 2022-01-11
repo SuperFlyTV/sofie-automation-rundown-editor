@@ -14,7 +14,13 @@
 		"shortName": "VT",
 		"colour": "#0a20ed",
 		"payload": [
-			{ "id": "fileName", "label": "File name", "type": "string", "includeInName": true }
+			{ "id": "fileName", "label": "File name", "type": "string", "includeInName": true },
+			{
+				"id": "sourceDuration",
+				"label": "Source duration (in milliseconds)",
+				"type": "number",
+				"includeInName": false
+			}
 		],
 		"id": "video"
 	},
