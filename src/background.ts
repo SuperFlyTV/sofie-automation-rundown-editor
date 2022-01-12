@@ -47,7 +47,7 @@ async function createWindow() {
 		fs.readdirSync(__dirname).forEach((file) => {
 			console.log(file)
 		})
-		globalAny.__static = path.join(__dirname, 'static').replace(/\\/g, '\\\\')
+		globalAny.__static = path.join(__dirname, '../static').replace(/\\/g, '\\\\')
 		console.log('New static path:', globalAny.__static)
 		fs.readdirSync(globalAny.__static).forEach((file) => {
 			console.log(file)

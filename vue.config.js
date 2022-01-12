@@ -17,7 +17,8 @@ module.exports = {
 					target: ['AppImage', 'deb'],
 					icon: 'static/icons/Icon-512x512.png',
 					category: 'Utility'
-				}
+				},
+				extraResources: ['static/icons/*.png']
 			}
 		}
 	},
