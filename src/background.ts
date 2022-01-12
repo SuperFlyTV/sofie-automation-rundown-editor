@@ -6,7 +6,9 @@ import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { ControlAPI } from './background/index'
 import path from 'path'
 import { initializeDefaults as initializeSettingsDefaults } from './background/api/settings'
+import os from 'os'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+const globalAny: any = global // When using TypeScript, Global does not allow setting custom properties.
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -17,8 +19,7 @@ async function createWindow() {
 	// Ensure defaults are ready before creating the browser window.
 	await initializeSettingsDefaults()
 
-	// Create the browser window.
-	const win = new BrowserWindow({
+	const winOpts: Electron.BrowserWindowConstructorOptions = {
 		width: 1020,
 		height: 800,
 		webPreferences: {
@@ -27,7 +28,21 @@ async function createWindow() {
 			nodeIntegration: (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean,
 			preload: path.join(__dirname, 'preload.js')
 		}
-	})
+	}
+
+	// Create the browser window.
+	const win = new BrowserWindow(winOpts)
+
+	// Helps fix the icon on AppImage and .deb builds for Linux.
+	// See https://github.com/electron-userland/electron-builder/issues/4617#issuecomment-623062713 for more information.
+	const needsIconFix =
+		process.env.NODE_ENV !== 'development' &&
+		os.platform() !== 'win32' &&
+		os.platform() !== 'darwin'
+	if (needsIconFix) {
+		globalAny.__static = path.resolve(__dirname, '../static').replace(/\\/g, '\\\\')
+		winOpts.icon = path.join(globalAny.__static, 'icons/Icon-64x64.png')
+	}
 
 	const api = new ControlAPI(win)
 	await api.init().catch((error) => {

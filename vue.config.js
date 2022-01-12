@@ -14,7 +14,8 @@ module.exports = {
 					target: 'dmg'
 				},
 				linux: {
-					target: ['AppImage', 'deb']
+					target: ['AppImage', 'deb'],
+					icon: 'static/icons/Icon-64x64.png'
 				}
 			}
 		}
