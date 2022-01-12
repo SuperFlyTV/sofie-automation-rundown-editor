@@ -15,7 +15,8 @@ module.exports = {
 				},
 				linux: {
 					target: ['AppImage', 'deb'],
-					icon: 'static/icons/Icon-64x64.png'
+					icon: 'static/icons/Icon-512x512.png',
+					category: 'Utility'
 				}
 			}
 		}
