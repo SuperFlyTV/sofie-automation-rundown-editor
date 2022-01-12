@@ -7,6 +7,7 @@ import { ControlAPI } from './background/index'
 import path from 'path'
 import { initializeDefaults as initializeSettingsDefaults } from './background/api/settings'
 import os from 'os'
+import fs from 'fs'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 const globalAny: any = global // When using TypeScript, Global does not allow setting custom properties.
 
@@ -41,7 +42,10 @@ async function createWindow() {
 		os.platform() !== 'darwin'
 	if (needsIconFix) {
 		globalAny.__static = path.resolve(__dirname, '../static').replace(/\\/g, '\\\\')
-		winOpts.icon = path.join(globalAny.__static, 'icons/Icon-64x64.png')
+		fs.readdirSync(globalAny.__static).forEach((file) => {
+			console.log(file)
+		})
+		winOpts.icon = path.join(globalAny.__static, 'icons/Icon-512x512.png')
 	}
 
 	const api = new ControlAPI(win)
