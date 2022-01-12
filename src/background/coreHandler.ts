@@ -92,7 +92,7 @@ export class CoreHandler {
 		// 		ca: this._process.certificates
 		// 	}
 		// }
-		return this.core
+		this.core
 			.init(ddpConfig)
 			.then(() => {
 				return this.setupSubscriptionsAndObservers()
