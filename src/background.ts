@@ -9,7 +9,6 @@ import { initializeDefaults as initializeSettingsDefaults } from './background/a
 import os from 'os'
 import fs from 'fs'
 const isDevelopment = process.env.NODE_ENV !== 'production'
-const globalAny: any = global // When using TypeScript, Global does not allow setting custom properties.
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -41,7 +40,15 @@ async function createWindow() {
 		os.platform() !== 'win32' &&
 		os.platform() !== 'darwin'
 	if (needsIconFix) {
+		console.log('Applying Linux icon fix...')
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const globalAny: any = global
+		console.log('Old static path:', globalAny.__static)
+		fs.readdirSync(globalAny.__static).forEach((file) => {
+			console.log(file)
+		})
 		globalAny.__static = path.resolve(__dirname, '../static').replace(/\\/g, '\\\\')
+		console.log('New static path:', globalAny.__static)
 		fs.readdirSync(globalAny.__static).forEach((file) => {
 			console.log(file)
 		})
