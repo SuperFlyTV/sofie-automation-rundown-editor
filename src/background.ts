@@ -43,11 +43,7 @@ async function createWindow() {
 		console.log('Applying Linux icon fix...')
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const globalAny: any = global
-		console.log('Root dir:', globalAny.__static)
-		fs.readdirSync(path.resolve(__dirname, '../')).forEach((file) => {
-			console.log(file)
-		})
-		globalAny.__static = path.resolve(__dirname, '../static').replace(/\\/g, '\\\\')
+		globalAny.__static = path.resolve(__dirname, '/static').replace(/\\/g, '\\\\')
 		console.log('New static path:', globalAny.__static)
 		fs.readdirSync(globalAny.__static).forEach((file) => {
 			console.log(file)
