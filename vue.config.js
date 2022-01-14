@@ -1,4 +1,9 @@
 module.exports = {
+	configureWebpack: {
+		devServer: {
+			port: 9123
+		}
+	},
 	pluginOptions: {
 		electronBuilder: {
 			preload: 'src/preload.ts',
