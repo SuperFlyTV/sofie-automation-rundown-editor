@@ -9,6 +9,7 @@ import { DEVICE_CONFIG_MANIFEST } from './configManifest'
 import { mutations as settingsMutations } from './api/settings'
 import { BrowserWindow } from 'electron'
 import { CoreConnectionInfo, CoreConnectionStatus } from './interfaces'
+import { mutateRundown, mutations as rundownMutations } from './api/rundowns'
 const serverCoreIntegrationVersion = require('@sofie-automation/server-core-integration/package.json')
 	.version
 
@@ -229,6 +230,20 @@ export class CoreHandler {
 			return true
 		}
 		return 0
+	}
+
+	async triggerReloadRundown(rundownId: string) {
+		const { result, error } = await rundownMutations.read({ id: rundownId })
+		if (error) {
+			throw error
+		}
+		if (!result) {
+			throw new Error(`No rundown found with ID "${rundownId}"`)
+		}
+		if (Array.isArray(result)) {
+			throw new Error(`Found more than one rundown with ID "${rundownId}"`)
+		}
+		return await mutateRundown(result)
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

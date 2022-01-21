@@ -26,9 +26,10 @@ Head to the [releases](https://github.com/SuperFlyTV/sofie-automation-rundown-ed
 
 > 💡 If at any point you need to re-ingest a rundown (for example, to pick up changes to the blueprints), perform the following procedure:
 >
-> 1. Open the relevant rundown in Rundown Editor.
-> 2. Uncheck the "Sync to Sofie" box and click "Save" in the bottom right.
-> 3. Recheck the "Sync to Sofie" box and click "Save" again.
+> 1. Ensure that Rundown Editor is running and connected to Sofie Core.
+> 2. In the Sofie Core web UI, open the rundown you wish to re-ingest.
+> 3. Right click on the header and click "Reload Google Sheet Data" (in a future version of Sofie Core, this will say "Reload Rundown Editor Data")
+>    ![Reload data image](docs/reload-data.png)
 
 ## For Developers
 
