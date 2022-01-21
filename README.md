@@ -29,6 +29,7 @@ Head to the [releases](https://github.com/SuperFlyTV/sofie-automation-rundown-ed
 > 1. Ensure that Rundown Editor is running and connected to Sofie Core.
 > 2. In the Sofie Core web UI, open the rundown you wish to re-ingest.
 > 3. Right click on the header and click "Reload Google Sheet Data" (in a future version of Sofie Core, this will say "Reload Rundown Editor Data")
+>
 >    ![Reload data image](docs/reload-data.png)
 
 ## For Developers
