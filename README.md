@@ -22,7 +22,8 @@ Head to the [releases](https://github.com/SuperFlyTV/sofie-automation-rundown-ed
 5. Before continuing, open the Sofie Core interface, navigate to the Settings page, click on your Studio, and attach `sofie-rundown-editor` as a Device by clicking the plus sign (+) under "Attached Devices".
 6. Back in Rundown Editor, navigate to the Rundowns page in the top right.
 7. Download and import [this demo Rundown](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/raw/master/demo-rundown.json) (right click and "Save link as...")
-8. Open the Rundown in Sofie.
+8. Click on the Rundown and ensure that the "Sync to Sofie" box is checked. Be sure to click Save if you changed the setting.
+9. Open the Rundown in Sofie.
 
 > 💡 If at any point you need to re-ingest a rundown (for example, to pick up changes to the blueprints), perform the following procedure:
 >
