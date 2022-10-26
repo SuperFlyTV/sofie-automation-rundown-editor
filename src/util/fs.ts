@@ -5,8 +5,7 @@
  * the browser sandbox.
  */
 
-import { remote } from 'electron'
-const { fs } = window
+const { fs, remoteDialog } = window
 
 export interface SaveToFileArgs {
 	title: string
@@ -14,7 +13,7 @@ export interface SaveToFileArgs {
 }
 
 export async function saveToFile(args: SaveToFileArgs): Promise<boolean> {
-	const { filePath, canceled } = await remote.dialog.showSaveDialog({
+	const { filePath, canceled } = await remoteDialog.showSaveDialog({
 		title: args.title,
 		filters: [{ name: 'JSON', extensions: ['json'] }]
 	})
@@ -32,7 +31,7 @@ export interface OpenFromFileArgs {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function openFromFile(args: OpenFromFileArgs): Promise<boolean | any> {
-	const { canceled, filePaths } = await remote.dialog.showOpenDialog({
+	const { canceled, filePaths } = await remoteDialog.showOpenDialog({
 		title: args.title,
 		filters: [{ name: 'JSON', extensions: ['json'] }],
 		properties: ['openFile']

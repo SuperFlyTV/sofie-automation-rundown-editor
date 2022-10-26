@@ -6,7 +6,10 @@ import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { ControlAPI } from './background/index'
 import path from 'path'
 import { initializeDefaults as initializeSettingsDefaults } from './background/api/settings'
+import * as remote from '@electron/remote/main'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+
+remote.initialize()
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -25,9 +28,12 @@ async function createWindow() {
 			// Use pluginOptions.nodeIntegration, leave this alone
 			// See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
 			nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION as unknown as boolean,
-			preload: path.join(__dirname, 'preload.js')
+			preload: path.join(__dirname, 'preload.js'),
+			contextIsolation: false
 		}
 	})
+
+	remote.enable(win.webContents)
 
 	const api = new ControlAPI(win)
 	await api.init().catch((error) => {
