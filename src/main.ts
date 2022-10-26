@@ -19,6 +19,7 @@ Vue.use(BootstrapVue)
 Vue.use(VueRouter)
 
 library.add(faTimes, faPencilAlt, faTrash)
+// eslint-disable-next-line vue/multi-word-component-names
 Vue.component('fa', FontAwesomeIcon)
 
 Vue.config.productionTip = false

@@ -29,7 +29,7 @@
 					<option v-for="(type, entry) in fieldTypes" :key="type" :value="type">{{ entry }}</option>
 				</select>
 
-				<span class="link" @click="() => removeField(field.id)"><fa icon="trash"/></span>
+				<span class="link" @click="() => removeField(field.id)"><fa icon="trash" /></span>
 			</div>
 			<b-button variant="primary" @click="() => newField()">+</b-button>
 		</div>

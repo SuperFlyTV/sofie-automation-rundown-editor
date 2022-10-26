@@ -1,5 +1,5 @@
 <template>
-	<div class="header d-flex justify-content-between">
+	<div class="app-header d-flex justify-content-between">
 		<div class="d-flex align-items-center">
 			<div class="logo"></div>
 			<div>Core Connection Status: {{ status }}</div>
@@ -42,7 +42,7 @@ a {
 a:hover {
 	text-decoration: underline;
 }
-.header {
+.app-header {
 	background: black;
 }
 .logo {

@@ -15,8 +15,8 @@
 					<div class="colour-preview" :style="{ backgroundColor: type.colour }"></div>
 					<div class="name">{{ type.name }}</div>
 					<div>
-						<span class="link" @click="() => toggleDetails(type.id)"><fa icon="pencil-alt"/></span>
-						<span class="link" @click="() => removePieceType(type.id)"><fa icon="trash"/></span>
+						<span class="link" @click="() => toggleDetails(type.id)"><fa icon="pencil-alt" /></span>
+						<span class="link" @click="() => removePieceType(type.id)"><fa icon="trash" /></span>
 					</div>
 				</div>
 				<div v-if="type._showDetails" :class="className('body', {})">

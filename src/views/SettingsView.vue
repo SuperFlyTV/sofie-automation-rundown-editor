@@ -8,7 +8,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import PieceTypes from '@/components/settings/PieceTypes.vue'
-import Settings from '@/components/settings/Settings.vue'
+import Settings from '@/components/settings/AppSettings.vue'
 
 export default Vue.extend({
 	components: { PieceTypes, Settings }

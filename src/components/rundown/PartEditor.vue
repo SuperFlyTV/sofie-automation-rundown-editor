@@ -48,36 +48,37 @@ import { Part, Rundown } from '@/background/interfaces'
 import store from '@/store'
 import Vue from 'vue'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const editField = <T extends any>(field: string, index?: string) => ({
-	[field]: {
-		get(): T | undefined {
-			const self = this as any
-			// console.log((this as any).part[field])
-			if (index) {
-				return self.editObject ? self.editObject[index]?.[field] : self.part?.[index]?.[field]
-			} else {
-				return self.editObject ? self.editObject[field] : self.part?.[field]
-			}
-		},
-		set(value: T) {
-			const self = this as any
-			if (!self.editObject) {
-				self.editObject = {
-					...self.part
+function editField<T>(field: string, index?: string) {
+	return {
+		[field]: {
+			get(): T | undefined {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				const self = this as any
+				if (index) {
+					return self.editObject ? self.editObject[index]?.[field] : self.part?.[index]?.[field]
+				} else {
+					return self.editObject ? self.editObject[field] : self.part?.[field]
 				}
-			}
-			if (index) {
-				if (!self.editObject[index]) self.editObject[index] = {}
+			},
+			set(value: T) {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				const self = this as any
+				if (!self.editObject) {
+					self.editObject = {
+						...self.part
+					}
+				}
+				if (index) {
+					if (!self.editObject[index]) self.editObject[index] = {}
 
-				self.editObject[index][field] = value
-			} else {
-				self.editObject[field] = value
+					self.editObject[index][field] = value
+				} else {
+					self.editObject[field] = value
+				}
 			}
 		}
 	}
-})
-/* eslint-enable @typescript-eslint/no-explicit-any */
+}
 
 export default Vue.extend({
 	computed: {
@@ -128,7 +129,7 @@ export default Vue.extend({
 		}
 	},
 	watch: {
-		$route: function() {
+		$route: function () {
 			this.editObject = undefined
 		}
 	}

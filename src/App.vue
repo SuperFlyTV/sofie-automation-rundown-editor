@@ -12,6 +12,7 @@ import { ipcRenderer } from 'electron'
 export default Vue.extend({
 	name: 'App',
 	methods: {
+		// eslint-disable-next-line no-undef
 		handleError(_: Electron.IpcRendererEvent, error: unknown) {
 			// eslint-disable-next-line no-console
 			console.error(error)
