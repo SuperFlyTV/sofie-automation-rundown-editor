@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import { DBPlaylist, IpcOperation, IpcOperationType } from '../interfaces'
-import { db } from '../db'
+import { db, InsertResolution } from '../db'
 import { v4 as uuid } from 'uuid'
 import { RunResult } from 'sqlite3'
 
@@ -12,7 +12,7 @@ ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 		}
 		delete document.id
 
-		const { result, error } = await new Promise((resolve) =>
+		const { result, error } = await new Promise<InsertResolution>((resolve) =>
 			db.run(
 				`
 			INSERT INTO playlists (id,document)

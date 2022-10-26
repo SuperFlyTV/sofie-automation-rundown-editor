@@ -10,11 +10,11 @@ import {
 	MutatedRundown,
 	Rundown
 } from '../interfaces'
-import { db } from '../db'
+import { db, InsertResolution, UpdateResolution } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
-import { PeripheralDeviceAPI } from '@sofie-automation/server-core-integration'
 import { getMutatedSegmentsFromRundown } from './segments'
+import { PeripheralDeviceAPIMethods } from '@sofie-automation/shared-lib/dist/peripheralDevice/methodsAPI'
 
 export async function mutateRundown(rundown: Rundown): Promise<MutatedRundown> {
 	return {
@@ -33,15 +33,15 @@ export async function mutateRundown(rundown: Rundown): Promise<MutatedRundown> {
 
 async function sendRundownDiffToCore(oldDocument: Rundown, newDocument: Rundown) {
 	if (oldDocument.sync && !newDocument.sync) {
-		return coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownDelete, [
+		return coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataRundownDelete, [
 			oldDocument.id
 		])
 	} else if (!oldDocument.sync && newDocument.sync) {
-		await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [
+		await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataRundownCreate, [
 			await mutateRundown(newDocument)
 		])
 	} else if (oldDocument.sync && newDocument.sync) {
-		return coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownUpdate, [
+		return coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataRundownUpdate, [
 			await mutateRundown(newDocument)
 		])
 	}
@@ -56,7 +56,7 @@ export const mutations = {
 		delete document.id
 		delete document.playlistId
 
-		const { result, error } = await new Promise((resolve) =>
+		const { result, error } = await new Promise<InsertResolution>((resolve) =>
 			db.run(
 				`
 			INSERT INTO rundowns (id,playlistId,document)
@@ -154,7 +154,7 @@ export const mutations = {
 			id: null,
 			playlistId: null
 		}
-		const { result, error } = await new Promise((resolve) =>
+		const { result, error } = await new Promise<UpdateResolution>((resolve) =>
 			db.run(
 				`
 			UPDATE rundowns
@@ -196,7 +196,7 @@ export const mutations = {
 			}
 		}
 
-		return error
+		return { error }
 	},
 	async delete(payload: MutationRundownDelete): Promise<{ error?: Error }> {
 		return new Promise((resolve) =>
@@ -226,7 +226,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 
 			if (result && result.sync) {
 				try {
-					await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownCreate, [
+					await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataRundownCreate, [
 						await mutateRundown(result)
 					])
 				} catch (error) {
@@ -260,7 +260,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 
 			if (document && 'id' in document && !error && document.sync) {
 				try {
-					await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataRundownDelete, [
+					await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataRundownDelete, [
 						document.id
 					])
 				} catch (error) {

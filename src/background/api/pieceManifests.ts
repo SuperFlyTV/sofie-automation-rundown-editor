@@ -9,7 +9,7 @@ import {
 	MutationPieceTypeManifestUpdate,
 	PieceTypeManifest
 } from '../interfaces'
-import { db } from '../db'
+import { db, InsertResolution, UpdateResolution } from '../db'
 import { v4 as uuid } from 'uuid'
 import { RunResult } from 'sqlite3'
 
@@ -23,7 +23,7 @@ export const mutations = {
 		}
 		delete document.id
 
-		const { result, error } = await new Promise((resolve) =>
+		const { result, error } = await new Promise<InsertResolution>((resolve) =>
 			db.run(
 				`
 			INSERT INTO pieceTypeManifests (id,document)
@@ -108,7 +108,7 @@ export const mutations = {
 			...payload.update,
 			id: null
 		}
-		const { result, error } = await new Promise((resolve) =>
+		const { result, error } = await new Promise<UpdateResolution>((resolve) =>
 			db.run(
 				`
 			UPDATE pieceTypeManifests
@@ -136,7 +136,7 @@ export const mutations = {
 			return { error: new Error('Unknown error') }
 		}
 
-		return error
+		return { error }
 	},
 	async delete(payload: MutationPieceTypeManifestDelete): Promise<{ error?: Error }> {
 		return new Promise((resolve) =>
