@@ -250,6 +250,10 @@ export default Vue.extend({
 				return
 			}
 
+			if (typeof rundown.sync !== 'boolean') {
+				rundown.sync = false
+			}
+
 			const segments = await ipcRenderer.invoke(
 				'segments',
 				literal<IpcOperation>({
