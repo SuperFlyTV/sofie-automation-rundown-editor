@@ -63,7 +63,7 @@ export const mutations = {
 			VALUES (?,?,json(?));
 		`,
 				[id, payload.playlistId || null, JSON.stringify(document)],
-				function(e: Error | null) {
+				function (e: Error | null) {
 					if (e) {
 						resolve({ result: undefined, error: e })
 					} else if (this) {

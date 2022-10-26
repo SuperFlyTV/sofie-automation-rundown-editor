@@ -42,7 +42,7 @@ export const mutations = {
 					payload.partId,
 					JSON.stringify(document)
 				],
-				function(e: Error | null) {
+				function (e: Error | null) {
 					if (e) {
 						resolve({ result: undefined, error: e })
 					} else if (this) {

@@ -7,7 +7,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { ipcRenderer } from 'electron'
+
+const { ipcRenderer } = window
 
 export default Vue.extend({
 	name: 'App',

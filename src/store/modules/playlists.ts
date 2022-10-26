@@ -1,9 +1,10 @@
 import { Playlist, IpcOperation, IpcOperationType } from '@/background/interfaces'
 import { literal } from '@/util/lib'
-import { ipcRenderer } from 'electron'
 import Vue from 'vue'
 import { Module } from 'vuex'
 import { State } from '..'
+
+const { ipcRenderer } = window
 
 export interface PlaylistsState {
 	playlists: Playlist[]

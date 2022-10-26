@@ -6,7 +6,7 @@
  */
 
 import { remote } from 'electron'
-import { promises as fs } from 'fs'
+const { fs } = window
 
 export interface SaveToFileArgs {
 	title: string

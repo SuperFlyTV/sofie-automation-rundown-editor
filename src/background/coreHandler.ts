@@ -17,8 +17,9 @@ import { BrowserWindow } from 'electron'
 import { CoreConnectionInfo, CoreConnectionStatus } from './interfaces'
 import { mutateRundown, mutations as rundownMutations } from './api/rundowns'
 import { PeripheralDeviceAPIMethods } from '@sofie-automation/shared-lib/dist/peripheralDevice/methodsAPI'
-const serverCoreIntegrationVersion = require('@sofie-automation/server-core-integration/package.json')
-	.version
+const serverCoreIntegrationVersion =
+	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	require('@sofie-automation/server-core-integration/package.json').version
 
 export interface DeviceConfig {
 	deviceId: string
@@ -144,7 +145,10 @@ export class CoreHandler {
 	}
 
 	getCoreConnectionOptions(deviceOptions: DeviceConfig, name: string): CoreOptions {
-		let credentials: CoreCredentials
+		let credentials: CoreCredentials = {
+			deviceId: protectString('SofieRundownEditor'),
+			deviceToken: 'unsecureToken'
+		}
 
 		if (deviceOptions.deviceId && deviceOptions.deviceToken) {
 			credentials = {
@@ -158,7 +162,7 @@ export class CoreHandler {
 				deviceToken: 'unsecureToken'
 			}
 		} else {
-			throw new Error('Please provide a deviceId')
+			console.warn('Device ID and token not set, using unsecure defaults!')
 		}
 		const options: CoreOptions = {
 			...credentials,
@@ -272,7 +276,7 @@ export class CoreHandler {
 					})
 			}
 
-			const fcn: Function = fcnObject[cmd.functionName]
+			const fcn: (...args: unknown[]) => void = fcnObject[cmd.functionName]
 			try {
 				if (!fcn) throw Error('Function "' + cmd.functionName + '" not found!')
 
