@@ -36,3 +36,8 @@ jobs:
           yarn build
         env:
           CI: true
+      - name: Validate deps
+        run: |
+          yarn license-validate
+        env:
+          CI: true
