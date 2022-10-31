@@ -30,7 +30,7 @@
 		"@sofie-automation/server-core-integration": "1.46.0-in-testing.0",
 		"@types/sqlite3": "^3.1.7",
 		"@types/uuid": "^8.3.1",
-		"bootstrap": "^5.0.2",
+		"bootstrap": "^4.6.2",
 		"bootstrap-vue": "^2.23.1",
 		"core-js": "^3.26.0",
 		"got": "^11.8.5",
