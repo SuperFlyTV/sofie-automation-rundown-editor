@@ -1,0 +1,64 @@
+name: Dependencies Check
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "v**"
+
+jobs:
+  validate-prod-dependencies-packages:
+    name: Validate Package production dependencies
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - name: Prepare Environment
+        run: |
+          yarn install
+        env:
+          CI: true
+      - name: Validate production dependencies
+        run: |
+          if ! git log --format=oneline -n 1 | grep -q "\[ignore-audit\]"; then
+            yarn validate:dependencies
+          else
+            echo "Skipping audit"
+          fi
+        env:
+          CI: true
+
+  validate-all-dependencies-packages:
+    name: Validate all Package dependencies
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - name: Prepare Environment
+        run: |
+          yarn install
+        env:
+          CI: true
+      - name: Validate production dependencies
+        run: |
+          yarn validate:dependencies
+        env:
+          CI: true
+      - name: Validate dev dependencies
+        run: |
+          yarn validate:dev-dependencies
+        env:
+          CI: true

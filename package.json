@@ -17,7 +17,9 @@
 		"license-validate": "license-checker -r --filter MIT --filter 0BSD --filter BSD --filter ISC --filter Apache --filter Unlicense --plain --border ascii",
 		"lint-fix": "yarn lint --fix",
 		"postinstall": "electron-builder install-app-deps",
-		"postuninstall": "electron-builder install-app-deps"
+		"postuninstall": "electron-builder install-app-deps",
+		"validate:dependencies": "yarn audit --groups dependencies && yarn license-validate",
+		"validate:dev-dependencies": "yarn audit --groups devDependencies"
 	},
 	"main": "index.js",
 	"dependencies": {
