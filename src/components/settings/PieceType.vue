@@ -49,12 +49,12 @@
 					@click="createEditObj"
 				/>
 
-				<span class="link" @click="() => removeField(field.id)"><fa icon="trash"/></span>
+				<span class="link" @click="() => removeField(field.id)"><fa icon="trash" /></span>
 			</div>
 			<b-button variant="primary" @click="() => newField()">+</b-button>
 		</div>
 
-		<div class="buttons d-flex flex-row justify-content-end ">
+		<div class="buttons d-flex flex-row justify-content-end">
 			<b-button-group>
 				<b-button @click="reset">Cancel</b-button>
 				<b-button @click="update" variant="primary">Save</b-button>

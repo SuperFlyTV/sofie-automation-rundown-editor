@@ -7,7 +7,7 @@ import {
 	MutationApplicationSettingsCreate,
 	MutationApplicationSettingsUpdate
 } from '../interfaces'
-import { db } from '../db'
+import { db, InsertResolution, UpdateResolution } from '../db'
 
 export const mutations = {
 	async create(
@@ -17,14 +17,14 @@ export const mutations = {
 			...payload
 		}
 
-		const { result, error } = await new Promise((resolve) =>
+		const { result, error } = await new Promise<InsertResolution>((resolve) =>
 			db.run(
 				`
 			INSERT INTO settings (id,document)
 			VALUES ("settings",json(?));
 		`,
 				[JSON.stringify(document)],
-				function(e: Error | null) {
+				function (e: Error | null) {
 					if (e) {
 						resolve({ result: undefined, error: e })
 					} else if (this) {
@@ -79,7 +79,7 @@ export const mutations = {
 		const update = {
 			...payload
 		}
-		const { result, error } = await new Promise((resolve) =>
+		const { result, error } = await new Promise<UpdateResolution>((resolve) =>
 			db.run(
 				`
 			UPDATE settings
@@ -105,7 +105,7 @@ export const mutations = {
 			return { error: new Error('Unknown error') }
 		}
 
-		return error
+		return { error }
 	}
 }
 

@@ -1,11 +1,11 @@
 import VueRouter from 'vue-router'
 
-import Home from '../views/Home.vue'
-import Playlist from '../views/Playlist.vue'
-import Rundown from '../views/Rundown.vue'
-import Settings from '../views/Settings.vue'
+import Home from '../views/HomeView.vue'
+import Playlist from '../views/PlaylistView.vue'
+import Rundown from '../views/RundownView.vue'
+import Settings from '../views/SettingsView.vue'
 
-import Header from '../components/Header.vue'
+import Header from '../components/AppHeader.vue'
 import RundownEditor from '../components/rundown/RundownEditor.vue'
 import SegmentEditor from '../components/rundown/SegmentEditor.vue'
 import PartEditor from '../components/rundown/PartEditor.vue'

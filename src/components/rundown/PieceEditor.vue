@@ -140,7 +140,7 @@ export default Vue.extend({
 		}
 	},
 	watch: {
-		$route: function() {
+		$route: function () {
 			this.editObject = undefined
 		}
 	}

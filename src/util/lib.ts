@@ -5,6 +5,7 @@ export function literal<T>(o: T) {
 export type Nullable<T> = { [K in keyof T]: T[K] | null }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
 export const editField = <T extends any>(
 	doc: string,
 	field: string,
@@ -27,7 +28,7 @@ export const editField = <T extends any>(
 		},
 		set(value: T) {
 			const self = this as any
-			const isValue = value !== undefined && value !== null && value !== ''
+			const isValue = value != '' && value !== undefined && value !== null
 
 			if (!self.editObject) {
 				self.editObject = {

@@ -10,12 +10,12 @@ import {
 	MutatedSegment,
 	Segment
 } from '../interfaces'
-import { db } from '../db'
+import { db, InsertResolution, UpdateResolution } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
-import { PeripheralDeviceAPI } from '@sofie-automation/server-core-integration'
 import { getMutatedPartsFromSegment } from './parts'
 import { mutations as rundownMutations } from './rundowns'
+import { PeripheralDeviceAPIMethods } from '@sofie-automation/shared-lib/dist/peripheralDevice/methodsAPI'
 
 async function mutateSegment(segment: Segment): Promise<MutatedSegment> {
 	return {
@@ -37,17 +37,17 @@ async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
 	}
 
 	if (oldSegment.float && !newSegment.float) {
-		await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [
+		await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataSegmentCreate, [
 			newSegment.rundownId,
 			await mutateSegment(newSegment)
 		])
 	} else if (!oldSegment.float && newSegment.float) {
-		await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentDelete, [
+		await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataSegmentDelete, [
 			newSegment.rundownId,
 			newSegment.id
 		])
 	} else if (!oldSegment.float && !newSegment.float) {
-		await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentUpdate, [
+		await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataSegmentUpdate, [
 			newSegment.rundownId,
 			await mutateSegment(newSegment)
 		])
@@ -68,14 +68,14 @@ export const mutations = {
 				error: new Error('Missing rundownId')
 			}
 
-		const { result, error } = await new Promise((resolve) =>
+		const { result, error } = await new Promise<InsertResolution>((resolve) =>
 			db.run(
 				`
 			INSERT INTO segments (id,playlistId,rundownId,document)
 			VALUES (?,?,?,json(?));
 		`,
 				[id, payload.playlistId || null, payload.rundownId, JSON.stringify(document)],
-				function(e: Error | null) {
+				function (e: Error | null) {
 					if (e) {
 						resolve({ result: undefined, error: e })
 					} else if (this) {
@@ -191,7 +191,7 @@ export const mutations = {
 			playlistId: null,
 			rundownId: null
 		}
-		const { result, error } = await new Promise((resolve) =>
+		const { result, error } = await new Promise<UpdateResolution>((resolve) =>
 			db.run(
 				`
 			UPDATE segments
@@ -266,7 +266,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 				const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
 				if (rundown && !Array.isArray(rundown) && rundown.sync) {
 					try {
-						await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentCreate, [
+						await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataSegmentCreate, [
 							result.rundownId,
 							await mutateSegment(result)
 						])
@@ -307,7 +307,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 				const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
 				if (rundown && !Array.isArray(rundown) && rundown.sync) {
 					try {
-						await coreHandler.core.callMethod(PeripheralDeviceAPI.methods.dataSegmentDelete, [
+						await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataSegmentDelete, [
 							document.rundownId,
 							document.id
 						])

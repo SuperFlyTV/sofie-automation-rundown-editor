@@ -10,7 +10,7 @@ import {
 	MutationPieceUpdate,
 	Piece
 } from '../interfaces'
-import { db } from '../db'
+import { db, InsertResolution, UpdateResolution } from '../db'
 import { v4 as uuid } from 'uuid'
 import { sendPartUpdateToCore } from './parts'
 
@@ -28,7 +28,7 @@ export const mutations = {
 		if (!payload.rundownId || !payload.partId)
 			return { error: new Error('Missing rundown id or part id') }
 
-		const { result, error } = await new Promise((resolve) =>
+		const { result, error } = await new Promise<InsertResolution>((resolve) =>
 			db.run(
 				`
 			INSERT INTO pieces (id,playlistId,rundownId,segmentId,partId,document)
@@ -42,7 +42,7 @@ export const mutations = {
 					payload.partId,
 					JSON.stringify(document)
 				],
-				function(e: Error | null) {
+				function (e: Error | null) {
 					if (e) {
 						resolve({ result: undefined, error: e })
 					} else if (this) {
@@ -164,7 +164,7 @@ export const mutations = {
 			partId: null
 		}
 
-		const { result, error } = await new Promise((resolve) =>
+		const { result, error } = await new Promise<UpdateResolution>((resolve) =>
 			db.run(
 				`
 			UPDATE pieces
@@ -172,7 +172,7 @@ export const mutations = {
 			WHERE id = "${payload.id}";
 		`,
 				[payload.playlistId || null, JSON.stringify(update), payload.id],
-				(e) => resolve({ error: e, result: e ? undefined : true })
+				(e) => resolve({ error: e ?? undefined, result: e ? undefined : true })
 			)
 		)
 

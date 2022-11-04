@@ -1,6 +1,16 @@
 import sqlite3 from 'sqlite3'
 import path from 'path'
 
+export interface InsertResolution {
+	result: number | undefined
+	error: Error | undefined
+}
+
+export interface UpdateResolution {
+	result: boolean | undefined
+	error: Error | undefined
+}
+
 let dbFile = path.join(process.cwd(), 'data.db')
 if (process.platform === 'darwin' && __dirname.includes('/app.asar')) {
 	dbFile = path.join(__dirname, '/data.db').replace('/app.asar', '')

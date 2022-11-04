@@ -7,11 +7,13 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { ipcRenderer } from 'electron'
+
+const { ipcRenderer } = window
 
 export default Vue.extend({
 	name: 'App',
 	methods: {
+		// eslint-disable-next-line no-undef
 		handleError(_: Electron.IpcRendererEvent, error: unknown) {
 			// eslint-disable-next-line no-console
 			console.error(error)

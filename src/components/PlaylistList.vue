@@ -9,9 +9,7 @@
 				:to="'/playlist/' + playlist.id"
 			>
 				{{ playlist.name }}
-				<b-button v-b-modal.edit-playlist @click="setEditPlaylist(playlist.id)">
-					edit
-				</b-button>
+				<b-button v-b-modal.edit-playlist @click="setEditPlaylist(playlist.id)"> edit </b-button>
 			</b-list-group-item>
 		</b-list-group>
 

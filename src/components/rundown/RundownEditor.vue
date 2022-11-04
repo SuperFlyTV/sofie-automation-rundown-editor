@@ -79,8 +79,9 @@ import { IpcOperation, IpcOperationType, Rundown, SerializedRundown } from '@/ba
 import { editField, literal, Nullable } from '@/util/lib'
 import store from '@/store'
 import Vue from 'vue'
-import { ipcRenderer } from 'electron'
 import { saveToFile } from '../../util/fs'
+
+const { ipcRenderer } = window
 
 export default Vue.extend({
 	computed: {
@@ -247,6 +248,10 @@ export default Vue.extend({
 			const rundown = this.rundown as Rundown
 			if (!rundown.id) {
 				return
+			}
+
+			if (typeof rundown.sync !== 'boolean') {
+				rundown.sync = false
 			}
 
 			const segments = await ipcRenderer.invoke(

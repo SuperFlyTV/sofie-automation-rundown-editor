@@ -1,17 +1,25 @@
 import {
 	CoreConnection,
+	CoreCredentials,
 	CoreOptions,
 	DDPConnectorOptions,
-	Observer,
-	PeripheralDeviceAPI as P
+	Observer
 } from '@sofie-automation/server-core-integration'
+import * as P from '@sofie-automation/shared-lib/dist/peripheralDevice/peripheralDeviceAPI'
+import { StatusCode } from '@sofie-automation/shared-lib/dist/lib/status'
+import {
+	protectString,
+	unprotectString
+} from '@sofie-automation/shared-lib/dist/lib/protectedString'
 import { DEVICE_CONFIG_MANIFEST } from './configManifest'
 import { mutations as settingsMutations } from './api/settings'
 import { BrowserWindow } from 'electron'
 import { CoreConnectionInfo, CoreConnectionStatus } from './interfaces'
 import { mutateRundown, mutations as rundownMutations } from './api/rundowns'
-const serverCoreIntegrationVersion = require('@sofie-automation/server-core-integration/package.json')
-	.version
+import { PeripheralDeviceAPIMethods } from '@sofie-automation/shared-lib/dist/peripheralDevice/methodsAPI'
+const serverCoreIntegrationVersion =
+	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	require('@sofie-automation/server-core-integration/package.json').version
 
 export interface DeviceConfig {
 	deviceId: string
@@ -69,7 +77,7 @@ export class CoreHandler {
 			console.log('Core Connected!')
 			this._connectionInfo.status = CoreConnectionStatus.CONNECTED
 			window.webContents.send('coreConnectionInfo', this._connectionInfo)
-			this.setStatus(P.StatusCode.GOOD, [])
+			this.setStatus(StatusCode.GOOD, [])
 			// if (this._isInitialized) this.onConnectionRestored()
 		})
 		this.core.onDisconnected(() => {
@@ -78,7 +86,7 @@ export class CoreHandler {
 			window.webContents.send('coreConnectionInfo', this._connectionInfo)
 		})
 		this.core.onError((err) => {
-			console.log('Core Error: ' + (err.message || err.toString() || err))
+			console.log('Core Error: ' + (typeof err === 'string' ? err : err.message))
 		})
 
 		const ddpConfig: DDPConnectorOptions = {
@@ -137,31 +145,31 @@ export class CoreHandler {
 	}
 
 	getCoreConnectionOptions(deviceOptions: DeviceConfig, name: string): CoreOptions {
-		let credentials: {
-			deviceId: string
-			deviceToken: string
+		let credentials: CoreCredentials = {
+			deviceId: protectString('SofieRundownEditor'),
+			deviceToken: 'unsecureToken'
 		}
 
 		if (deviceOptions.deviceId && deviceOptions.deviceToken) {
 			credentials = {
-				deviceId: deviceOptions.deviceId,
+				deviceId: protectString(deviceOptions.deviceId),
 				deviceToken: deviceOptions.deviceToken
 			}
 		} else if (deviceOptions.deviceId) {
 			console.warn('Token not set, only id! This might be unsecure!')
 			credentials = {
-				deviceId: deviceOptions.deviceId + name,
+				deviceId: protectString(deviceOptions.deviceId + name),
 				deviceToken: 'unsecureToken'
 			}
 		} else {
-			credentials = CoreConnection.getCredentials(name.replace(/ /g, ''))
+			console.warn('Device ID and token not set, using unsecure defaults!')
 		}
 		const options: CoreOptions = {
 			...credentials,
 
-			deviceCategory: P.DeviceCategory.INGEST,
-			deviceType: P.DeviceType.SPREADSHEET,
-			deviceSubType: P.SUBTYPE_PROCESS,
+			deviceCategory: P.PeripheralDeviceCategory.INGEST,
+			deviceType: P.PeripheralDeviceType.SPREADSHEET,
+			deviceSubType: P.PERIPHERAL_SUBTYPE_PROCESS,
 
 			deviceName: name,
 			watchDog: false, // todo - unhardcode
@@ -172,7 +180,7 @@ export class CoreHandler {
 		return options
 	}
 
-	setStatus(statusCode: P.StatusCode, messages: string[]) {
+	setStatus(statusCode: StatusCode, messages: string[]) {
 		this.core
 			.setStatus({
 				statusCode: statusCode,
@@ -198,7 +206,7 @@ export class CoreHandler {
 			if (!cmds) throw Error('"peripheralDeviceCommands" collection not found!')
 			const cmd = cmds.findOne(id) as PeripheralDeviceCommand
 			if (!cmd) throw Error('PeripheralCommand "' + id + '" not found!')
-			if (cmd.deviceId === this.core.deviceId) {
+			if (cmd.deviceId === unprotectString(this.core.deviceId)) {
 				this.executeFunction(cmd, this)
 			}
 		}
@@ -215,7 +223,7 @@ export class CoreHandler {
 		if (!cmds) throw Error('"peripheralDeviceCommands" collection not found!')
 		cmds.find({}).forEach((cmd0) => {
 			const cmd = cmd0 as PeripheralDeviceCommand
-			if (cmd.deviceId === this.core.deviceId) {
+			if (cmd.deviceId === unprotectString(this.core.deviceId)) {
 				this.executeFunction(cmd, this)
 			}
 		})
@@ -261,12 +269,14 @@ export class CoreHandler {
 						console.error('executeFunction error', err)
 					}
 				}
-				this.core.callMethod(P.methods.functionReply, [cmd._id, err, res]).catch((e) => {
-					console.error(e)
-				})
+				this.core
+					.callMethod(PeripheralDeviceAPIMethods.functionReply, [cmd._id, err, res])
+					.catch((e) => {
+						console.error(e)
+					})
 			}
 
-			const fcn: Function = fcnObject[cmd.functionName]
+			const fcn: (...args: unknown[]) => void = fcnObject[cmd.functionName]
 			try {
 				if (!fcn) throw Error('Function "' + cmd.functionName + '" not found!')
 
