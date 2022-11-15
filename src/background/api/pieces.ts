@@ -13,6 +13,7 @@ import {
 import { db, InsertResolution, UpdateResolution } from '../db'
 import { v4 as uuid } from 'uuid'
 import { sendPartUpdateToCore } from './parts'
+import { stringifyError } from '../util'
 
 export const mutations = {
 	async create(payload: MutationPieceCreate): Promise<{ result?: Piece; error?: Error }> {
@@ -213,7 +214,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					await sendPartUpdateToCore(result.partId)
 				} catch (error) {
 					console.error(error)
-					window.webContents.send('error', error)
+					window.webContents.send('error', stringifyError(error, true))
 				}
 			}
 
@@ -230,7 +231,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					await sendPartUpdateToCore(result.partId)
 				} catch (error) {
 					console.error(error)
-					window.webContents.send('error', error)
+					window.webContents.send('error', stringifyError(error, true))
 				}
 			}
 
@@ -244,7 +245,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					await sendPartUpdateToCore(document.partId)
 				} catch (error) {
 					console.error(error)
-					window.webContents.send('error', error)
+					window.webContents.send('error', stringifyError(error, true))
 				}
 			}
 

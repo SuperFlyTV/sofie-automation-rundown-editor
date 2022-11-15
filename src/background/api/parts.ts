@@ -17,6 +17,7 @@ import { getMutatedPiecesFromPart } from './pieces'
 import { mutations as rundownMutations } from './rundowns'
 import { mutations as segmentsMutations } from './segments'
 import { PeripheralDeviceAPIMethods } from '@sofie-automation/shared-lib/dist/peripheralDevice/methodsAPI'
+import { stringifyError } from '../util'
 
 async function mutatePart(part: Part): Promise<MutatedPart> {
 	return {
@@ -272,7 +273,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 						])
 					} catch (error) {
 						console.error(error)
-						window.webContents.send('error', error)
+						window.webContents.send('error', stringifyError(error, true))
 					}
 				}
 			}
@@ -291,7 +292,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					await sendPartDiffToCore(document, result)
 				} catch (error) {
 					console.error(error)
-					window.webContents.send('error', error)
+					window.webContents.send('error', stringifyError(error, true))
 				}
 			}
 
@@ -311,7 +312,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 						])
 					} catch (error) {
 						console.error(error)
-						window.webContents.send('error', error)
+						window.webContents.send('error', stringifyError(error, true))
 					}
 				}
 			}

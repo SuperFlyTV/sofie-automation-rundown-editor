@@ -15,6 +15,7 @@ import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { getMutatedSegmentsFromRundown } from './segments'
 import { PeripheralDeviceAPIMethods } from '@sofie-automation/shared-lib/dist/peripheralDevice/methodsAPI'
+import { stringifyError } from '../util'
 
 export async function mutateRundown(rundown: Rundown): Promise<MutatedRundown> {
 	return {
@@ -231,7 +232,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					])
 				} catch (error) {
 					console.error(error)
-					window.webContents.send('error', error)
+					window.webContents.send('error', stringifyError(error, true))
 				}
 			}
 
@@ -249,7 +250,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					await sendRundownDiffToCore(document, result)
 				} catch (error) {
 					console.error(error)
-					window.webContents.send('error', error)
+					window.webContents.send('error', stringifyError(error, true))
 				}
 			}
 
@@ -265,7 +266,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					])
 				} catch (error) {
 					console.error(error)
-					window.webContents.send('error', error)
+					window.webContents.send('error', stringifyError(error, true))
 				}
 			}
 
