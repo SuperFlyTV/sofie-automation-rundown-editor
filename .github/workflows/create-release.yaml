@@ -78,6 +78,10 @@ jobs:
     needs: create-release
     continue-on-error: true
     steps:
+      # For some reason we need to manually install Python as of like mid-November 2022.
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
       - uses: actions/checkout@v3
       - name: Use Node.js 14.x
         uses: actions/setup-node@v3
