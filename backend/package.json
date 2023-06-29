@@ -1,0 +1,30 @@
+{
+	"name": "backend",
+	"version": "1.0.0",
+	"main": "index.js",
+	"license": "MIT",
+	"devDependencies": {
+		"@sofie-automation/code-standard-preset": "^2.4.1",
+		"@types/koa": "^2.13.6",
+		"@types/koa__cors": "^4.0.0",
+		"@types/node": "^18.15.11",
+		"@types/uuid": "^9.0.1",
+		"@types/sqlite3": "^3.1.7",
+		"typescript": "^5.0.3"
+	},
+	"dependencies": {
+		"@koa/cors": "^4.0.0",
+		"@sofie-automation/server-core-integration": "1.37.0",
+		"koa": "^2.14.1",
+		"socket.io": "^4.6.1",
+		"sqlite3": "^5.0.2",
+		"uuid": "^9.0.0"
+	},
+	"scripts": {
+		"lint:raw": "eslint --ext .ts --ext .js --ext .tsx --ext .jsx --ignore-pattern dist",
+		"lint": "yarn lint:raw .",
+		"lint-fix": "yarn lint --fix",
+		"build": "tsc -p tsconfig.json"
+	},
+	"prettier": "@sofie-automation/code-standard-preset/.prettierrc.json"
+}
