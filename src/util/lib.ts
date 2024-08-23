@@ -28,7 +28,7 @@ export const editField = <T extends any>(
 		},
 		set(value: T) {
 			const self = this as any
-			const isValue = value != '' && value !== undefined && value !== null
+			const isValue = value !== '' && value !== undefined && value !== null
 
 			if (!self.editObject) {
 				self.editObject = {
