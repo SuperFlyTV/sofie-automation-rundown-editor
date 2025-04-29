@@ -34,15 +34,15 @@ export async function mutateRundown(rundown: Rundown): Promise<MutatedRundown> {
 
 async function sendRundownDiffToCore(oldDocument: Rundown, newDocument: Rundown) {
 	if (oldDocument.sync && !newDocument.sync) {
-		return coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataRundownDelete, [
+		return coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataRundownDelete, [
 			oldDocument.id
 		])
 	} else if (!oldDocument.sync && newDocument.sync) {
-		await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataRundownCreate, [
+		await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataRundownCreate, [
 			await mutateRundown(newDocument)
 		])
 	} else if (oldDocument.sync && newDocument.sync) {
-		return coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataRundownUpdate, [
+		return coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataRundownUpdate, [
 			await mutateRundown(newDocument)
 		])
 	}
@@ -227,7 +227,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 
 			if (result && result.sync) {
 				try {
-					await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataRundownCreate, [
+					await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataRundownCreate, [
 						await mutateRundown(result)
 					])
 				} catch (error) {
@@ -261,7 +261,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 
 			if (document && 'id' in document && !error && document.sync) {
 				try {
-					await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataRundownDelete, [
+					await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataRundownDelete, [
 						document.id
 					])
 				} catch (error) {

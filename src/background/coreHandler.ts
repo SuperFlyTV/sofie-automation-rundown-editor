@@ -3,20 +3,21 @@ import {
 	CoreCredentials,
 	CoreOptions,
 	DDPConnectorOptions,
-	Observer
+	Observer,
+	PeripheralDevicePubSub,
+	PeripheralDeviceCommand,
+	PeripheralDevicePubSubCollectionsNames,
+	stringifyError
 } from '@sofie-automation/server-core-integration'
 import * as P from '@sofie-automation/shared-lib/dist/peripheralDevice/peripheralDeviceAPI'
 import { StatusCode } from '@sofie-automation/shared-lib/dist/lib/status'
-import {
-	protectString,
-	unprotectString
-} from '@sofie-automation/shared-lib/dist/lib/protectedString'
+import { protectString } from '@sofie-automation/shared-lib/dist/lib/protectedString'
 import { DEVICE_CONFIG_MANIFEST } from './configManifest'
 import { mutations as settingsMutations } from './api/settings'
 import { BrowserWindow } from 'electron'
 import { CoreConnectionInfo, CoreConnectionStatus } from './interfaces'
 import { mutateRundown, mutations as rundownMutations } from './api/rundowns'
-import { PeripheralDeviceAPIMethods } from '@sofie-automation/shared-lib/dist/peripheralDevice/methodsAPI'
+import { PeripheralDeviceCommandId } from '@sofie-automation/shared-lib/dist/core/model/Ids'
 const serverCoreIntegrationVersion =
 	// eslint-disable-next-line @typescript-eslint/no-var-requires
 	require('@sofie-automation/server-core-integration/package.json').version
@@ -26,31 +27,15 @@ export interface DeviceConfig {
 	deviceToken: string
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export interface PeripheralDeviceCommand {
-	_id: string
-
-	deviceId: string
-	functionName: string
-	args: Array<any>
-
-	hasReply: boolean
-	reply?: any
-	replyError?: any
-
-	time: number // time
-}
-/* eslint-enable @typescript-eslint/no-explicit-any */
-
 export class CoreHandler {
 	public core: CoreConnection
 	public get connectionInfo(): Readonly<CoreConnectionInfo> {
 		return Object.freeze({ ...this._connectionInfo })
 	}
 
-	private _observers: Array<Observer> = []
+	private _observers: Array<Observer<any>> = []
 	private _subscriptions: Array<string> = []
-	private _executedFunctions: { [id: string]: boolean } = {}
+	private _executedFunctions = new Set<PeripheralDeviceCommandId>()
 	private _connectionInfo: CoreConnectionInfo = {
 		url: undefined,
 		port: undefined,
@@ -116,32 +101,27 @@ export class CoreHandler {
 	/**
 	 * Subscribes to events in the core.
 	 */
-	setupSubscriptionsAndObservers(): Promise<void> {
+	async setupSubscriptionsAndObservers(): Promise<void> {
+		// console.log('setupObservers', this.core.deviceId)
 		if (this._observers.length) {
-			console.log('Core: Clearing observers..')
+			console.info('Core: Clearing observers..')
 			this._observers.forEach((obs) => {
 				obs.stop()
 			})
 			this._observers = []
 		}
-		this._subscriptions = []
 
-		console.log('Core: Setting up subscriptions for ' + this.core.deviceId + '..')
-		return Promise.all([
-			this.core.autoSubscribe('peripheralDevices', {
-				_id: this.core.deviceId
-			}),
-			this.core.autoSubscribe('peripheralDeviceCommands', this.core.deviceId),
-			this.core.autoSubscribe('peripheralDevices', this.core.deviceId)
+		if (!this.core) {
+			throw Error('core is undefined!')
+		}
+
+		console.info('Core: Setting up subscriptions for ' + this.core.deviceId + '..')
+		await Promise.all([
+			this.core.autoSubscribe(PeripheralDevicePubSub.peripheralDeviceForDevice, this.core.deviceId),
+			this.core.autoSubscribe(PeripheralDevicePubSub.peripheralDeviceCommands, this.core.deviceId)
 		])
-			.then((subs) => {
-				this._subscriptions = this._subscriptions.concat(subs)
-			})
-			.then(() => {
-				this.setupObserverForPeripheralDeviceCommands()
 
-				return
-			})
+		this.setupObserverForPeripheralDeviceCommands()
 	}
 
 	getCoreConnectionOptions(deviceOptions: DeviceConfig, name: string): CoreOptions {
@@ -169,7 +149,8 @@ export class CoreHandler {
 
 			deviceCategory: P.PeripheralDeviceCategory.INGEST,
 			deviceType: P.PeripheralDeviceType.SPREADSHEET,
-			deviceSubType: P.PERIPHERAL_SUBTYPE_PROCESS,
+			documentationUrl: 'xxx',
+			versions: {}, // todo - unhardcode
 
 			deviceName: name,
 			watchDog: false, // todo - unhardcode
@@ -193,7 +174,9 @@ export class CoreHandler {
 	 * Listen for commands and execute.
 	 */
 	setupObserverForPeripheralDeviceCommands() {
-		const observer = this.core.observe('peripheralDeviceCommands')
+		const observer = this.core.observe(
+			PeripheralDevicePubSubCollectionsNames.peripheralDeviceCommands
+		)
 		this.killProcess(0) // just make sure it exists
 		this._observers.push(observer)
 
@@ -201,29 +184,36 @@ export class CoreHandler {
 		 * Called when a command is added/changed. Executes that command.
 		 * @param {string} id Command id to execute.
 		 */
-		const addedChangedCommand = (id: string) => {
-			const cmds = this.core.getCollection('peripheralDeviceCommands')
+		const addedChangedCommand = (id: PeripheralDeviceCommandId) => {
+			const cmds = this.core.getCollection(
+				PeripheralDevicePubSubCollectionsNames.peripheralDeviceCommands
+			)
 			if (!cmds) throw Error('"peripheralDeviceCommands" collection not found!')
-			const cmd = cmds.findOne(id) as PeripheralDeviceCommand
-			if (!cmd) throw Error('PeripheralCommand "' + id + '" not found!')
-			if (cmd.deviceId === unprotectString(this.core.deviceId)) {
+			const cmd = cmds.findOne(id)
+			if (!cmd) throw Error(`PeripheralCommand "${id}" not found!`)
+			if (cmd.deviceId === this.core.deviceId) {
 				this.executeFunction(cmd, this)
 			}
 		}
-		observer.added = (id: string) => {
+		observer.added = (id: PeripheralDeviceCommandId) => {
 			addedChangedCommand(id)
 		}
-		observer.changed = (id: string) => {
+		observer.changed = (id: PeripheralDeviceCommandId) => {
 			addedChangedCommand(id)
 		}
-		observer.removed = (id: string) => {
+		observer.removed = (id: PeripheralDeviceCommandId) => {
 			this.retireExecuteFunction(id)
 		}
-		const cmds = this.core.getCollection('peripheralDeviceCommands')
+		const cmds = this.core.getCollection(
+			PeripheralDevicePubSubCollectionsNames.peripheralDeviceCommands
+		)
 		if (!cmds) throw Error('"peripheralDeviceCommands" collection not found!')
-		cmds.find({}).forEach((cmd0) => {
-			const cmd = cmd0 as PeripheralDeviceCommand
-			if (cmd.deviceId === unprotectString(this.core.deviceId)) {
+		// any should be PeripheralDeviceCommand
+		cmds.find({}).forEach((cmd) => {
+			if (!this.core) {
+				throw Error('functionObject.core is undefined!')
+			}
+			if (cmd.deviceId === this.core.deviceId) {
 				this.executeFunction(cmd, this)
 			}
 		})
@@ -254,12 +244,11 @@ export class CoreHandler {
 		return await mutateRundown(result)
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	executeFunction(cmd: PeripheralDeviceCommand, fcnObject: any) {
+	executeFunction(cmd: PeripheralDeviceCommand, fcnObject: CoreHandler) {
 		if (cmd) {
-			if (this._executedFunctions[cmd._id]) return // prevent it from running multiple times
+			if (this._executedFunctions.has(cmd._id)) return // prevent it from running multiple times
 			console.debug(cmd.functionName, cmd.args)
-			this._executedFunctions[cmd._id] = true
+			this._executedFunctions.add(cmd._id)
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const cb = (err: unknown, res?: any) => {
 				if (err) {
@@ -269,14 +258,16 @@ export class CoreHandler {
 						console.error('executeFunction error', err)
 					}
 				}
-				this.core
-					.callMethod(PeripheralDeviceAPIMethods.functionReply, [cmd._id, err, res])
-					.catch((e) => {
-						console.error(e)
-					})
+				this.core.coreMethods.functionReply(cmd._id, err, res).catch((e) => {
+					console.error(e)
+				})
 			}
 
-			const fcn: (...args: unknown[]) => void = fcnObject[cmd.functionName]
+			if (!cmd.functionName) {
+				throw Error('Function name is undefined')
+			}
+			//@ts-expect-error - functionName is a string
+			const fcn = fcnObject[cmd.functionName]
 			try {
 				if (!fcn) throw Error('Function "' + cmd.functionName + '" not found!')
 
@@ -285,19 +276,15 @@ export class CoreHandler {
 						cb(null, result)
 					})
 					.catch((e) => {
-						cb(e.toString(), null)
+						cb(stringifyError(e), null)
 					})
-			} catch (e) {
-				if (e instanceof Error) {
-					cb(e.toString(), null)
-				} else {
-					cb(e, null)
-				}
+			} catch (e: any) {
+				cb(stringifyError(e), null)
 			}
 		}
 	}
-	retireExecuteFunction(cmdId: string) {
-		delete this._executedFunctions[cmdId]
+	retireExecuteFunction(cmdId: PeripheralDeviceCommandId): void {
+		this._executedFunctions.delete(cmdId)
 	}
 
 	private _getVersions() {

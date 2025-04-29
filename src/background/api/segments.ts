@@ -38,17 +38,17 @@ async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
 	}
 
 	if (oldSegment.float && !newSegment.float) {
-		await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataSegmentCreate, [
+		await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataSegmentCreate, [
 			newSegment.rundownId,
 			await mutateSegment(newSegment)
 		])
 	} else if (!oldSegment.float && newSegment.float) {
-		await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataSegmentDelete, [
+		await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataSegmentDelete, [
 			newSegment.rundownId,
 			newSegment.id
 		])
 	} else if (!oldSegment.float && !newSegment.float) {
-		await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataSegmentUpdate, [
+		await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataSegmentUpdate, [
 			newSegment.rundownId,
 			await mutateSegment(newSegment)
 		])
@@ -267,7 +267,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 				const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
 				if (rundown && !Array.isArray(rundown) && rundown.sync) {
 					try {
-						await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataSegmentCreate, [
+						await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataSegmentCreate, [
 							result.rundownId,
 							await mutateSegment(result)
 						])
@@ -308,7 +308,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 				const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
 				if (rundown && !Array.isArray(rundown) && rundown.sync) {
 					try {
-						await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataSegmentDelete, [
+						await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataSegmentDelete, [
 							document.rundownId,
 							document.id
 						])

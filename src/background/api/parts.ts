@@ -50,19 +50,19 @@ async function sendPartDiffToCore(oldPart: Part, newPart: Part) {
 	}
 
 	if (oldPart.float && !newPart.float) {
-		coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataPartCreate, [
+		coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataPartCreate, [
 			newPart.rundownId,
 			newPart.segmentId,
 			await mutatePart(newPart)
 		])
 	} else if (!oldPart.float && newPart.float) {
-		coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataPartDelete, [
+		coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataPartDelete, [
 			newPart.rundownId,
 			newPart.segmentId,
 			newPart.id
 		])
 	} else if (!oldPart.float && !newPart.float) {
-		coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataPartUpdate, [
+		coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataPartUpdate, [
 			newPart.rundownId,
 			newPart.segmentId,
 			await mutatePart(newPart)
@@ -266,7 +266,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 				const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
 				if (rundown && !Array.isArray(rundown) && rundown.sync) {
 					try {
-						await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataPartCreate, [
+						await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataPartCreate, [
 							result.rundownId,
 							result.segmentId,
 							await mutatePart(result)
@@ -305,7 +305,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 				const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
 				if (rundown && !Array.isArray(rundown) && rundown.sync) {
 					try {
-						await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataPartDelete, [
+						await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataPartDelete, [
 							document.rundownId,
 							document.segmentId,
 							document.id
@@ -335,7 +335,7 @@ export async function sendPartUpdateToCore(partId: string) {
 			return
 		}
 
-		await coreHandler.core.callMethod(PeripheralDeviceAPIMethods.dataPartUpdate, [
+		await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataPartUpdate, [
 			result.rundownId,
 			result.segmentId,
 			await mutatePart(result)
