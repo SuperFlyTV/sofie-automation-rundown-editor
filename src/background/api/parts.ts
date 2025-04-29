@@ -50,23 +50,19 @@ async function sendPartDiffToCore(oldPart: Part, newPart: Part) {
 	}
 
 	if (oldPart.float && !newPart.float) {
-		coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataPartCreate, [
-			newPart.rundownId,
-			newPart.segmentId,
-			await mutatePart(newPart)
-		])
+		await coreHandler.core.coreMethods.dataPartDelete(
+			oldPart.rundownId,
+			oldPart.segmentId,
+			oldPart.id
+		)
 	} else if (!oldPart.float && newPart.float) {
-		coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataPartDelete, [
-			newPart.rundownId,
-			newPart.segmentId,
-			newPart.id
-		])
+		coreHandler.core.coreMethods.dataPartDelete(newPart.rundownId, newPart.segmentId, newPart.id)
 	} else if (!oldPart.float && !newPart.float) {
-		coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataPartUpdate, [
+		coreHandler.core.coreMethods.dataPartUpdate(
 			newPart.rundownId,
 			newPart.segmentId,
 			await mutatePart(newPart)
-		])
+		)
 	}
 }
 
@@ -266,11 +262,11 @@ export async function init(window: BrowserWindow): Promise<void> {
 				const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
 				if (rundown && !Array.isArray(rundown) && rundown.sync) {
 					try {
-						await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataPartCreate, [
+						await coreHandler.core.coreMethods.dataPartCreate(
 							result.rundownId,
 							result.segmentId,
 							await mutatePart(result)
-						])
+						)
 					} catch (error) {
 						console.error(error)
 						window.webContents.send('error', stringifyError(error, true))
@@ -305,11 +301,11 @@ export async function init(window: BrowserWindow): Promise<void> {
 				const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
 				if (rundown && !Array.isArray(rundown) && rundown.sync) {
 					try {
-						await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataPartDelete, [
+						await coreHandler.core.coreMethods.dataPartDelete(
 							document.rundownId,
 							document.segmentId,
 							document.id
-						])
+						)
 					} catch (error) {
 						console.error(error)
 						window.webContents.send('error', stringifyError(error, true))
@@ -335,11 +331,11 @@ export async function sendPartUpdateToCore(partId: string) {
 			return
 		}
 
-		await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataPartUpdate, [
+		await coreHandler.core.coreMethods.dataPartUpdate(
 			result.rundownId,
 			result.segmentId,
 			await mutatePart(result)
-		])
+		)
 	}
 }
 

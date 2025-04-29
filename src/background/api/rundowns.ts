@@ -34,17 +34,14 @@ export async function mutateRundown(rundown: Rundown): Promise<MutatedRundown> {
 
 async function sendRundownDiffToCore(oldDocument: Rundown, newDocument: Rundown) {
 	if (oldDocument.sync && !newDocument.sync) {
-		return coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataRundownDelete, [
-			oldDocument.id
-		])
+		console.log('delete rundown', oldDocument, newDocument)
+		return coreHandler.core.coreMethods.dataRundownDelete(oldDocument.id)
 	} else if (!oldDocument.sync && newDocument.sync) {
-		await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataRundownCreate, [
-			await mutateRundown(newDocument)
-		])
+		console.log('create rundown', oldDocument, newDocument)
+		return coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(newDocument))
 	} else if (oldDocument.sync && newDocument.sync) {
-		return coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataRundownUpdate, [
-			await mutateRundown(newDocument)
-		])
+		console.log('update rundown', oldDocument, newDocument)
+		return coreHandler.core.coreMethods.dataRundownUpdate(await mutateRundown(newDocument))
 	}
 }
 
@@ -224,12 +221,10 @@ export async function init(window: BrowserWindow): Promise<void> {
 	ipcMain.handle('rundowns', async (_, operation: IpcOperation) => {
 		if (operation.type === IpcOperationType.Create) {
 			const { result, error } = await mutations.create(operation.payload)
-
 			if (result && result.sync) {
+				console.log('create rundown', result, error)
 				try {
-					await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataRundownCreate, [
-						await mutateRundown(result)
-					])
+					await coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(result))
 				} catch (error) {
 					console.error(error)
 					window.webContents.send('error', stringifyError(error, true))
@@ -261,9 +256,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 
 			if (document && 'id' in document && !error && document.sync) {
 				try {
-					await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataRundownDelete, [
-						document.id
-					])
+					await coreHandler.core.coreMethods.dataRundownDelete(document.id)
 				} catch (error) {
 					console.error(error)
 					window.webContents.send('error', stringifyError(error, true))

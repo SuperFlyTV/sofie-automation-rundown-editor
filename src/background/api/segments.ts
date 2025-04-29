@@ -38,20 +38,17 @@ async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
 	}
 
 	if (oldSegment.float && !newSegment.float) {
-		await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataSegmentCreate, [
+		await coreHandler.core.coreMethods.dataSegmentCreate(
 			newSegment.rundownId,
 			await mutateSegment(newSegment)
-		])
+		)
 	} else if (!oldSegment.float && newSegment.float) {
-		await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataSegmentDelete, [
-			newSegment.rundownId,
-			newSegment.id
-		])
+		await coreHandler.core.coreMethods.dataSegmentDelete(newSegment.rundownId, newSegment.id)
 	} else if (!oldSegment.float && !newSegment.float) {
-		await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataSegmentUpdate, [
+		await coreHandler.core.coreMethods.dataSegmentUpdate(
 			newSegment.rundownId,
 			await mutateSegment(newSegment)
-		])
+		)
 	}
 }
 
@@ -267,10 +264,10 @@ export async function init(window: BrowserWindow): Promise<void> {
 				const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
 				if (rundown && !Array.isArray(rundown) && rundown.sync) {
 					try {
-						await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataSegmentCreate, [
+						await coreHandler.core.coreMethods.dataSegmentCreate(
 							result.rundownId,
 							await mutateSegment(result)
-						])
+						)
 					} catch (error) {
 						console.error(error)
 						window.webContents.send('error', stringifyError(error, true))
@@ -308,10 +305,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 				const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
 				if (rundown && !Array.isArray(rundown) && rundown.sync) {
 					try {
-						await coreHandler.core.callMethodLowPrioRaw(PeripheralDeviceAPIMethods.dataSegmentDelete, [
-							document.rundownId,
-							document.id
-						])
+						await coreHandler.core.coreMethods.dataSegmentDelete(document.rundownId, document.id)
 					} catch (error) {
 						console.error(error)
 						window.webContents.send('error', stringifyError(error, true))
