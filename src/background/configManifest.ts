@@ -1,7 +1,11 @@
-import { DeviceConfigManifest, JSONBlobStringify, JSONSchema } from '@sofie-automation/server-core-integration'
+import {
+	DeviceConfigManifest,
+	JSONBlobStringify,
+	JSONSchema
+} from '@sofie-automation/server-core-integration'
 
 const deviceConfigSchema: JSONSchema = {
-	$schema: 'http://json-schema.org/draft-07/schema#',
+	$schema: 'https://json-schema.org/draft/2020-12/schema',
 	type: 'object',
 	properties: {
 		deviceId: {
@@ -15,8 +19,20 @@ const deviceConfigSchema: JSONSchema = {
 	},
 	required: ['deviceId', 'deviceToken']
 }
+const subDeviceConfigSchema: JSONSchema = {
+	$schema: 'https://json-schema.org/draft/2020-12/schema',
+	type: 'object',
+	title: 'Rundown Editor Config',
+	properties: {},
+	required: []
+}
 
 export const DEVICE_CONFIG_MANIFEST: DeviceConfigManifest = {
 	deviceConfigSchema: JSONBlobStringify<JSONSchema>(deviceConfigSchema),
-	subdeviceManifest: {}
+	subdeviceManifest: {
+		default: {
+			displayName: 'Rundow Editor',
+			configSchema: JSONBlobStringify<JSONSchema>(subDeviceConfigSchema)
+		}
+	}
 }
