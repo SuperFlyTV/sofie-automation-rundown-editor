@@ -1,30 +1,25 @@
 <template>
 	<div class="segment-editor d-flex flex-column">
 		<h2>Segment</h2>
+		<b-form @submit.prevent="update">
+			<b-form-group label="Name:">
+				<b-form-input v-model="name"></b-form-input>
+			</b-form-group>
 
-		<b-form-group label="Name:">
-			<b-form-input v-model="name"></b-form-input>
-		</b-form-group>
-
-		<b-form-group label="Float:">
-			<b-form-checkbox v-model="float"></b-form-checkbox>
-		</b-form-group>
+			<b-form-group label="Float:">
+				<b-form-checkbox v-model="float"></b-form-checkbox>
+			</b-form-group>
+		</b-form>
 
 		<div class="buttons d-flex flex-row justify-content-between">
 			<b-button variant="danger" v-b-modal.delete-rd>Delete</b-button>
 			<b-button-group>
 				<b-button @click="reset">Cancel</b-button>
-				<b-button @click="update" variant="primary">Save</b-button>
+				<b-button type="submit" variant="primary">Save</b-button>
 			</b-button-group>
 		</div>
 
-		<b-modal
-			id="delete-rd"
-			title="Delete segment"
-			@ok="deleteRundown"
-			ok-variant="danger"
-			ok-title="Delete"
-		>
+		<b-modal id="delete-rd" title="Delete segment" @ok="deleteRundown" ok-variant="danger" ok-title="Delete">
 			<p class="my-4">Are you sure you want to delete "{{ segment.name }}?"</p>
 		</b-modal>
 	</div>
@@ -100,9 +95,11 @@ export default Vue.extend({
 .segment-editor {
 	padding: 2em;
 }
+
 .form-group {
 	margin: 0.5em 0;
 }
+
 .buttons {
 	margin: 1em 0;
 }

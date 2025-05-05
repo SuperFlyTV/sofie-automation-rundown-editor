@@ -1,6 +1,7 @@
 <template>
 	<div class="type-editor">
 		<h4>Piece Manifest:</h4>
+		<b-form @submit.prevent="update">
 		<div>
 			<label for="id">ID:</label>
 			<input type="text" name="id" v-model="id" />
@@ -57,9 +58,10 @@
 		<div class="buttons d-flex flex-row justify-content-end">
 			<b-button-group>
 				<b-button @click="reset">Cancel</b-button>
-				<b-button @click="update" variant="primary">Save</b-button>
+				<b-button type="submit" variant="primary">Save</b-button>
 			</b-button-group>
 		</div>
+		</b-form>
 	</div>
 </template>
 
