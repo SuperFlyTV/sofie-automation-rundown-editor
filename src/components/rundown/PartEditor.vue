@@ -1,5 +1,5 @@
 <template>
-	<div class="segment-editor d-flex flex-column">
+	<div class="part-editor d-flex flex-column">
 		<h2>Part</h2>
 		<b-form @submit.prevent="update">
 			<b-form-group label="Name:">
@@ -135,7 +135,8 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.segment-editor {
+.part-editor {
+	background-color: rgb(30, 30, 30);
 	padding: 2em;
 }
 

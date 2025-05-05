@@ -260,6 +260,7 @@ a {
 }
 
 .part {
+	margin-top: 2px;
 	background-color: #353535;
 	margin-left: 15px;
 	width: calc(100% - 15px);
@@ -267,10 +268,6 @@ a {
 	line-height: 1.5em;
 	height: 1.8em;
 	padding: 0.2em;
-}
-
-.part + .part {
-	margin-top: 2px;
 }
 
 .part:hover {
