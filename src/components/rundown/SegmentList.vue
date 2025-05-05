@@ -2,25 +2,16 @@
 	<div class="segment-list d-flex flex-column">
 		<draggable :list="sortableSegments" group="segments" @change="changeSegments">
 			<div class="part-list d-flex flex-column" v-for="segment in segments" :key="segment.id">
-				<router-link
-					:to="`/rundown/${rundown.id}/segment/${segment.id}`"
-					:class="classes('segment', { floated: segment.float })"
-				>
+				<router-link :to="`/rundown/${rundown.id}/segment/${segment.id}`"
+					:class="classes('segment', { floated: segment.float })">
 					{{ segment.name }}
 					<span class="time">{{ displayTime(segment.duration) }}</span>
 				</router-link>
-				<draggable
-					class="d-flex flex-column"
-					:list="segment.parts.map((p) => p.id)"
-					:group="partGroup(segment.id)"
-					@change="(ev) => changeParts2(segment.id, ev)"
-				>
-					<router-link
-						:to="`/rundown/${rundown.id}/part/${part.id}`"
+				<draggable class="d-flex flex-column" :list="segment.parts.map((p) => p.id)"
+					:group="partGroup(segment.id)" @change="(ev) => changeParts2(segment.id, ev)">
+					<router-link :to="`/rundown/${rundown.id}/part/${part.id}`"
 						:class="classes('part', { floated: segment.float || part.float, active: part.active })"
-						v-for="part in segment.parts"
-						:key="part.id"
-					>
+						v-for="part in segment.parts" :key="part.id">
 						{{ part.name }}
 						<span class="time">{{ displayTime(part.payload.duration) }}</span>
 					</router-link>
@@ -81,11 +72,11 @@ export default Vue.extend({
 		return {
 			lastPartListMutation: undefined as
 				| {
-						segmentId: string
-						partId: string
-						index: number
-						futureIndex: number
-				  }
+					segmentId: string
+					partId: string
+					index: number
+					futureIndex: number
+				}
 				| undefined
 		}
 	},
@@ -258,6 +249,7 @@ a {
 .new {
 	color: #777;
 }
+
 .new:hover {
 	color: white;
 	cursor: pointer;
@@ -268,14 +260,33 @@ a {
 }
 
 .part {
-	width: 100%;
+	background-color: #353535;
+	margin-left: 15px;
+	width: calc(100% - 15px);
 	font-size: 1em;
 	line-height: 1.5em;
-	height: 1.6em;
+	height: 1.8em;
 	padding: 0.2em;
 }
+
+.part + .part {
+	margin-top: 2px;
+}
+
 .part:hover {
 	background-color: #777;
+}
+
+/* Keep the "New part" button aligned with other parts */
+.part.new {
+	margin-left: 15px;
+	margin-bottom: 8px;
+	margin-top: 2px;
+}
+
+/* Add a subtle background to make the hierarchy more visible */
+.part-list {
+	background-color: rgba(0, 0, 0, 0.2);
 }
 
 .time {
