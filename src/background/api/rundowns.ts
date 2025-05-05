@@ -14,7 +14,6 @@ import { db, InsertResolution, UpdateResolution } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { getMutatedSegmentsFromRundown } from './segments'
-import { PeripheralDeviceAPIMethods } from '@sofie-automation/shared-lib/dist/peripheralDevice/methodsAPI'
 import { stringifyError } from '../util'
 
 export async function mutateRundown(rundown: Rundown): Promise<MutatedRundown> {

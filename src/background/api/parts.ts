@@ -16,7 +16,6 @@ import { coreHandler } from '../coreHandler'
 import { getMutatedPiecesFromPart } from './pieces'
 import { mutations as rundownMutations } from './rundowns'
 import { mutations as segmentsMutations } from './segments'
-import { PeripheralDeviceAPIMethods } from '@sofie-automation/shared-lib/dist/peripheralDevice/methodsAPI'
 import { stringifyError } from '../util'
 
 async function mutatePart(part: Part): Promise<MutatedPart> {

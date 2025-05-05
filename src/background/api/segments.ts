@@ -15,7 +15,6 @@ import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { getMutatedPartsFromSegment } from './parts'
 import { mutations as rundownMutations } from './rundowns'
-import { PeripheralDeviceAPIMethods } from '@sofie-automation/shared-lib/dist/peripheralDevice/methodsAPI'
 import { stringifyError } from '../util'
 
 async function mutateSegment(segment: Segment): Promise<MutatedSegment> {
