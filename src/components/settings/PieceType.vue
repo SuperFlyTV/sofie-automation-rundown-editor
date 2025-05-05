@@ -58,7 +58,7 @@
 		<div class="buttons d-flex flex-row justify-content-end">
 			<b-button-group>
 				<b-button @click="reset">Cancel</b-button>
-				<b-button type="submit" variant="primary">Save</b-button>
+				<b-button type="submit" @click="update" variant="primary">Save</b-button>
 			</b-button-group>
 		</div>
 		</b-form>

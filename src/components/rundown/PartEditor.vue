@@ -27,7 +27,7 @@
 				<b-button variant="danger" v-b-modal.delete-rd>Delete</b-button>
 				<b-button-group>
 					<b-button @click="reset">Cancel</b-button>
-					<b-button type="submit" variant="primary">Save</b-button>
+					<b-button type="submit" @click="update" variant="primary">{{ labelOnUpdateButton }}</b-button>
 				</b-button-group>
 			</div>
 		</b-form>
@@ -97,6 +97,9 @@ export default Vue.extend({
 
 		types() {
 			return store.state.settings.partTypes
+		},
+		labelOnUpdateButton(): string {
+			return this.rundown.sync ? 'Update' : 'Save'
 		}
 	},
 	data() {

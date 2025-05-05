@@ -45,7 +45,7 @@
 				</b-button-group>
 				<b-button-group>
 					<b-button @click="reset">Cancel</b-button>
-					<b-button type="submit" variant="primary">Save</b-button>
+					<b-button type="submit" @click="update" variant="primary">{{ labelOnUpdateButton }}</b-button>
 				</b-button-group>
 			</div>
 		</div>
@@ -192,6 +192,9 @@ export default Vue.extend({
 		},
 		metaDataManifest() {
 			return store.state.settings.rundownMetadata
+		},
+		labelOnUpdateButton(): string {
+			return this.rundown.sync ? 'Update' : 'Save'
 		}
 	},
 	data() {
