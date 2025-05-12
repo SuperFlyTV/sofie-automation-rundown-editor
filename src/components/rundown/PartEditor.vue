@@ -27,12 +27,20 @@
 				<b-button variant="danger" v-b-modal.delete-rd>Delete</b-button>
 				<b-button-group>
 					<b-button @click="reset">Cancel</b-button>
-					<b-button type="submit" @click="update" variant="primary">{{ labelOnUpdateButton }}</b-button>
+					<b-button type="submit" @click="update" variant="primary">{{
+						labelOnUpdateButton
+					}}</b-button>
 				</b-button-group>
 			</div>
 		</b-form>
 
-		<b-modal id="delete-rd" title="Delete segment" @ok="deleteRundown" ok-variant="danger" ok-title="Delete">
+		<b-modal
+			id="delete-rd"
+			title="Delete segment"
+			@ok="deleteRundown"
+			ok-variant="danger"
+			ok-title="Delete"
+		>
 			<p class="my-4">Are you sure you want to delete "{{ part.name }}?"</p>
 		</b-modal>
 	</div>

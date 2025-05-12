@@ -16,7 +16,11 @@
 			</b-form-group>
 
 			<b-form-group label="Start time:">
-				<b-form-timepicker :disabled="!startDate" reset-button v-model="startTime"></b-form-timepicker>
+				<b-form-timepicker
+					:disabled="!startDate"
+					reset-button
+					v-model="startTime"
+				></b-form-timepicker>
 			</b-form-group>
 
 			<b-form-group label="End date:">
@@ -28,12 +32,22 @@
 			</b-form-group>
 
 			<b-form-group v-for="m in metaDataManifest" :key="m.id" :label="m.label + ':'">
-				<b-form-input v-if="m.type === 'number'" number :value="metaData[m.id]"
-					@update="(v) => updateMetaData(m.id, v)"></b-form-input>
-				<b-form-input v-if="m.type === 'string'" :value="metaData[m.id]"
-					@update="(v) => updateMetaData(m.id, v)"></b-form-input>
-				<b-form-checkbox v-if="m.type === 'boolean'" :value="metaData[m.id]"
-					@update="(v) => updateMetaData(m.id, v)"></b-form-checkbox>
+				<b-form-input
+					v-if="m.type === 'number'"
+					number
+					:value="metaData[m.id]"
+					@update="(v) => updateMetaData(m.id, v)"
+				></b-form-input>
+				<b-form-input
+					v-if="m.type === 'string'"
+					:value="metaData[m.id]"
+					@update="(v) => updateMetaData(m.id, v)"
+				></b-form-input>
+				<b-form-checkbox
+					v-if="m.type === 'boolean'"
+					:value="metaData[m.id]"
+					@update="(v) => updateMetaData(m.id, v)"
+				></b-form-checkbox>
 			</b-form-group>
 		</b-form>
 
@@ -45,12 +59,20 @@
 				</b-button-group>
 				<b-button-group>
 					<b-button @click="reset">Cancel</b-button>
-					<b-button type="submit" @click="update" variant="primary">{{ labelOnUpdateButton }}</b-button>
+					<b-button type="submit" @click="update" variant="primary">{{
+						labelOnUpdateButton
+					}}</b-button>
 				</b-button-group>
 			</div>
 		</div>
 
-		<b-modal id="delete-rd" title="Delete rundown" @ok="deleteRundown" ok-variant="danger" ok-title="Delete">
+		<b-modal
+			id="delete-rd"
+			title="Delete rundown"
+			@ok="deleteRundown"
+			ok-variant="danger"
+			ok-title="Delete"
+		>
 			<p class="my-4">Are you sure you want to delete "{{ rundown.name }}?"</p>
 		</b-modal>
 	</div>

@@ -2,16 +2,25 @@
 	<div class="segment-list d-flex flex-column">
 		<draggable :list="sortableSegments" group="segments" @change="changeSegments">
 			<div class="part-list d-flex flex-column" v-for="segment in segments" :key="segment.id">
-				<router-link :to="`/rundown/${rundown.id}/segment/${segment.id}`"
-					:class="classes('segment', { floated: segment.float })">
+				<router-link
+					:to="`/rundown/${rundown.id}/segment/${segment.id}`"
+					:class="classes('segment', { floated: segment.float })"
+				>
 					{{ segment.name }}
 					<span class="time">{{ displayTime(segment.duration) }}</span>
 				</router-link>
-				<draggable class="d-flex flex-column" :list="segment.parts.map((p) => p.id)"
-					:group="partGroup(segment.id)" @change="(ev) => changeParts2(segment.id, ev)">
-					<router-link :to="`/rundown/${rundown.id}/part/${part.id}`"
+				<draggable
+					class="d-flex flex-column"
+					:list="segment.parts.map((p) => p.id)"
+					:group="partGroup(segment.id)"
+					@change="(ev) => changeParts2(segment.id, ev)"
+				>
+					<router-link
+						:to="`/rundown/${rundown.id}/part/${part.id}`"
 						:class="classes('part', { floated: segment.float || part.float, active: part.active })"
-						v-for="part in segment.parts" :key="part.id">
+						v-for="part in segment.parts"
+						:key="part.id"
+					>
 						{{ part.name }}
 						<span class="time">{{ displayTime(part.payload.duration) }}</span>
 					</router-link>
@@ -72,11 +81,11 @@ export default Vue.extend({
 		return {
 			lastPartListMutation: undefined as
 				| {
-					segmentId: string
-					partId: string
-					index: number
-					futureIndex: number
-				}
+						segmentId: string
+						partId: string
+						index: number
+						futureIndex: number
+				  }
 				| undefined
 		}
 	},

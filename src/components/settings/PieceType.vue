@@ -2,65 +2,67 @@
 	<div class="type-editor">
 		<h4>Piece Manifest:</h4>
 		<b-form @submit.prevent="update">
-		<div>
-			<label for="id">ID:</label>
-			<input type="text" name="id" v-model="id" />
-		</div>
-
-		<div>
-			<label for="name">Name:</label>
-			<input type="text" name="name" v-model="name" />
-		</div>
-
-		<div>
-			<label for="shortName">Short Name:</label>
-			<input type="text" name="shortName" v-model="shortName" />
-		</div>
-
-		<div>
-			<label for="colour">Colour:</label>
-			<input type="text" name="colour" v-model="colour" />
-		</div>
-
-		<div>
-			<label for="includeTypeInName">Include in name:</label>
-			<input type="checkbox" name="includeTypeInName" v-model="includeTypeInName" />
-		</div>
-
-		<div>
-			<h4>Fields:</h4>
-
-			<div class="field-editor" v-for="(field, i) in payload" :key="i">
-				<label for="id">Field ID:</label>
-				<input type="text" name="id" v-model="field.id" @click="createEditObj" />
-
-				<label for="label">Label:</label>
-				<input type="text" name="label" v-model="field.label" @click="createEditObj" />
-
-				<label for="type">Type:</label>
-				<select name="type" id="type" v-model="field.type" @change="createEditObj">
-					<option v-for="(type, entry) in fieldTypes" :key="type" :value="type">{{ entry }}</option>
-				</select>
-
-				<label for="includeInName">Include in name:</label>
-				<input
-					type="checkbox"
-					name="includeInName"
-					v-model="field.includeInName"
-					@click="createEditObj"
-				/>
-
-				<span class="link" @click="() => removeField(field.id)"><fa icon="trash" /></span>
+			<div>
+				<label for="id">ID:</label>
+				<input type="text" name="id" v-model="id" />
 			</div>
-			<b-button variant="primary" @click="() => newField()">+</b-button>
-		</div>
 
-		<div class="buttons d-flex flex-row justify-content-end">
-			<b-button-group>
-				<b-button @click="reset">Cancel</b-button>
-				<b-button type="submit" @click="update" variant="primary">Save</b-button>
-			</b-button-group>
-		</div>
+			<div>
+				<label for="name">Name:</label>
+				<input type="text" name="name" v-model="name" />
+			</div>
+
+			<div>
+				<label for="shortName">Short Name:</label>
+				<input type="text" name="shortName" v-model="shortName" />
+			</div>
+
+			<div>
+				<label for="colour">Colour:</label>
+				<input type="text" name="colour" v-model="colour" />
+			</div>
+
+			<div>
+				<label for="includeTypeInName">Include in name:</label>
+				<input type="checkbox" name="includeTypeInName" v-model="includeTypeInName" />
+			</div>
+
+			<div>
+				<h4>Fields:</h4>
+
+				<div class="field-editor" v-for="(field, i) in payload" :key="i">
+					<label for="id">Field ID:</label>
+					<input type="text" name="id" v-model="field.id" @click="createEditObj" />
+
+					<label for="label">Label:</label>
+					<input type="text" name="label" v-model="field.label" @click="createEditObj" />
+
+					<label for="type">Type:</label>
+					<select name="type" id="type" v-model="field.type" @change="createEditObj">
+						<option v-for="(type, entry) in fieldTypes" :key="type" :value="type">
+							{{ entry }}
+						</option>
+					</select>
+
+					<label for="includeInName">Include in name:</label>
+					<input
+						type="checkbox"
+						name="includeInName"
+						v-model="field.includeInName"
+						@click="createEditObj"
+					/>
+
+					<span class="link" @click="() => removeField(field.id)"><fa icon="trash" /></span>
+				</div>
+				<b-button variant="primary" @click="() => newField()">+</b-button>
+			</div>
+
+			<div class="buttons d-flex flex-row justify-content-end">
+				<b-button-group>
+					<b-button @click="reset">Cancel</b-button>
+					<b-button type="submit" @click="update" variant="primary">Save</b-button>
+				</b-button-group>
+			</div>
 		</b-form>
 	</div>
 </template>
