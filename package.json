@@ -16,8 +16,6 @@
 		"electron:serve": "vue-cli-service electron:serve",
 		"license-validate": "license-checker -r --filter MIT --filter 0BSD --filter BSD --filter ISC --filter Apache --filter Unlicense --plain --border ascii",
 		"lint-fix": "yarn lint --fix",
-		"postinstall": "electron-builder install-app-deps",
-		"postuninstall": "electron-builder install-app-deps",
 		"validate:dependencies": "yarn audit --groups dependencies && yarn license-validate",
 		"validate:dev-dependencies": "yarn audit --groups devDependencies"
 	},
@@ -92,5 +90,6 @@
 		"*.{ts,tsx,.vue}": [
 			"yarn lint-fix"
 		]
-	}
+	},
+	"packageManager": "yarn@4.9.1"
 }
