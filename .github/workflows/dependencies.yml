@@ -3,9 +3,9 @@ name: Dependencies Check
 on:
   push:
     branches:
-      - "**"
+      - '**'
     tags:
-      - "v**"
+      - 'v**'
 
 jobs:
   validate-prod-dependencies-packages:
@@ -16,12 +16,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 16.x
+      - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version-file: '.node-version'
       - name: Prepare Environment
         run: |
+          corepack enable
           yarn install
         env:
           CI: true
@@ -43,12 +44,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 16.x
+      - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version-file: '.node-version'
       - name: Prepare Environment
         run: |
+          corepack enable
           yarn install
         env:
           CI: true

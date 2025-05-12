@@ -22,10 +22,10 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 14.x
+      - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 14.x
+          node-version-file: '.node-version'
       - name: restore node_modules
         uses: actions/cache@v3
         with:
@@ -34,7 +34,8 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
       - name: Prepare Environment
         run: |
-          yarn --frozen-lockfile --network-timeout 1000000
+          corepack enable
+          yarn --immutable --network-timeout 1000000
         env:
           CI: true
       - name: Build installer
@@ -52,10 +53,10 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 14.x
+      - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 14.x
+          node-version-file: '.node-version'
       - name: restore node_modules
         uses: actions/cache@v3
         with:
@@ -64,7 +65,8 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
       - name: Prepare Environment
         run: |
-          yarn --frozen-lockfile --network-timeout 1000000
+          corepack enable
+          yarn --immutable --network-timeout 1000000
         env:
           CI: true
       - name: Build installer
@@ -79,10 +81,10 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 14.x
+      - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 14.x
+          node-version-file: '.node-version'
       - name: restore node_modules
         uses: actions/cache@v3
         with:
@@ -91,7 +93,8 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
       - name: Prepare Environment
         run: |
-          yarn --frozen-lockfile --network-timeout 1000000
+          corepack enable
+          yarn --immutable --network-timeout 1000000
         env:
           CI: true
       - name: Build installer
