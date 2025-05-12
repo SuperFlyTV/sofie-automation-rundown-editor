@@ -1,17 +1,24 @@
-export function literal<T>(o: T) {
+export function literal<T>(o: T): T {
 	return o
 }
 
 export type Nullable<T> = { [K in keyof T]: T[K] | null }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+export interface EditField<T> {
+	[field: string]: {
+		get(): T | undefined
+		set(value: T): void
+	}
+}
+
+ 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
 export const editField = <T extends any>(
 	doc: string,
 	field: string,
 	index?: string,
 	defaultVal: any = undefined
-) => ({
+): EditField<T> => ({
 	[field]: {
 		get(): T | undefined {
 			const self = this as any
@@ -46,9 +53,9 @@ export const editField = <T extends any>(
 		}
 	}
 })
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 
-export const toTime = (seconds: number) => {
+export const toTime = (seconds: number): string => {
 	const h = Math.floor(seconds / 3600)
 	const m = Math.floor((seconds % 3600) / 60)
 	const s = Math.floor(seconds % 60)
@@ -57,7 +64,7 @@ export const toTime = (seconds: number) => {
 	return `${h > 0 ? pad(h) + ':' : ''}${pad(m)}:${pad(s)}`
 }
 
-export const toTimeDiff = (seconds: number) => {
+export const toTimeDiff = (seconds: number): string => {
 	const prefix = seconds > 0 ? '+' : '-'
 
 	seconds = Math.abs(seconds)

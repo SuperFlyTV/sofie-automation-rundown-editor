@@ -535,7 +535,7 @@ const store = new Vuex.Store<State>({
 
 export default store
 
-export async function initStore() {
+export async function initStore(): Promise<void> {
 	const playlists = await ipcRenderer.invoke(
 		'playlists',
 		literal<IpcOperation>({

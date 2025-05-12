@@ -8,27 +8,27 @@
 			</b-form-group>
 
 			<b-form-group label="Sync to Sofie:">
-				<b-form-checkbox switch v-model="sync"></b-form-checkbox>
+				<b-form-checkbox v-model="sync" switch></b-form-checkbox>
 			</b-form-group>
 
 			<b-form-group label="Start date:">
-				<b-form-datepicker reset-button v-model="startDate"></b-form-datepicker>
+				<b-form-datepicker v-model="startDate" reset-button></b-form-datepicker>
 			</b-form-group>
 
 			<b-form-group label="Start time:">
 				<b-form-timepicker
+					v-model="startTime"
 					:disabled="!startDate"
 					reset-button
-					v-model="startTime"
 				></b-form-timepicker>
 			</b-form-group>
 
 			<b-form-group label="End date:">
-				<b-form-datepicker reset-button v-model="endDate"></b-form-datepicker>
+				<b-form-datepicker v-model="endDate" reset-button></b-form-datepicker>
 			</b-form-group>
 
 			<b-form-group label="End time:">
-				<b-form-timepicker :disabled="!endDate" reset-button v-model="endTime"></b-form-timepicker>
+				<b-form-timepicker v-model="endTime" :disabled="!endDate" reset-button></b-form-timepicker>
 			</b-form-group>
 
 			<b-form-group v-for="m in metaDataManifest" :key="m.id" :label="m.label + ':'">
@@ -52,14 +52,14 @@
 		</b-form>
 
 		<div class="buttons d-flex flex-row justify-content-between">
-			<b-button variant="danger" v-b-modal.delete-rd>Delete</b-button>
+			<b-button v-b-modal.delete-rd variant="danger">Delete</b-button>
 			<div class="d-flex">
 				<b-button-group>
 					<b-button class="export-button" @click="exportRundown">Export</b-button>
 				</b-button-group>
 				<b-button-group>
 					<b-button @click="reset">Cancel</b-button>
-					<b-button type="submit" @click="update" variant="primary">{{
+					<b-button type="submit" variant="primary" @click="update">{{
 						labelOnUpdateButton
 					}}</b-button>
 				</b-button-group>
@@ -69,9 +69,9 @@
 		<b-modal
 			id="delete-rd"
 			title="Delete rundown"
-			@ok="deleteRundown"
 			ok-variant="danger"
 			ok-title="Delete"
+			@ok="deleteRundown"
 		>
 			<p class="my-4">Are you sure you want to delete "{{ rundown.name }}?"</p>
 		</b-modal>
@@ -88,6 +88,13 @@ import { saveToFile } from '../../util/fs'
 const { ipcRenderer } = window
 
 export default Vue.extend({
+	data() {
+		return {
+			editObject: undefined as
+				| (Partial<Omit<Rundown, 'metaData'>> & { metaData?: Nullable<Rundown['metaData']> })
+				| undefined
+		}
+	},
 	computed: {
 		id(): string {
 			return this.$route.params.id
@@ -217,13 +224,6 @@ export default Vue.extend({
 		},
 		labelOnUpdateButton(): string {
 			return this.rundown.sync ? 'Update' : 'Save'
-		}
-	},
-	data() {
-		return {
-			editObject: undefined as
-				| (Partial<Omit<Rundown, 'metaData'>> & { metaData?: Nullable<Rundown['metaData']> })
-				| undefined
 		}
 	},
 	methods: {

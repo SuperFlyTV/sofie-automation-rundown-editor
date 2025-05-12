@@ -18,8 +18,9 @@ import { BrowserWindow } from 'electron'
 import { CoreConnectionInfo, CoreConnectionStatus } from './interfaces'
 import { mutateRundown, mutations as rundownMutations } from './api/rundowns'
 import { PeripheralDeviceCommandId } from '@sofie-automation/shared-lib/dist/core/model/Ids'
+
 const serverCoreIntegrationVersion =
-	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	// eslint-disable-next-line @typescript-eslint/no-require-imports
 	require('@sofie-automation/server-core-integration/package.json').version
 
 export interface DeviceConfig {
@@ -249,7 +250,7 @@ export class CoreHandler {
 			if (this._executedFunctions.has(cmd._id)) return // prevent it from running multiple times
 			console.debug(cmd.functionName, cmd.args)
 			this._executedFunctions.add(cmd._id)
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 			const cb = (err: unknown, res?: any) => {
 				if (err) {
 					if (err instanceof Error) {

@@ -12,10 +12,16 @@ const { ipcRenderer } = window
 
 export default Vue.extend({
 	name: 'App',
+	created() {
+		ipcRenderer.on('error', this.handleError)
+	},
+	destroyed() {
+		ipcRenderer.removeListener('error', this.handleError)
+	},
 	methods: {
-		// eslint-disable-next-line no-undef
+		 
 		handleError(_: Electron.IpcRendererEvent, error: unknown) {
-			// eslint-disable-next-line no-console
+			 
 			console.error(error)
 
 			let message = 'An unknown error occurred.'
@@ -23,22 +29,16 @@ export default Vue.extend({
 			if (typeof error === 'string') {
 				message = error
 			} else if (typeof error === 'object' && error !== null && 'message' in error) {
-				/* eslint-disable @typescript-eslint/no-explicit-any */
+				 
 				message = (error as any).message
 				if ('errorType' in error && (error as any).errorType === 'Meteor.Error') {
 					title = 'Sofie Core Error'
 					message = `Error when updating rundown in Sofie Core: ${message}`
 				}
-				/* eslint-enable @typescript-eslint/no-explicit-any */
+				 
 			}
 			this.$bvModal.msgBoxOk(message, { title })
 		}
-	},
-	created() {
-		ipcRenderer.on('error', this.handleError)
-	},
-	destroyed() {
-		ipcRenderer.removeListener('error', this.handleError)
 	}
 })
 </script>

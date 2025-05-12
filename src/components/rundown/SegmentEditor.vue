@@ -12,10 +12,10 @@
 		</b-form>
 
 		<div class="buttons d-flex flex-row justify-content-between">
-			<b-button variant="danger" v-b-modal.delete-rd>Delete</b-button>
+			<b-button v-b-modal.delete-rd variant="danger">Delete</b-button>
 			<b-button-group>
 				<b-button @click="reset">Cancel</b-button>
-				<b-button type="submit" @click="update" variant="primary">{{
+				<b-button type="submit" variant="primary" @click="update">{{
 					labelOnUpdateButton
 				}}</b-button>
 			</b-button-group>
@@ -24,9 +24,9 @@
 		<b-modal
 			id="delete-rd"
 			title="Delete segment"
-			@ok="deleteRundown"
 			ok-variant="danger"
 			ok-title="Delete"
+			@ok="deleteRundown"
 		>
 			<p class="my-4">Are you sure you want to delete "{{ segment.name }}?"</p>
 		</b-modal>
@@ -39,6 +39,11 @@ import store from '@/store'
 import Vue from 'vue'
 
 export default Vue.extend({
+	data() {
+		return {
+			editObject: undefined as Partial<Segment> | undefined
+		}
+	},
 	computed: {
 		id(): string {
 			return this.$route.params.id
@@ -75,9 +80,9 @@ export default Vue.extend({
 			return this.rundown.sync ? 'Update' : 'Save'
 		}
 	},
-	data() {
-		return {
-			editObject: undefined as Partial<Segment> | undefined
+	watch: {
+		$route: function () {
+			this.editObject = undefined
 		}
 	},
 	methods: {
@@ -92,11 +97,6 @@ export default Vue.extend({
 			if (this.editObject) {
 				store.dispatch('updateSegment', { ...this.editObject })
 			}
-		}
-	},
-	watch: {
-		$route: function () {
-			this.editObject = undefined
 		}
 	}
 })

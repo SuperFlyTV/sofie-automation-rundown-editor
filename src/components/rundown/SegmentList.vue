@@ -1,7 +1,7 @@
 <template>
 	<div class="segment-list d-flex flex-column">
 		<draggable :list="sortableSegments" group="segments" @change="changeSegments">
-			<div class="part-list d-flex flex-column" v-for="segment in segments" :key="segment.id">
+			<div v-for="segment in segments" :key="segment.id" class="part-list d-flex flex-column">
 				<router-link
 					:to="`/rundown/${rundown.id}/segment/${segment.id}`"
 					:class="classes('segment', { floated: segment.float })"
@@ -16,10 +16,10 @@
 					@change="(ev) => changeParts2(segment.id, ev)"
 				>
 					<router-link
-						:to="`/rundown/${rundown.id}/part/${part.id}`"
-						:class="classes('part', { floated: segment.float || part.float, active: part.active })"
 						v-for="part in segment.parts"
 						:key="part.id"
+						:to="`/rundown/${rundown.id}/part/${part.id}`"
+						:class="classes('part', { floated: segment.float || part.float, active: part.active })"
 					>
 						{{ part.name }}
 						<span class="time">{{ displayTime(part.payload.duration) }}</span>
@@ -40,6 +40,18 @@ import draggable from 'vuedraggable'
 
 export default Vue.extend({
 	components: { draggable },
+	data() {
+		return {
+			lastPartListMutation: undefined as
+				| {
+						segmentId: string
+						partId: string
+						index: number
+						futureIndex: number
+				  }
+				| undefined
+		}
+	},
 	computed: {
 		rundown(): Rundown | undefined {
 			return store.state.rundowns.find((r) => r.id === this.$route.params.id) || undefined
@@ -75,18 +87,6 @@ export default Vue.extend({
 					.sort((a, b) => (a.rank || 0) - (b.rank || 0))
 					.map((segment) => segment.id)
 			}
-		}
-	},
-	data() {
-		return {
-			lastPartListMutation: undefined as
-				| {
-						segmentId: string
-						partId: string
-						index: number
-						futureIndex: number
-				  }
-				| undefined
 		}
 	},
 	methods: {
@@ -135,7 +135,7 @@ export default Vue.extend({
 			}
 		},
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		 
 		changeParts2(segmentId: string, ev: any) {
 			const segment = this.segments.find((s) => s.id === segmentId)
 			if (!segment) return
@@ -205,7 +205,7 @@ export default Vue.extend({
 				})
 			}
 		},
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		 
 		changeSegments(ev: any) {
 			if ('moved' in ev) {
 				const { oldIndex, newIndex, element: id } = ev.moved

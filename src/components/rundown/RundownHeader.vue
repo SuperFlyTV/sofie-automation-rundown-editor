@@ -14,7 +14,7 @@
 			</div>
 			<div>
 				<router-link class="close" to="/">
-					<fa icon="times" />
+					<Fa icon="times" />
 				</router-link>
 			</div>
 		</div>

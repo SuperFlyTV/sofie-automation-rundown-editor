@@ -1,9 +1,9 @@
 <template>
 	<div class="piece-list d-flex flex-column">
 		<router-link
-			class="piece d-flex"
 			v-for="piece in pieces"
 			:key="piece.id"
+			class="piece d-flex"
 			:to="`/rundown/${rundown.id}/piece/${piece.id}`"
 		>
 			<div class="type" :style="{ backgroundColor: piece.manifest.colour }">
@@ -13,9 +13,9 @@
 			<div class="start">{{ piece.start }}</div>
 			<div class="duration">{{ piece.duration }}</div>
 		</router-link>
-		<div class="piece new" v-b-modal.new-piece>New piece</div>
+		<div v-b-modal.new-piece class="piece new">New piece</div>
 
-		<b-modal id="new-piece" title="New piece" @ok="newPiece" ok-title="Create">
+		<b-modal id="new-piece" title="New piece" ok-title="Create" @ok="newPiece">
 			Piece type: <b-form-select v-model="newPieceType" :options="pieceTypes"></b-form-select>
 		</b-modal>
 	</div>
@@ -28,6 +28,11 @@ import store from '@/store'
 import Vue from 'vue'
 
 export default Vue.extend({
+	data() {
+		return {
+			newPieceType: undefined
+		}
+	},
 	computed: {
 		rundown(): Rundown | undefined {
 			return store.state.rundowns.find((r) => r.id === this.$route.params.id) || undefined
@@ -70,11 +75,6 @@ export default Vue.extend({
 				value: m.id,
 				text: m.name
 			}))
-		}
-	},
-	data() {
-		return {
-			newPieceType: undefined
 		}
 	},
 	methods: {

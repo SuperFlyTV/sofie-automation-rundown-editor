@@ -3,8 +3,8 @@
 		<div class="d-flex justify-content-between align-items-center">
 			<h2>Home</h2>
 			<div class="d-flex">
-				<b-button @click="newRundown" class="m-2">New</b-button>
-				<b-button @click="importRundown" class="m-2">Import</b-button>
+				<b-button class="m-2" @click="newRundown">New</b-button>
+				<b-button class="m-2" @click="importRundown">Import</b-button>
 			</div>
 			<!-- <b-dropdown split text="New rundown" @click="newRundown" class="m-2">
 				<b-dropdown-item href="#" v-b-modal.new-playlist>New playlist</b-dropdown-item>
@@ -50,6 +50,15 @@ export default Vue.extend({
 	components: {
 		PlaylistList
 	},
+	data(): {
+		editPlaylistId: string
+		newPlaylistName: string
+	} {
+		return {
+			newPlaylistName: '',
+			editPlaylistId: ''
+		}
+	},
 	computed: {
 		playlists(): (Playlist & { rundowns: Rundown[] })[] {
 			return store.state.playlists.map((p) => ({
@@ -63,15 +72,6 @@ export default Vue.extend({
 
 		rundowns() {
 			return store.state.rundowns.filter((r) => !r.playlistId)
-		}
-	},
-	data(): {
-		editPlaylistId: string
-		newPlaylistName: string
-	} {
-		return {
-			newPlaylistName: '',
-			editPlaylistId: ''
 		}
 	},
 	methods: {
@@ -88,13 +88,13 @@ export default Vue.extend({
 			try {
 				rundown = await openFromFile({ title: 'Import rundown' })
 			} catch (error) {
-				// eslint-disable-next-line no-console
+				 
 				console.error(error)
 				this.$bvModal.show('rundown-import-is-invalid')
 				return
 			}
 
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			 
 			const verify = (maybeRundown: any): maybeRundown is SerializedRundown => {
 				const rundownValid =
 					typeof maybeRundown === 'object' &&
@@ -128,7 +128,7 @@ export default Vue.extend({
 					pieces: unknown[]
 				}
 
-				/* eslint-disable @typescript-eslint/no-explicit-any */
+				 
 				const segmentsValid = rd.segments.every((segment: any) => {
 					return (
 						typeof segment === 'object' &&

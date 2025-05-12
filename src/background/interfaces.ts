@@ -167,7 +167,7 @@ export enum IpcOperationType {
 
 export interface IpcOperation {
 	type: IpcOperationType
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	 
 	payload: any
 }
 
@@ -185,7 +185,7 @@ export interface MutatedRundown {
 	type: 'sofie-rundown-editor'
 	segments: MutatedSegment[]
 	payload: {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		 
 		[key: string]: any
 		name: string
 		expectedStart: number | undefined
@@ -225,7 +225,7 @@ export interface MutatedPiece {
 	duration: number | undefined
 	clipName: string | undefined
 	attributes: {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		 
 		[key: string]: any
 		adlib: boolean
 	}

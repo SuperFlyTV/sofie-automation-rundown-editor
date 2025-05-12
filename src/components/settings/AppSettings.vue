@@ -4,32 +4,32 @@
 
 		<div>
 			<label for="coreUrl">Core connection:</label>
-			<input type="text" placeholder="Core URL" name="coreUrl" v-model="coreUrl" />
+			<input v-model="coreUrl" type="text" placeholder="Core URL" name="coreUrl" />
 
-			<input type="number" placeholder="Core Port" name="corePort" v-model="corePort" />
+			<input v-model="corePort" type="number" placeholder="Core Port" name="corePort" />
 		</div>
 
 		<div>
 			<label for="id">Part types:</label>
-			<input type="text" name="id" v-model="partTypes" />
+			<input v-model="partTypes" type="text" name="id" />
 		</div>
 
 		<div>
 			<h4>Rundown Metadata Fields:</h4>
 
-			<div class="field-editor" v-for="(field, i) in rundownMetadata" :key="i">
+			<div v-for="(field, i) in rundownMetadata" :key="i" class="field-editor">
 				<label for="id">Field ID:</label>
-				<input type="text" name="id" v-model="field.id" @click="createEditObj" />
+				<input v-model="field.id" type="text" name="id" @click="createEditObj" />
 
 				<label for="label">Label:</label>
-				<input type="text" name="label" v-model="field.label" @click="createEditObj" />
+				<input v-model="field.label" type="text" name="label" @click="createEditObj" />
 
 				<label for="type">Type:</label>
-				<select name="type" id="type" v-model="field.type" @change="createEditObj">
+				<select id="type" v-model="field.type" name="type" @change="createEditObj">
 					<option v-for="(type, entry) in fieldTypes" :key="type" :value="type">{{ entry }}</option>
 				</select>
 
-				<span class="link" @click="() => removeField(field.id)"><fa icon="trash" /></span>
+				<span class="link" @click="() => removeField(field.id)"><Fa icon="trash" /></span>
 			</div>
 			<b-button variant="primary" @click="() => newField()">+</b-button>
 		</div>
@@ -37,7 +37,7 @@
 		<div class="buttons d-flex flex-row">
 			<b-button-group>
 				<b-button @click="reset">Cancel</b-button>
-				<b-button @click="update" variant="primary">Save</b-button>
+				<b-button variant="primary" @click="update">Save</b-button>
 			</b-button-group>
 		</div>
 	</div>
@@ -52,6 +52,12 @@ import Vue from 'vue'
 type EditApplicationSettings = Omit<ApplicationSettings, 'partTypes'> & { partTypes: string }
 
 export default Vue.extend({
+	data() {
+		return {
+			editObject: undefined as EditApplicationSettings | undefined,
+			fieldTypes: ManifestFieldType
+		}
+	},
 	computed: {
 		settings(): EditApplicationSettings {
 			return {
@@ -63,12 +69,6 @@ export default Vue.extend({
 		...editField('settings', 'corePort'),
 		...editField('settings', 'partTypes'),
 		...editField('settings', 'rundownMetadata')
-	},
-	data() {
-		return {
-			editObject: undefined as EditApplicationSettings | undefined,
-			fieldTypes: ManifestFieldType
-		}
 	},
 	methods: {
 		createEditObj() {

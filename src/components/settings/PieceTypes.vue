@@ -10,17 +10,17 @@
 				</b-button-group>
 			</div>
 
-			<div class="type" v-for="type in types" :key="type.id">
+			<div v-for="type in types" :key="type.id" class="type">
 				<div class="header">
 					<div class="colour-preview" :style="{ backgroundColor: type.colour }"></div>
 					<div class="name">{{ type.name }}</div>
 					<div>
-						<span class="link" @click="() => toggleDetails(type.id)"><fa icon="pencil-alt" /></span>
-						<span class="link" @click="() => removePieceType(type.id)"><fa icon="trash" /></span>
+						<span class="link" @click="() => toggleDetails(type.id)"><Fa icon="pencil-alt" /></span>
+						<span class="link" @click="() => removePieceType(type.id)"><Fa icon="trash" /></span>
 					</div>
 				</div>
 				<div v-if="type._showDetails" :class="className('body', {})">
-					<piece-type :manifestId="type.id" />
+					<piece-type :manifest-id="type.id" />
 				</div>
 			</div>
 			<b-button variant="" @click="newPieceType">New piece type</b-button>
@@ -37,6 +37,11 @@ import { openFromFile, saveToFile } from '@/util/fs'
 
 export default Vue.extend({
 	components: { PieceType },
+	data() {
+		return {
+			showDetails: [] as string[]
+		}
+	},
 	computed: {
 		types(): Array<PieceTypeManifest & { _showDetails: boolean }> {
 			return store.state.piecesManifest.map((piece) => ({
@@ -46,11 +51,6 @@ export default Vue.extend({
 		},
 		pieceTypes() {
 			return store.state.piecesManifest
-		}
-	},
-	data() {
-		return {
-			showDetails: [] as string[]
 		}
 	},
 	methods: {
@@ -80,7 +80,7 @@ export default Vue.extend({
 
 		async importPieceTypes() {
 			const pieceTypes = await openFromFile({ title: 'Import piece types' })
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 			const verify = (pieceTypes: any) =>
 				Array.isArray(pieceTypes) &&
 				pieceTypes.map((t) => 'id' in t && 'name' in t && 'payload' in t).filter((p) => p === false)

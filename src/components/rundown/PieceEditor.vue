@@ -10,11 +10,11 @@
 			<p>Piece type: {{ pieceManifest.name }}</p>
 
 			<b-form-group label="Duration:">
-				<b-form-input number v-model="duration"></b-form-input>
+				<b-form-input v-model="duration" number></b-form-input>
 			</b-form-group>
 
 			<b-form-group label="Start:">
-				<b-form-input number v-model="start"></b-form-input>
+				<b-form-input v-model="start" number></b-form-input>
 			</b-form-group>
 
 			<b-form-group v-for="m in pieceManifest.payload" :key="m.id" :label="m.label + ':'">
@@ -37,10 +37,10 @@
 			</b-form-group>
 
 			<div class="buttons d-flex flex-row justify-content-between">
-				<b-button variant="danger" v-b-modal.delete-rd>Delete</b-button>
+				<b-button v-b-modal.delete-rd variant="danger">Delete</b-button>
 				<b-button-group>
 					<b-button @click="reset">Cancel</b-button>
-					<b-button type="submit" @click="update" variant="primary">{{
+					<b-button type="submit" variant="primary" @click="update">{{
 						labelOnUpdateButton
 					}}</b-button>
 				</b-button-group>
@@ -50,9 +50,9 @@
 		<b-modal
 			id="delete-rd"
 			title="Delete segment"
-			@ok="deletePiece"
 			ok-variant="danger"
 			ok-title="Delete"
+			@ok="deletePiece"
 		>
 			<p class="my-4">Are you sure you want to delete "{{ piece.name }}?"</p>
 		</b-modal>
@@ -66,6 +66,13 @@ import store from '@/store'
 import Vue from 'vue'
 
 export default Vue.extend({
+	data() {
+		return {
+			editObject: undefined as
+				| (Partial<Omit<Piece, 'payload'>> & { payload?: Nullable<Piece['payload']> })
+				| undefined
+		}
+	},
 	computed: {
 		id(): string {
 			return this.$route.params.piece
@@ -94,11 +101,9 @@ export default Vue.extend({
 		...editField('piece', 'duration'),
 		...editField('piece', 'start')
 	},
-	data() {
-		return {
-			editObject: undefined as
-				| (Partial<Omit<Piece, 'payload'>> & { payload?: Nullable<Piece['payload']> })
-				| undefined
+	watch: {
+		$route: function () {
+			this.editObject = undefined
 		}
 	},
 	methods: {
@@ -144,11 +149,6 @@ export default Vue.extend({
 					}
 				})
 			}
-		}
-	},
-	watch: {
-		$route: function () {
-			this.editObject = undefined
 		}
 	}
 })

@@ -29,7 +29,6 @@ export interface OpenFromFileArgs {
 	title: string
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function openFromFile(args: OpenFromFileArgs): Promise<boolean | any> {
 	const { canceled, filePaths } = await remoteDialog.showOpenDialog({
 		title: args.title,

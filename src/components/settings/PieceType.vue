@@ -4,41 +4,41 @@
 		<b-form @submit.prevent="update">
 			<div>
 				<label for="id">ID:</label>
-				<input type="text" name="id" v-model="id" />
+				<input v-model="id" type="text" name="id" />
 			</div>
 
 			<div>
 				<label for="name">Name:</label>
-				<input type="text" name="name" v-model="name" />
+				<input v-model="name" type="text" name="name" />
 			</div>
 
 			<div>
 				<label for="shortName">Short Name:</label>
-				<input type="text" name="shortName" v-model="shortName" />
+				<input v-model="shortName" type="text" name="shortName" />
 			</div>
 
 			<div>
 				<label for="colour">Colour:</label>
-				<input type="text" name="colour" v-model="colour" />
+				<input v-model="colour" type="text" name="colour" />
 			</div>
 
 			<div>
 				<label for="includeTypeInName">Include in name:</label>
-				<input type="checkbox" name="includeTypeInName" v-model="includeTypeInName" />
+				<input v-model="includeTypeInName" type="checkbox" name="includeTypeInName" />
 			</div>
 
 			<div>
 				<h4>Fields:</h4>
 
-				<div class="field-editor" v-for="(field, i) in payload" :key="i">
+				<div v-for="(field, i) in payload" :key="i" class="field-editor">
 					<label for="id">Field ID:</label>
-					<input type="text" name="id" v-model="field.id" @click="createEditObj" />
+					<input v-model="field.id" type="text" name="id" @click="createEditObj" />
 
 					<label for="label">Label:</label>
-					<input type="text" name="label" v-model="field.label" @click="createEditObj" />
+					<input v-model="field.label" type="text" name="label" @click="createEditObj" />
 
 					<label for="type">Type:</label>
-					<select name="type" id="type" v-model="field.type" @change="createEditObj">
+					<select id="type" v-model="field.type" name="type" @change="createEditObj">
 						<option v-for="(type, entry) in fieldTypes" :key="type" :value="type">
 							{{ entry }}
 						</option>
@@ -46,13 +46,13 @@
 
 					<label for="includeInName">Include in name:</label>
 					<input
+						v-model="field.includeInName"
 						type="checkbox"
 						name="includeInName"
-						v-model="field.includeInName"
 						@click="createEditObj"
 					/>
 
-					<span class="link" @click="() => removeField(field.id)"><fa icon="trash" /></span>
+					<span class="link" @click="() => removeField(field.id)"><Fa icon="trash" /></span>
 				</div>
 				<b-button variant="primary" @click="() => newField()">+</b-button>
 			</div>
@@ -60,7 +60,7 @@
 			<div class="buttons d-flex flex-row justify-content-end">
 				<b-button-group>
 					<b-button @click="reset">Cancel</b-button>
-					<b-button type="submit" @click="update" variant="primary">Save</b-button>
+					<b-button type="submit" variant="primary" @click="update">Save</b-button>
 				</b-button-group>
 			</div>
 		</b-form>
@@ -75,7 +75,16 @@ import Vue from 'vue'
 
 export default Vue.extend({
 	props: {
-		manifestId: String
+		manifestId: {
+			type: String,
+			default: ''
+		}
+	},
+	data() {
+		return {
+			editObject: undefined as Partial<PieceTypeManifest> | undefined,
+			fieldTypes: ManifestFieldType
+		}
 	},
 	computed: {
 		item(): Partial<PieceTypeManifest> {
@@ -89,12 +98,6 @@ export default Vue.extend({
 		...editField('item', 'colour'),
 		...editField('item', 'includeTypeInName'),
 		...editField('item', 'payload')
-	},
-	data() {
-		return {
-			editObject: undefined as Partial<PieceTypeManifest> | undefined,
-			fieldTypes: ManifestFieldType
-		}
 	},
 	methods: {
 		createEditObj() {

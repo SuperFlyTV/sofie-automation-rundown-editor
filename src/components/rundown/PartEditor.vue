@@ -16,7 +16,7 @@
 			<b-form-select v-model="type" :options="types"></b-form-select>
 
 			<b-form-group label="Duration:">
-				<b-form-input number v-model="duration"></b-form-input>
+				<b-form-input v-model="duration" number></b-form-input>
 			</b-form-group>
 
 			<b-form-group label="Script:">
@@ -24,10 +24,10 @@
 			</b-form-group>
 
 			<div class="buttons d-flex flex-row justify-content-between">
-				<b-button variant="danger" v-b-modal.delete-rd>Delete</b-button>
+				<b-button v-b-modal.delete-rd variant="danger">Delete</b-button>
 				<b-button-group>
 					<b-button @click="reset">Cancel</b-button>
-					<b-button type="submit" @click="update" variant="primary">{{
+					<b-button type="submit" variant="primary" @click="update">{{
 						labelOnUpdateButton
 					}}</b-button>
 				</b-button-group>
@@ -37,9 +37,9 @@
 		<b-modal
 			id="delete-rd"
 			title="Delete segment"
-			@ok="deleteRundown"
 			ok-variant="danger"
 			ok-title="Delete"
+			@ok="deleteRundown"
 		>
 			<p class="my-4">Are you sure you want to delete "{{ part.name }}?"</p>
 		</b-modal>
@@ -55,7 +55,7 @@ function editField<T>(field: string, index?: string) {
 	return {
 		[field]: {
 			get(): T | undefined {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 				const self = this as any
 				if (index) {
 					return self.editObject ? self.editObject[index]?.[field] : self.part?.[index]?.[field]
@@ -64,7 +64,7 @@ function editField<T>(field: string, index?: string) {
 				}
 			},
 			set(value: T) {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 				const self = this as any
 				if (!self.editObject) {
 					self.editObject = {
@@ -84,6 +84,11 @@ function editField<T>(field: string, index?: string) {
 }
 
 export default Vue.extend({
+	data() {
+		return {
+			editObject: undefined as Partial<Part> | undefined
+		}
+	},
 	computed: {
 		id(): string {
 			return this.$route.params.part
@@ -110,9 +115,9 @@ export default Vue.extend({
 			return this.rundown.sync ? 'Update' : 'Save'
 		}
 	},
-	data() {
-		return {
-			editObject: undefined as Partial<Part> | undefined
+	watch: {
+		$route: function () {
+			this.editObject = undefined
 		}
 	},
 	methods: {
@@ -132,11 +137,6 @@ export default Vue.extend({
 					}
 				})
 			}
-		}
-	},
-	watch: {
-		$route: function () {
-			this.editObject = undefined
 		}
 	}
 })

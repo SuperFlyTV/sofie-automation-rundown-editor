@@ -2,7 +2,7 @@ import { Playlist, IpcOperation, IpcOperationType } from '@/background/interface
 import { literal } from '@/util/lib'
 import Vue from 'vue'
 import { Module } from 'vuex'
-import { State } from '..'
+import { State } from '../index.js'
 
 const { ipcRenderer } = window
 

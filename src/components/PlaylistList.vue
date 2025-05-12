@@ -31,18 +31,18 @@ import store from '../store'
 
 export default Vue.extend({
 	components: {},
+	data() {
+		return {
+			newPlaylistName: '',
+			editPlaylistId: ''
+		}
+	},
 	computed: {
 		playlists() {
 			return store.state.playlists.map((p) => ({
 				...p,
 				rundowns: store.state.rundowns.filter((r) => r.playlistId === p.id)
 			}))
-		}
-	},
-	data() {
-		return {
-			newPlaylistName: '',
-			editPlaylistId: ''
 		}
 	},
 	methods: {
