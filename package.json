@@ -9,24 +9,25 @@
 		"url": "https://superfly.tv"
 	},
 	"scripts": {
+		"prepare": "husky",
 		"serve": "vue-cli-service serve",
 		"build": "vue-cli-service build",
-		"lint": "vue-cli-service lint",
+		"lint": "run lint:raw .",
 		"electron:build": "vue-cli-service electron:build",
 		"electron:serve": "vue-cli-service electron:serve",
 		"license-validate": "license-checker -r --filter MIT --filter 0BSD --filter BSD --filter ISC --filter Apache --filter Unlicense --plain --border ascii",
-		"lint-fix": "yarn lint --fix",
+		"lint:raw": "eslint",
 		"validate:dependencies": "yarn npm audit --environment production && yarn license-validate",
 		"validate:dev-dependencies": "yarn npm audit --environment development"
 	},
 	"main": "index.js",
 	"dependencies": {
-		"@fortawesome/fontawesome-svg-core": "^1.2.36",
-		"@fortawesome/free-solid-svg-icons": "^5.15.4",
+		"@fortawesome/fontawesome-svg-core": "^6.7.2",
+		"@fortawesome/free-solid-svg-icons": "^6.7.2",
 		"@fortawesome/vue-fontawesome": "^2.0.10",
 		"@popperjs/core": "^2.11.8",
 		"@sofie-automation/server-core-integration": "1.53.0-nightly-release53-20250423-081454-dc957dd.0",
-		"@types/sqlite3": "^3.1.11",
+		"@types/sqlite3": "^5.1.0",
 		"@types/uuid": "^8.3.4",
 		"bootstrap": "^4.6.2",
 		"bootstrap-vue": "^2.23.1",
@@ -46,7 +47,6 @@
 		"@typescript-eslint/parser": "^5.62.0",
 		"@volar-plugins/vetur": "^0.1.0",
 		"@vue/cli-plugin-babel": "~5.0.8",
-		"@vue/cli-plugin-eslint": "~5.0.8",
 		"@vue/cli-plugin-typescript": "~5.0.8",
 		"@vue/cli-plugin-vuex": "~5.0.8",
 		"@vue/cli-service": "~5.0.8",
@@ -58,9 +58,9 @@
 		"eslint-config-prettier": "^8.10.0",
 		"eslint-plugin-prettier": "^4.2.1",
 		"eslint-plugin-vue": "^8.7.1",
-		"husky": "^8.0.3",
+		"husky": "^9.1.7",
 		"license-checker": "^25.0.1",
-		"lint-staged": "^10.5.4",
+		"lint-staged": "^16.0.0",
 		"prettier": "^2.8.8",
 		"typescript": "~4.6.4",
 		"vue-cli-plugin-electron-builder": "^3.0.0-alpha.4",
@@ -75,7 +75,7 @@
 			"prettier --write"
 		],
 		"*.{ts,tsx,.vue}": [
-			"yarn lint-fix"
+			"yarn lint:raw --fix"
 		]
 	},
 	"packageManager": "yarn@4.9.1"
