@@ -8,6 +8,7 @@ import {
 	MutationApplicationSettingsUpdate
 } from '../interfaces'
 import { db, InsertResolution, UpdateResolution } from '../db'
+import { PARTS_MANIFEST, PIECES_MANIFEST } from '../manifest';
 
 export const mutations = {
 	async create(
@@ -126,7 +127,7 @@ ipcMain.handle('settings', async (_, operation: IpcOperation) => {
 })
 
 const DEFAULT_SETTINGS: ApplicationSettings = {
-	partTypes: ['Cam', 'Remote', 'Full', 'VO', 'Titles', 'DVE', 'GFX', 'BREAK'],
+	partTypes: PARTS_MANIFEST,
 	rundownMetadata: [],
 	coreUrl: '127.0.0.1',
 	corePort: 3000
