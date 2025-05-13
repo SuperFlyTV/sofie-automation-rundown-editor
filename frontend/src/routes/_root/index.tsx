@@ -4,7 +4,7 @@ import { Button, ListGroup } from 'react-bootstrap'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import { addNewRundown } from '~/store/rundowns'
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/_root/')({
 	component: Index
 })
 

@@ -10,7 +10,11 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@fortawesome/fontawesome-svg-core": "^6.7.2",
+		"@fortawesome/free-solid-svg-icons": "^6.7.2",
+		"@fortawesome/react-fontawesome": "^0.2.2",
 		"@reduxjs/toolkit": "^2.8.1",
+		"@tanstack/react-form": "^1.11.1",
 		"@tanstack/react-router": "^1.120.3",
 		"@tanstack/react-router-devtools": "^1.120.3",
 		"bootstrap": "^5.3.6",

@@ -1,7 +1,6 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { useEffect } from 'react'
-import { EditorNavbar } from '~/components/navbar/navbar'
 import { useAppDispatch } from '~/store/app'
 import { initStore } from '~/store/init'
 
@@ -15,8 +14,6 @@ export const Route = createRootRoute({
 
 		return (
 			<>
-				<EditorNavbar />
-
 				<Outlet />
 				<TanStackRouterDevtools position="top-left" />
 			</>

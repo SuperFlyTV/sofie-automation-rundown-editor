@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useAppSelector } from '~/store/app'
 
-export const Route = createFileRoute('/settings')({
+export const Route = createFileRoute('/_root/settings')({
 	component: Settings
 })
 

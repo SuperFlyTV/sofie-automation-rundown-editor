@@ -279,20 +279,7 @@ const store = new Vuex.Store<State>({
 			)
 			commit('removeRundown', id)
 		},
-		newRundown: async ({ commit }, { playlistId }) => {
-			const rundown = await ipcRenderer.invoke(
-				'rundowns',
-				literal<IpcOperation>({
-					type: IpcOperationType.Create,
-					payload: {
-						name: 'New rundown',
-						sync: false,
-						playlistId
-					}
-				})
-			)
-			commit('addRundown', rundown)
-		},
+		newRundown: async ({ commit }, { playlistId }) => {},
 		updateRundown: async ({ commit }, update) => {
 			const rundown = await ipcRenderer.invoke(
 				'rundowns',

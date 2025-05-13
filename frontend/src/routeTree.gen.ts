@@ -11,22 +11,22 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as SettingsImport } from './routes/settings'
-import { Route as IndexImport } from './routes/index'
+import { Route as RootRouteImport } from './routes/_root/route'
+import { Route as RootIndexImport } from './routes/_root/index'
 import { Route as RundownRundownIdImport } from './routes/rundown/$rundownId'
+import { Route as RootSettingsImport } from './routes/_root/settings'
 
 // Create/Update Routes
 
-const SettingsRoute = SettingsImport.update({
-  id: '/settings',
-  path: '/settings',
+const RootRouteRoute = RootRouteImport.update({
+  id: '/_root',
   getParentRoute: () => rootRoute,
 } as any)
 
-const IndexRoute = IndexImport.update({
+const RootIndexRoute = RootIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => RootRouteRoute,
 } as any)
 
 const RundownRundownIdRoute = RundownRundownIdImport.update({
@@ -35,23 +35,29 @@ const RundownRundownIdRoute = RundownRundownIdImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const RootSettingsRoute = RootSettingsImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => RootRouteRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
+    '/_root': {
+      id: '/_root'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof RootRouteImport
       parentRoute: typeof rootRoute
     }
-    '/settings': {
-      id: '/settings'
+    '/_root/settings': {
+      id: '/_root/settings'
       path: '/settings'
       fullPath: '/settings'
-      preLoaderRoute: typeof SettingsImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof RootSettingsImport
+      parentRoute: typeof RootRouteImport
     }
     '/rundown/$rundownId': {
       id: '/rundown/$rundownId'
@@ -60,48 +66,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RundownRundownIdImport
       parentRoute: typeof rootRoute
     }
+    '/_root/': {
+      id: '/_root/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof RootIndexImport
+      parentRoute: typeof RootRouteImport
+    }
   }
 }
 
 // Create and export the route tree
 
+interface RootRouteRouteChildren {
+  RootSettingsRoute: typeof RootSettingsRoute
+  RootIndexRoute: typeof RootIndexRoute
+}
+
+const RootRouteRouteChildren: RootRouteRouteChildren = {
+  RootSettingsRoute: RootSettingsRoute,
+  RootIndexRoute: RootIndexRoute,
+}
+
+const RootRouteRouteWithChildren = RootRouteRoute._addFileChildren(
+  RootRouteRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/settings': typeof SettingsRoute
+  '': typeof RootRouteRouteWithChildren
+  '/settings': typeof RootSettingsRoute
   '/rundown/$rundownId': typeof RundownRundownIdRoute
+  '/': typeof RootIndexRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/settings': typeof SettingsRoute
+  '/settings': typeof RootSettingsRoute
   '/rundown/$rundownId': typeof RundownRundownIdRoute
+  '/': typeof RootIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/settings': typeof SettingsRoute
+  '/_root': typeof RootRouteRouteWithChildren
+  '/_root/settings': typeof RootSettingsRoute
   '/rundown/$rundownId': typeof RundownRundownIdRoute
+  '/_root/': typeof RootIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/settings' | '/rundown/$rundownId'
+  fullPaths: '' | '/settings' | '/rundown/$rundownId' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/settings' | '/rundown/$rundownId'
-  id: '__root__' | '/' | '/settings' | '/rundown/$rundownId'
+  to: '/settings' | '/rundown/$rundownId' | '/'
+  id:
+    | '__root__'
+    | '/_root'
+    | '/_root/settings'
+    | '/rundown/$rundownId'
+    | '/_root/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  SettingsRoute: typeof SettingsRoute
+  RootRouteRoute: typeof RootRouteRouteWithChildren
   RundownRundownIdRoute: typeof RundownRundownIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  SettingsRoute: SettingsRoute,
+  RootRouteRoute: RootRouteRouteWithChildren,
   RundownRundownIdRoute: RundownRundownIdRoute,
 }
 
@@ -115,19 +147,27 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/",
-        "/settings",
+        "/_root",
         "/rundown/$rundownId"
       ]
     },
-    "/": {
-      "filePath": "index.tsx"
+    "/_root": {
+      "filePath": "_root/route.tsx",
+      "children": [
+        "/_root/settings",
+        "/_root/"
+      ]
     },
-    "/settings": {
-      "filePath": "settings.tsx"
+    "/_root/settings": {
+      "filePath": "_root/settings.tsx",
+      "parent": "/_root"
     },
     "/rundown/$rundownId": {
       "filePath": "rundown/$rundownId.tsx"
+    },
+    "/_root/": {
+      "filePath": "_root/index.tsx",
+      "parent": "/_root"
     }
   }
 }
