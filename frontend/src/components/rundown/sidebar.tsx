@@ -1,5 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '~/store/app'
+import { addNewPart } from '~/store/parts'
 import { addNewSegment } from '~/store/segments'
 import type { Segment } from '~backend/background/interfaces'
 
@@ -35,7 +36,33 @@ export function RundownSidebar({
 		</div>
 	)
 }
+
 function SidebarSegment({ segment }: { segment: Segment }) {
+	const dispatch = useAppDispatch()
+	const navigate = useNavigate()
+
+	const parts = useAppSelector((state) =>
+		state.parts.parts.filter((part) => part.segmentId === segment.id)
+	)
+	const sortedParts = [...parts].sort((a, b) => a.rank - b.rank)
+
+	const handleAddPart = () => {
+		dispatch(
+			addNewPart({
+				rundownId: segment.rundownId,
+				playlistId: segment.playlistId,
+				segmentId: segment.id,
+				rank: sortedParts.length
+			})
+		)
+			.unwrap()
+			.then(async (part) => {
+				await navigate({
+					to: `/rundown/${segment.rundownId}/segment/${segment.id}/part/${part.id}`
+				})
+			})
+	}
+
 	return (
 		<div className="mb-1">
 			<Link
@@ -43,8 +70,28 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 				params={{ rundownId: segment.rundownId, segmentId: segment.id }}
 			>
 				{/* // TODO - highlight when active */}
-				<button style={segmentStyle}>{segment.name}</button>
+				<button style={segmentStyle} className="mb-1">
+					{segment.name}
+				</button>
 			</Link>
+
+			<div className="ps-3">
+				{sortedParts.map((part) => (
+					<Link
+						key={part.id}
+						to="/rundown/$rundownId/segment/$segmentId/part/$partId"
+						params={{ rundownId: segment.rundownId, segmentId: segment.id, partId: part.id }}
+					>
+						{/* // TODO - highlight when active */}
+						<button style={partStyle} className="mb-1">
+							{part.name}
+						</button>
+					</Link>
+				))}
+				<button style={addPartStyle} onClick={handleAddPart} className="mb-2">
+					+ Add Part
+				</button>
+			</div>
 		</div>
 	)
 }
@@ -65,11 +112,24 @@ const segmentStyle: React.CSSProperties = {
 	backgroundColor: '#4b4b4b',
 	fontSize: '1.2em',
 	lineHeight: '2em',
-	// height: 2.4em;
 	color: 'white'
 }
 
 const addSegmentStyle: React.CSSProperties = {
 	...segmentStyle,
+	color: '#777'
+}
+
+const partStyle: React.CSSProperties = {
+	...baseButtonStyle,
+
+	backgroundColor: '#353535',
+	fontSize: '1em',
+	lineHeight: '1.5em',
+	color: 'white'
+}
+
+const addPartStyle: React.CSSProperties = {
+	...partStyle,
 	color: '#777'
 }

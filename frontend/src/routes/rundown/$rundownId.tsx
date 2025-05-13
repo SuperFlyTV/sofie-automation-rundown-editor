@@ -4,6 +4,8 @@ import { EditorNavbar } from '~/components/navbar/navbar'
 import { RundownNavbar } from '~/components/rundown/navbar'
 import { RundownSidebar } from '~/components/rundown/sidebar'
 import { useAppDispatch, useAppSelector } from '~/store/app'
+import { loadParts } from '~/store/parts'
+import { loadPieces } from '~/store/pieces'
 import { loadSegments } from '~/store/segments'
 
 export const Route = createFileRoute('/rundown/$rundownId')({
@@ -14,18 +16,35 @@ function RouteComponent() {
 	const { rundownId } = Route.useParams()
 
 	const dispatch = useAppDispatch()
-	const segmentsStatus = useAppSelector((state) => ({
-		status: state.segments.status,
-		rundownId: state.segments.rundownId
+	const loadStatus = useAppSelector((state) => ({
+		segmentsStatus: state.segments.status,
+		segmentsRundownId: state.segments.rundownId,
+		partsStatus: state.parts.status,
+		partsRundownId: state.parts.rundownId,
+		piecesStatus: state.pieces.status,
+		piecesRundownId: state.pieces.rundownId
 	}))
 
-	// TODO - load content from the backend
-
+	// TODO: This is not the correct way to do this, but it works for now
 	useEffect(() => {
-		if (segmentsStatus.status === 'idle' || segmentsStatus.rundownId !== rundownId) {
+		if (loadStatus.segmentsStatus === 'idle' || loadStatus.segmentsRundownId !== rundownId) {
 			dispatch(loadSegments({ rundownId }))
 		}
-	}, [segmentsStatus.status, segmentsStatus.rundownId, dispatch])
+		if (loadStatus.partsStatus === 'idle' || loadStatus.partsRundownId !== rundownId) {
+			dispatch(loadParts({ rundownId }))
+		}
+		if (loadStatus.piecesStatus === 'idle' || loadStatus.piecesRundownId !== rundownId) {
+			dispatch(loadPieces({ rundownId }))
+		}
+	}, [
+		loadStatus.segmentsStatus,
+		loadStatus.segmentsRundownId,
+		loadStatus.partsStatus,
+		loadStatus.partsRundownId,
+		loadStatus.piecesStatus,
+		loadStatus.piecesRundownId,
+		dispatch
+	])
 
 	const rundown = useAppSelector((state) => state.rundowns.find((r) => r.id === rundownId))
 	if (!rundown) {

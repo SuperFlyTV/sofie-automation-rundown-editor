@@ -234,7 +234,7 @@ export interface MutatedPiece {
 	position: number | undefined
 }
 
-export type MutationPartCreate = Part
+export type MutationPartCreate = SetOptional<Part, 'id'>
 
 export type MutationPartRead = Pick<Part, 'id' | 'rundownId' | 'segmentId'>
 

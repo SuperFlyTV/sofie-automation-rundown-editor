@@ -7,5 +7,5 @@ export const Route = createFileRoute('/rundown/$rundownId/segment/$segmentId/')(
 function RouteComponent() {
 	const { segmentId } = Route.useParams()
 
-	return <div>Hello "{segmentId}!</div>
+	return <div>Hello {segmentId}!</div>
 }

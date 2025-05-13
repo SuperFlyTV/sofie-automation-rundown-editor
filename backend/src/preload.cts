@@ -18,6 +18,8 @@ const { contextBridge, ipcRenderer } = require('electron')
 import type { BackendApi } from './background/api/api.js'
 import {
 	CoreConnectionInfo,
+	MutationPartCreate,
+	MutationPieceCreate,
 	MutationRundownCreate,
 	MutationSegmentCreate,
 	Rundown
@@ -80,6 +82,36 @@ const electronApi: BackendApi = {
 	},
 	addNewSegment: (segment: MutationSegmentCreate) => {
 		return ipcRenderer.invoke('segments', {
+			type: 'create',
+			payload: segment
+		})
+	},
+
+	getParts: (rundownId: string) => {
+		return ipcRenderer.invoke('parts', {
+			type: 'read',
+			payload: {
+				rundownId
+			}
+		})
+	},
+	addNewPart: (part: MutationPartCreate) => {
+		return ipcRenderer.invoke('parts', {
+			type: 'create',
+			payload: part
+		})
+	},
+
+	getPieces: (rundownId: string) => {
+		return ipcRenderer.invoke('pieces', {
+			type: 'read',
+			payload: {
+				rundownId
+			}
+		})
+	},
+	addNewPiece: (segment: MutationPieceCreate) => {
+		return ipcRenderer.invoke('pieces', {
 			type: 'create',
 			payload: segment
 		})

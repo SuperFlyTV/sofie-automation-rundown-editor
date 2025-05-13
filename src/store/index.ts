@@ -232,40 +232,7 @@ const store = new Vuex.Store<State>({
 			commit('updatePlaylist', playlist)
 		},
 
-		loadRundown: async ({ commit }, id: string) => {
-			const segments = await ipcRenderer.invoke(
-				'segments',
-				literal<IpcOperation>({
-					type: IpcOperationType.Read,
-					payload: {
-						rundownId: id
-					}
-				})
-			)
-			commit('setSegments', segments)
-
-			const parts = await ipcRenderer.invoke(
-				'parts',
-				literal<IpcOperation>({
-					type: IpcOperationType.Read,
-					payload: {
-						rundownId: id
-					}
-				})
-			)
-			commit('setParts', parts)
-
-			const pieces = await ipcRenderer.invoke(
-				'pieces',
-				literal<IpcOperation>({
-					type: IpcOperationType.Read,
-					payload: {
-						rundownId: id
-					}
-				})
-			)
-			commit('setPieces', pieces)
-		},
+		loadRundown: async ({ commit }, id: string) => {},
 
 		removeRundown: async ({ commit }, id: string) => {},
 		newRundown: async ({ commit }, { playlistId }) => {},

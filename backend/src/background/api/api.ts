@@ -1,7 +1,11 @@
 import type {
 	CoreConnectionInfo,
+	MutationPartCreate,
+	MutationPieceCreate,
 	MutationRundownCreate,
 	MutationSegmentCreate,
+	Part,
+	Piece,
 	Playlist,
 	Rundown,
 	Segment
@@ -20,4 +24,10 @@ export interface BackendApi {
 
 	getSegments: (rundownId: string) => Promise<Segment[]>
 	addNewSegment: (segment: MutationSegmentCreate) => Promise<Segment>
+
+	getParts: (rundownId: string) => Promise<Part[]>
+	addNewPart: (segment: MutationPartCreate) => Promise<Part>
+
+	getPieces: (rundownId: string) => Promise<Piece[]>
+	addNewPiece: (segment: MutationPieceCreate) => Promise<Piece>
 }
