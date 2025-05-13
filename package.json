@@ -16,15 +16,12 @@
 		"frontend",
 		"backend"
 	],
-	"resolutions": {
-		"vue-cli-plugin-electron-builder/electron-builder": "^23.0.3"
-	},
 	"license": "MIT",
 	"lint-staged": {
 		"*.{js,css,json,md,scss}": [
 			"prettier --write"
 		],
-		"*.{ts,tsx,.vue}": [
+		"*.{ts,tsx,cts}": [
 			"yarn lint-fix"
 		]
 	},

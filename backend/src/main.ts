@@ -1,7 +1,7 @@
 'use strict'
 
 import { app, protocol, BrowserWindow } from 'electron'
-import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
+import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import { ControlAPI } from './background/index'
 import path from 'path'
 import { initializeDefaults as initializeSettingsDefaults } from './background/api/settings'
@@ -132,7 +132,7 @@ app.on('ready', async () => {
 	if (isDev && !process.env.IS_TEST) {
 		// Install Vue Devtools
 		try {
-			await installExtension(VUEJS_DEVTOOLS)
+			await installExtension(REACT_DEVELOPER_TOOLS)
 		} catch (e) {
 			console.error('Vue Devtools failed to install:', (e as Error).toString())
 		}
