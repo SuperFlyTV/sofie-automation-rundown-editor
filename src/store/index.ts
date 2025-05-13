@@ -17,6 +17,7 @@ import {
 	MutationPartCreate,
 	MutationPieceCreate
 } from '@/background/interfaces'
+import { PIECES_MANIFEST } from '@/background/manifest'
 import { literal } from '@/util/lib'
 import Vue from 'vue'
 import Vuex from 'vuex'
@@ -528,6 +529,31 @@ const store = new Vuex.Store<State>({
 				})
 			)
 			commit('setSettings', settings)
+		},
+		// In the actions section of the store, add:
+		resetToDefaults: async ({ commit }) => {
+			try {
+				// Call the backend reset function
+				const result = await ipcRenderer.invoke(
+					'settings',
+					literal<IpcOperation>({
+						type: IpcOperationType.Read,
+						payload: {}
+					})
+				)
+				// Update the store with the new settings
+				commit('setSettings', result)
+
+				// Reset PieceTypeManifests:
+				PIECES_MANIFEST.forEach((pieceType) => {
+					commit('addPieceTypeManifest', pieceType)
+				})
+
+				return true
+			} catch (error) {
+				console.error('Error resetting to defaults:', error)
+				throw error
+			}
 		}
 	},
 	modules: {}

@@ -34,12 +34,17 @@
 			<b-button variant="primary" @click="() => newField()">+</b-button>
 		</div>
 
-		<div class="buttons d-flex flex-row">
+		<div class="buttons d-flex flex-row justify-content-between">
+			<b-button variant="warning" @click="resetToDefaults">Reset to defaults</b-button>
 			<b-button-group>
 				<b-button @click="reset">Cancel</b-button>
 				<b-button @click="update" variant="primary">Save</b-button>
 			</b-button-group>
 		</div>
+
+		<b-modal id="confirm-reset" title="Reset to defaults" @ok="confirmReset" ok-variant="warning" ok-title="Reset">
+			<p class="my-4">Are you sure you want to reset all settings and piece types to their defaults? This action cannot be undone.</p>
+		</b-modal>
 	</div>
 </template>
 
@@ -115,6 +120,13 @@ export default Vue.extend({
 					partTypes: this.editObject.partTypes.split(',').map((type) => type.trim())
 				})
 			}
+		},
+		resetToDefaults() {
+			this.$bvModal.show('confirm-reset')
+		},
+		confirmReset() {
+			store.dispatch('resetToDefaults')
+			this.editObject = undefined
 		}
 	}
 })
