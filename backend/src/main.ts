@@ -21,13 +21,13 @@ async function createWindow() {
 
 	// Create the browser window.
 	const win = new BrowserWindow({
-		width: 1020,
+		width: isDev ? 1600 : 1020,
 		height: 800,
 		webPreferences: {
 			// Use pluginOptions.nodeIntegration, leave this alone
 			// See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
 			nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION as unknown as boolean,
-			preload: path.join(__dirname, 'preload.cjs'),
+			preload: 'file://' + path.join(__dirname, 'preload.cjs'), // TODO - check/rework this
 			contextIsolation: false
 		}
 	})
