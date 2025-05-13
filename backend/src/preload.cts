@@ -49,6 +49,20 @@ const electronApi: BackendApi = {
 			type: 'create',
 			payload: rundown
 		})
+	},
+	updateRundown: (rundown: Rundown) => {
+		return ipcRenderer.invoke('rundowns', {
+			type: 'update',
+			payload: rundown
+		})
+	},
+	deleteRundown: (rundownId: string) => {
+		return ipcRenderer.invoke('rundowns', {
+			type: 'delete',
+			payload: {
+				id: rundownId
+			}
+		})
 	}
 }
 

@@ -8,4 +8,6 @@ export interface BackendApi {
 
 	getRundowns: () => Promise<Rundown[]>
 	addNewRundown: (rundown: MutationRundownCreate) => Promise<Rundown>
+	updateRundown: (rundown: Rundown) => Promise<Rundown>
+	deleteRundown: (rundownId: string) => Promise<void>
 }

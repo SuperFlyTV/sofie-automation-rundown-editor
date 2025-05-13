@@ -1,6 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Outlet } from '@tanstack/react-router'
 import { EditorNavbar } from '~/components/navbar/navbar'
 import { RundownNavbar } from '~/components/rundown/navbar'
+import { RundownSidebar } from '~/components/rundown/sidebar'
 import { useAppSelector } from '~/store/app'
 
 export const Route = createFileRoute('/rundown/$rundownId')({
@@ -9,6 +10,8 @@ export const Route = createFileRoute('/rundown/$rundownId')({
 
 function RouteComponent() {
 	const { rundownId } = Route.useParams()
+
+	// TODO - load content from the backend
 
 	const rundown = useAppSelector((state) => state.rundowns.find((r) => r.id === rundownId))
 	if (!rundown) {
@@ -25,7 +28,19 @@ function RouteComponent() {
 		<>
 			<RundownNavbar rundown={rundown} />
 
-			<div>Hello {rundownId}!</div>
+			<div style={layoutStyle}>
+				<RundownSidebar />
+
+				<Outlet />
+			</div>
+
+			<div>Breadcrumbs: TODO (sticky bottom)</div>
 		</>
 	)
+}
+
+const layoutStyle: React.CSSProperties = {
+	display: 'grid',
+	gridAutoFlow: 'column',
+	gridTemplateColumns: '1fr 3fr'
 }

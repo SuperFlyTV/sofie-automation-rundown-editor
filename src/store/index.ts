@@ -267,29 +267,10 @@ const store = new Vuex.Store<State>({
 			commit('setPieces', pieces)
 		},
 
-		removeRundown: async ({ commit }, id: string) => {
-			await ipcRenderer.invoke(
-				'rundowns',
-				literal<IpcOperation>({
-					type: IpcOperationType.Delete,
-					payload: {
-						id
-					}
-				})
-			)
-			commit('removeRundown', id)
-		},
+		removeRundown: async ({ commit }, id: string) => {},
 		newRundown: async ({ commit }, { playlistId }) => {},
-		updateRundown: async ({ commit }, update) => {
-			const rundown = await ipcRenderer.invoke(
-				'rundowns',
-				literal<IpcOperation>({
-					type: IpcOperationType.Update,
-					payload: update
-				})
-			)
-			commit('updateRundown', rundown)
-		},
+		updateRundown: async ({ commit }, update) => {},
+
 		importRundown: async ({ commit }, update: SerializedRundown) => {
 			const rundown = await ipcRenderer.invoke(
 				'rundowns',

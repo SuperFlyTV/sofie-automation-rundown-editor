@@ -15,6 +15,7 @@ import { Route as RootRouteImport } from './routes/_root/route'
 import { Route as RootIndexImport } from './routes/_root/index'
 import { Route as RundownRundownIdImport } from './routes/rundown/$rundownId'
 import { Route as RootSettingsImport } from './routes/_root/settings'
+import { Route as RundownRundownIdIndexImport } from './routes/rundown/$rundownId/index'
 
 // Create/Update Routes
 
@@ -39,6 +40,12 @@ const RootSettingsRoute = RootSettingsImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => RootRouteRoute,
+} as any)
+
+const RundownRundownIdIndexRoute = RundownRundownIdIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RundownRundownIdRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -73,6 +80,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RootIndexImport
       parentRoute: typeof RootRouteImport
     }
+    '/rundown/$rundownId/': {
+      id: '/rundown/$rundownId/'
+      path: '/'
+      fullPath: '/rundown/$rundownId/'
+      preLoaderRoute: typeof RundownRundownIdIndexImport
+      parentRoute: typeof RundownRundownIdImport
+    }
   }
 }
 
@@ -92,49 +106,68 @@ const RootRouteRouteWithChildren = RootRouteRoute._addFileChildren(
   RootRouteRouteChildren,
 )
 
+interface RundownRundownIdRouteChildren {
+  RundownRundownIdIndexRoute: typeof RundownRundownIdIndexRoute
+}
+
+const RundownRundownIdRouteChildren: RundownRundownIdRouteChildren = {
+  RundownRundownIdIndexRoute: RundownRundownIdIndexRoute,
+}
+
+const RundownRundownIdRouteWithChildren =
+  RundownRundownIdRoute._addFileChildren(RundownRundownIdRouteChildren)
+
 export interface FileRoutesByFullPath {
   '': typeof RootRouteRouteWithChildren
   '/settings': typeof RootSettingsRoute
-  '/rundown/$rundownId': typeof RundownRundownIdRoute
+  '/rundown/$rundownId': typeof RundownRundownIdRouteWithChildren
   '/': typeof RootIndexRoute
+  '/rundown/$rundownId/': typeof RundownRundownIdIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/settings': typeof RootSettingsRoute
-  '/rundown/$rundownId': typeof RundownRundownIdRoute
   '/': typeof RootIndexRoute
+  '/rundown/$rundownId': typeof RundownRundownIdIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/_root': typeof RootRouteRouteWithChildren
   '/_root/settings': typeof RootSettingsRoute
-  '/rundown/$rundownId': typeof RundownRundownIdRoute
+  '/rundown/$rundownId': typeof RundownRundownIdRouteWithChildren
   '/_root/': typeof RootIndexRoute
+  '/rundown/$rundownId/': typeof RundownRundownIdIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/settings' | '/rundown/$rundownId' | '/'
+  fullPaths:
+    | ''
+    | '/settings'
+    | '/rundown/$rundownId'
+    | '/'
+    | '/rundown/$rundownId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/settings' | '/rundown/$rundownId' | '/'
+  to: '/settings' | '/' | '/rundown/$rundownId'
   id:
     | '__root__'
     | '/_root'
     | '/_root/settings'
     | '/rundown/$rundownId'
     | '/_root/'
+    | '/rundown/$rundownId/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   RootRouteRoute: typeof RootRouteRouteWithChildren
-  RundownRundownIdRoute: typeof RundownRundownIdRoute
+  RundownRundownIdRoute: typeof RundownRundownIdRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   RootRouteRoute: RootRouteRouteWithChildren,
-  RundownRundownIdRoute: RundownRundownIdRoute,
+  RundownRundownIdRoute: RundownRundownIdRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -163,11 +196,18 @@ export const routeTree = rootRoute
       "parent": "/_root"
     },
     "/rundown/$rundownId": {
-      "filePath": "rundown/$rundownId.tsx"
+      "filePath": "rundown/$rundownId.tsx",
+      "children": [
+        "/rundown/$rundownId/"
+      ]
     },
     "/_root/": {
       "filePath": "_root/index.tsx",
       "parent": "/_root"
+    },
+    "/rundown/$rundownId/": {
+      "filePath": "rundown/$rundownId/index.tsx",
+      "parent": "/rundown/$rundownId"
     }
   }
 }

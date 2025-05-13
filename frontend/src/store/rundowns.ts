@@ -5,6 +5,12 @@ import { createAppAsyncThunk } from './app'
 export interface NewRundownPayload {
 	playlistId: string | null
 }
+export interface UpdateRundownPayload {
+	rundown: Rundown
+}
+export interface RemoveRundownPayload {
+	id: string
+}
 
 export const addNewRundown = createAppAsyncThunk(
 	'rundowns/addNewRundown',
@@ -16,6 +22,19 @@ export const addNewRundown = createAppAsyncThunk(
 		})
 	}
 )
+export const updateRundown = createAppAsyncThunk(
+	'rundowns/updateRundown',
+	async (payload: UpdateRundownPayload) => {
+		return electronApi.updateRundown(payload.rundown)
+	}
+)
+export const removeRundown = createAppAsyncThunk(
+	'rundowns/removeRundown',
+	async (payload: RemoveRundownPayload) => {
+		await electronApi.deleteRundown(payload.id)
+		return payload
+	}
+)
 
 const rundownsSlice = createSlice({
 	name: 'rundowns',
@@ -25,28 +44,24 @@ const rundownsSlice = createSlice({
 			console.log('initRundowns', action)
 			return action.payload
 		}
-		// newRundown: async (state, action: { type: string; payload: NewRundownPayload }) => {
-		// 	const rundown = await ipcRenderer.invoke(
-		// 		'rundowns',
-		// 		literal<IpcOperation>({
-		// 			type: IpcOperationType.Create,
-		// 			payload: {
-		// 				name: 'New rundown',
-		// 				sync: false,
-		// 				playlistId
-		// 			}
-		// 		})
-		// 	)
-		// 	commit('addRundown', rundown)
-
-		// 	state.push(rundown)
-		// }
-		// addRundown: (state, action: { type: string; payload: Rundown }) => {
 	},
 	extraReducers(builder) {
-		builder.addCase(addNewRundown.fulfilled, (state, action) => {
-			state.push(action.payload)
-		})
+		builder
+			.addCase(addNewRundown.fulfilled, (state, action) => {
+				state.push(action.payload)
+			})
+			.addCase(updateRundown.fulfilled, (state, action) => {
+				const index = state.findIndex((rundown) => rundown.id === action.payload.id)
+				if (index !== -1) {
+					state[index] = action.payload
+				}
+			})
+			.addCase(removeRundown.fulfilled, (state, action) => {
+				const index = state.findIndex((rundown) => rundown.id === action.payload.id)
+				if (index !== -1) {
+					state.splice(index, 1)
+				}
+			})
 	}
 })
 
