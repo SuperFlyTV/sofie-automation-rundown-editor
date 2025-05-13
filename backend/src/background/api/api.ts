@@ -24,6 +24,8 @@ export interface BackendApi {
 
 	getSegments: (rundownId: string) => Promise<Segment[]>
 	addNewSegment: (segment: MutationSegmentCreate) => Promise<Segment>
+	updateSegment: (segment: Segment) => Promise<Segment>
+	deleteSegment: (segmentId: string) => Promise<void>
 
 	getParts: (rundownId: string) => Promise<Part[]>
 	addNewPart: (segment: MutationPartCreate) => Promise<Part>

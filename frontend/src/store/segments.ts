@@ -10,12 +10,12 @@ export interface NewSegmentPayload {
 	rundownId: string
 	rank: number
 }
-// export interface UpdateSegmentPayload {
-// 	segment: Segment
-// }
-// export interface RemoveSegmentPayload {
-// 	id: string
-// }
+export interface UpdateSegmentPayload {
+	segment: Segment
+}
+export interface RemoveSegmentPayload {
+	id: string
+}
 
 export const addNewSegment = createAppAsyncThunk(
 	'segments/addNewSegment',
@@ -29,19 +29,19 @@ export const addNewSegment = createAppAsyncThunk(
 		})
 	}
 )
-// export const updateSegment = createAppAsyncThunk(
-// 	'segments/updateSegment',
-// 	async (payload: UpdateSegmentPayload) => {
-// 		return electronApi.updateSegment(payload.segment)
-// 	}
-// )
-// export const removeSegment = createAppAsyncThunk(
-// 	'segments/removeSegment',
-// 	async (payload: RemoveSegmentPayload) => {
-// 		await electronApi.deleteSegment(payload.id)
-// 		return payload
-// 	}
-// )
+export const updateSegment = createAppAsyncThunk(
+	'segments/updateSegment',
+	async (payload: UpdateSegmentPayload) => {
+		return electronApi.updateSegment(payload.segment)
+	}
+)
+export const removeSegment = createAppAsyncThunk(
+	'segments/removeSegment',
+	async (payload: RemoveSegmentPayload) => {
+		await electronApi.deleteSegment(payload.id)
+		return payload
+	}
+)
 
 interface SegmentsState {
 	rundownId: string | null
@@ -98,18 +98,18 @@ const segmentsSlice = createSlice({
 			.addCase(addNewSegment.fulfilled, (state, action) => {
 				state.segments.push(action.payload)
 			})
-		// 	.addCase(updateSegment.fulfilled, (state, action) => {
-		// 		const index = state.findIndex((segment) => segment.id === action.payload.id)
-		// 		if (index !== -1) {
-		// 			state[index] = action.payload
-		// 		}
-		// 	})
-		// 	.addCase(removeSegment.fulfilled, (state, action) => {
-		// 		const index = state.findIndex((segment) => segment.id === action.payload.id)
-		// 		if (index !== -1) {
-		// 			state.splice(index, 1)
-		// 		}
-		// 	})
+			.addCase(updateSegment.fulfilled, (state, action) => {
+				const index = state.segments.findIndex((segment) => segment.id === action.payload.id)
+				if (index !== -1) {
+					state.segments[index] = action.payload
+				}
+			})
+			.addCase(removeSegment.fulfilled, (state, action) => {
+				const index = state.segments.findIndex((segment) => segment.id === action.payload.id)
+				if (index !== -1) {
+					state.segments.splice(index, 1)
+				}
+			})
 	}
 })
 

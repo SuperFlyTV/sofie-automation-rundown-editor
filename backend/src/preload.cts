@@ -22,7 +22,8 @@ import {
 	MutationPieceCreate,
 	MutationRundownCreate,
 	MutationSegmentCreate,
-	Rundown
+	Rundown,
+	Segment
 } from './background/interfaces.js'
 
 const electronApi: BackendApi = {
@@ -84,6 +85,20 @@ const electronApi: BackendApi = {
 		return ipcRenderer.invoke('segments', {
 			type: 'create',
 			payload: segment
+		})
+	},
+	updateSegment: (segment: Segment) => {
+		return ipcRenderer.invoke('segments', {
+			type: 'update',
+			payload: segment
+		})
+	},
+	deleteSegment: (segmentId: string) => {
+		return ipcRenderer.invoke('segments', {
+			type: 'delete',
+			payload: {
+				id: segmentId
+			}
 		})
 	},
 
