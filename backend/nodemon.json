@@ -1,0 +1,6 @@
+{
+	"watch": ["src/**/*"],
+	"ignore": ["*.test.ts", "src/react/*", "README"],
+	"exec": "run build:main && electron ./dist/main.js",
+	"ext": "ts"
+}

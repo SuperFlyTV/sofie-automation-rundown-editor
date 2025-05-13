@@ -1,13 +1,12 @@
 'use strict'
 
 import { app, protocol, BrowserWindow } from 'electron'
-import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { ControlAPI } from './background/index'
 import path from 'path'
 import { initializeDefaults as initializeSettingsDefaults } from './background/api/settings'
 import * as remote from '@electron/remote/main'
-const isDevelopment = process.env.NODE_ENV !== 'production'
+import isDev from 'electron-is-dev'
 
 remote.initialize()
 
@@ -28,7 +27,7 @@ async function createWindow() {
 			// Use pluginOptions.nodeIntegration, leave this alone
 			// See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
 			nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION as unknown as boolean,
-			preload: path.join(__dirname, 'preload.js'),
+			preload: path.join(__dirname, 'preload.cjs'),
 			contextIsolation: false
 		}
 	})
@@ -101,14 +100,13 @@ async function createWindow() {
 	// ])
 	// Menu.setApplicationMenu(menu)
 
-	if (process.env.WEBPACK_DEV_SERVER_URL) {
+	if (isDev) {
 		// Load the url of the dev server if in development mode
-		await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string)
+		await win.loadURL(process.env.VITE_URL || 'http://localhost:5173/')
 		if (!process.env.IS_TEST) win.webContents.openDevTools()
 	} else {
-		createProtocol('app')
 		// Load the index.html when not in development
-		win.loadURL('app://./index.html')
+		win.loadURL(`file://${app.getAppPath()}/dist/index.html`)
 	}
 }
 
@@ -131,7 +129,7 @@ app.on('activate', () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
-	if (isDevelopment && !process.env.IS_TEST) {
+	if (isDev && !process.env.IS_TEST) {
 		// Install Vue Devtools
 		try {
 			await installExtension(VUEJS_DEVTOOLS)
@@ -143,7 +141,7 @@ app.on('ready', async () => {
 })
 
 // Exit cleanly on request from parent process in development mode.
-if (isDevelopment) {
+if (isDev) {
 	if (process.platform === 'win32') {
 		process.on('message', (data) => {
 			if (data === 'graceful-exit') {

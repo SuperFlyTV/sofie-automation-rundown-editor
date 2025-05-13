@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"target": "ES2015",
+		"module": "CommonJS",
+		"strict": true,
+		"jsx": "preserve",
+		"importHelpers": true,
+		"moduleResolution": "node",
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"sourceMap": true,
+		"baseUrl": ".",
+		"types": ["webpack-env"],
+		"paths": {
+			"@/*": ["src/*"]
+		},
+		"lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+		"outDir": "dist"
+	},
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.tsx",
+		"src/**/*.cts",
+		"tests/**/*.ts",
+		"tests/**/*.tsx",
+		"src/preload.cts"
+	],
+	"exclude": ["node_modules"]
+}

@@ -33,3 +33,6 @@ pnpm-debug.log*
 
 #Electron-builder output
 /dist_electron
+
+# TSC output
+/backend/dist
