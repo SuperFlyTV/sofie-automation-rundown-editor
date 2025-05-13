@@ -1,3 +1,5 @@
+import { SetOptional } from 'type-fest'
+
 export interface Playlist {
 	/** Id of the playlist. */
 	id: string
@@ -250,7 +252,7 @@ export type MutationPieceTypeManifestUpdate = Pick<PieceTypeManifest, 'id'> & {
 
 export type MutationPieceTypeManifestDelete = Pick<PieceTypeManifest, 'id'>
 
-export type MutationRundownCreate = Rundown
+export type MutationRundownCreate = SetOptional<Rundown, 'id'>
 
 export type MutationRundownRead = Pick<Rundown, 'id'>
 

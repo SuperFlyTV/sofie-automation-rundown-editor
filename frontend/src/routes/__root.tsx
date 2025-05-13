@@ -1,14 +1,25 @@
-import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
+import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { useEffect } from 'react'
 import { EditorNavbar } from '~/components/navbar/navbar'
+import { useAppDispatch } from '~/store/app'
+import { initStore } from '~/store/init'
 
 export const Route = createRootRoute({
-	component: () => (
-		<>
-			<EditorNavbar />
+	component: () => {
+		const appDispatch = useAppDispatch()
 
-			<Outlet />
-			<TanStackRouterDevtools position="top-left" />
-		</>
-	)
+		// TODO: this is a hack to get the store to initialize
+		// It should be done in a better way, but this is a quick port of the old code
+		useEffect(() => initStore(appDispatch), [])
+
+		return (
+			<>
+				<EditorNavbar />
+
+				<Outlet />
+				<TanStackRouterDevtools position="top-left" />
+			</>
+		)
+	}
 })

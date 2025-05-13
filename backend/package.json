@@ -12,6 +12,7 @@
 		"dev": "nodemon",
 		"build": "run -T rimraf dist && run build:main",
 		"build:main": "run -T tsc -p tsconfig.json",
+		"watch-types": "run build:main --watch --noEmit",
 		"_": "_",
 		"_serve": "vue-cli-service serve",
 		"_build": "vue-cli-service build",
@@ -35,6 +36,7 @@
 		"core-js": "^3.26.0",
 		"electron-is-dev": "^2",
 		"sqlite3": "^5.1.2",
+		"type-fest": "^4.41.0",
 		"uid": "^2.0.0",
 		"uuid": "^8.3.2",
 		"yaml": "^1.10.0"

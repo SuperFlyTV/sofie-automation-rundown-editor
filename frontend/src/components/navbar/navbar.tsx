@@ -3,6 +3,8 @@ import Nav from 'react-bootstrap/esm/Nav'
 import Navbar from 'react-bootstrap/esm/Navbar'
 import sofieLogo from '~/assets/sofie-logo.svg'
 import { Link } from '@tanstack/react-router'
+import { useAppSelector } from '~/store/app'
+import { CoreConnectionStatus } from '~backend/background/interfaces'
 
 const brandStyle: React.CSSProperties = {
 	width: '2rem',
@@ -10,6 +12,14 @@ const brandStyle: React.CSSProperties = {
 }
 
 export function EditorNavbar() {
+	const connectionStatus = useAppSelector((state) => state.coreConnectionStatus)
+
+	const hostPortString = `${connectionStatus.url || '127.0.0.1'}:${connectionStatus.port || 3000}`
+	const statusString =
+		connectionStatus.status === CoreConnectionStatus.CONNECTED
+			? `${connectionStatus.status} to ${hostPortString}`
+			: `${connectionStatus.status} from ${hostPortString}`
+
 	return (
 		<Navbar expand="lg" style={{ background: 'black' }}>
 			<Container fluid>
@@ -21,7 +31,7 @@ export function EditorNavbar() {
 						alt="Sofie logo"
 					/>
 				</Navbar.Brand>
-				<Navbar.Text>Core Status: TODO - status here</Navbar.Text>
+				<Navbar.Text>Core Status: {statusString}</Navbar.Text>
 				<Navbar.Toggle aria-controls="basic-navbar-nav" />
 				<Navbar.Collapse id="basic-navbar-nav">
 					<Nav className="ms-auto">

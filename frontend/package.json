@@ -10,12 +10,14 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@reduxjs/toolkit": "^2.8.1",
 		"@tanstack/react-router": "^1.120.3",
 		"@tanstack/react-router-devtools": "^1.120.3",
 		"bootstrap": "^5.3.6",
 		"react": "^19.1.0",
 		"react-bootstrap": "^2.10.10",
-		"react-dom": "^19.1.0"
+		"react-dom": "^19.1.0",
+		"react-redux": "^9.2.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.25.0",
