@@ -532,25 +532,34 @@ const store = new Vuex.Store<State>({
 		},
 		async resetToDefaults({ commit }) {
 			// Call the backend reset function
-			await ipcRenderer.invoke('settings', {
-				type: IpcOperationType.Reset,
-				payload: {}
-			})
+			await ipcRenderer.invoke(
+				'settings',
+				literal<IpcOperation>({
+					type: IpcOperationType.Read,
+					payload: {}
+				})
+			)
 
 			// Fetch the updated settings
-			const settings = await ipcRenderer.invoke('settings', {
-				type: IpcOperationType.Read,
-				payload: {}
-			})
+			const settings = await ipcRenderer.invoke(
+				'settings',
+				literal<IpcOperation>({
+					type: IpcOperationType.Read,
+					payload: {}
+				})
+			)
 
 			// Update the store with the new settings
 			commit('setSettings', settings)
 
 			// Reset PieceTypeManifests - fetch the new defaults that were just inserted in the DB
-			const piecesManifest = await ipcRenderer.invoke('pieceTypeManifests', {
-				type: IpcOperationType.Read,
-				payload: {}
-			})
+			const piecesManifest = await ipcRenderer.invoke(
+				'pieceTypeManifests',
+				literal<IpcOperation>({
+					type: IpcOperationType.Read,
+					payload: {}
+				})
+			)
 
 			// Update the store with the new piece type manifests
 			commit('setPiecesManifest', piecesManifest)

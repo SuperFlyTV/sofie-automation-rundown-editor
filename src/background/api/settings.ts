@@ -9,6 +9,7 @@ import {
 } from '../interfaces'
 import { db, InsertResolution, UpdateResolution } from '../db'
 import { PARTS_MANIFEST, PIECES_MANIFEST } from '../manifest'
+import { mutations as pieceTypeManifestMutations } from './pieceManifests'
 
 export const mutations = {
 	async create(
@@ -144,93 +145,25 @@ const DEFAULT_SETTINGS: ApplicationSettings = {
 }
 
 export async function initializeDefaults() {
-	const settings: DBSettings | undefined = await new Promise((resolve) => {
-		db.get('SELECT * FROM settings WHERE id = ? LIMIT 1', ['application'], (err, row) => {
-			resolve(row as DBSettings | undefined)
-		})
-	})
-
-	if (!settings) {
-		mutations.read().then(({ result }) => {
-			if (!result) {
-				mutations.create(DEFAULT_SETTINGS)
-			}
-		})
-	
-		// If no settings exist, create them
-		await new Promise<void>((resolve, reject) => {
-			db.run(
-				'INSERT INTO settings (id, document) VALUES (?, ?)',
-				[
-					'application',
-					JSON.stringify({
-						partTypes: PARTS_MANIFEST,
-						rundownMetadata: []
-					})
-				],
-				(err) => {
-					if (err) reject(err)
-					else resolve()
-				}
-			)
-		})
-	} else {
-		// If settings already exist, update them to defaults
-		let existingMetadata: unknown[] = []
-		try {
-			const parsedDoc = JSON.parse(settings.document)
-			existingMetadata = parsedDoc.rundownMetadata || []
-		} catch (e) {
-			console.error('Error parsing settings document:', e)
+	mutations.read().then(({ result }) => {
+		if (!result) {
+			mutations.create(DEFAULT_SETTINGS)
 		}
-
-		await new Promise<void>((resolve, reject) => {
-			db.run(
-				'UPDATE settings SET document = ? WHERE id = ?',
-				[
-					JSON.stringify({
-						partTypes: PARTS_MANIFEST,
-						rundownMetadata: existingMetadata
-					}),
-					'application'
-				],
-				(err) => {
-					if (err) reject(err)
-					else resolve()
-				}
-			)
-		})
-	}
-
-	// Reset piece type manifests
-	// First, get all existing manifests
-	const manifests: Array<{ id: string }> = await new Promise((resolve) => {
-		db.all('SELECT id FROM piece_type_manifests', [], (err, rows) => {
-			resolve((rows as Array<{ id: string }>) || [])
-		})
 	})
+
+	// Reset piece type manifests using the pieceManifests module
+	// First, get all existing manifests
+	const existingManifests = await pieceTypeManifestMutations.read({})
 
 	// Delete them all
-	for (const manifest of manifests) {
-		await new Promise<void>((resolve, reject) => {
-			db.run('DELETE FROM piece_type_manifests WHERE id = ?', [manifest.id], (err) => {
-				if (err) reject(err)
-				else resolve()
-			})
-		})
+	if (existingManifests && Array.isArray(existingManifests)) {
+		for (const manifest of existingManifests) {
+			await pieceTypeManifestMutations.delete({ id: manifest.id })
+		}
 	}
 
 	// Insert the defaults
 	for (const pieceType of PIECES_MANIFEST) {
-		await new Promise<void>((resolve, reject) => {
-			db.run(
-				'INSERT INTO piece_type_manifests (id, document) VALUES (?, ?)',
-				[pieceType.id, JSON.stringify(pieceType)],
-				(err) => {
-					if (err) reject(err)
-					else resolve()
-				}
-			)
-		})
+		await pieceTypeManifestMutations.create(pieceType)
 	}
 }

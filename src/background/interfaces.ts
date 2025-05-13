@@ -162,8 +162,7 @@ export enum IpcOperationType {
 	Create = 'create',
 	Read = 'read',
 	Update = 'update',
-	Delete = 'delete',
-	Reset = 'reset'
+	Delete = 'delete'
 }
 
 export interface IpcOperation {
