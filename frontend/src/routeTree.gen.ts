@@ -16,6 +16,7 @@ import { Route as RootIndexImport } from './routes/_root/index'
 import { Route as RundownRundownIdImport } from './routes/rundown/$rundownId'
 import { Route as RootSettingsImport } from './routes/_root/settings'
 import { Route as RundownRundownIdIndexImport } from './routes/rundown/$rundownId/index'
+import { Route as RundownRundownIdSegmentSegmentIdIndexImport } from './routes/rundown/$rundownId/segment/$segmentId/index'
 
 // Create/Update Routes
 
@@ -47,6 +48,13 @@ const RundownRundownIdIndexRoute = RundownRundownIdIndexImport.update({
   path: '/',
   getParentRoute: () => RundownRundownIdRoute,
 } as any)
+
+const RundownRundownIdSegmentSegmentIdIndexRoute =
+  RundownRundownIdSegmentSegmentIdIndexImport.update({
+    id: '/segment/$segmentId/',
+    path: '/segment/$segmentId/',
+    getParentRoute: () => RundownRundownIdRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -87,6 +95,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RundownRundownIdIndexImport
       parentRoute: typeof RundownRundownIdImport
     }
+    '/rundown/$rundownId/segment/$segmentId/': {
+      id: '/rundown/$rundownId/segment/$segmentId/'
+      path: '/segment/$segmentId'
+      fullPath: '/rundown/$rundownId/segment/$segmentId'
+      preLoaderRoute: typeof RundownRundownIdSegmentSegmentIdIndexImport
+      parentRoute: typeof RundownRundownIdImport
+    }
   }
 }
 
@@ -108,10 +123,13 @@ const RootRouteRouteWithChildren = RootRouteRoute._addFileChildren(
 
 interface RundownRundownIdRouteChildren {
   RundownRundownIdIndexRoute: typeof RundownRundownIdIndexRoute
+  RundownRundownIdSegmentSegmentIdIndexRoute: typeof RundownRundownIdSegmentSegmentIdIndexRoute
 }
 
 const RundownRundownIdRouteChildren: RundownRundownIdRouteChildren = {
   RundownRundownIdIndexRoute: RundownRundownIdIndexRoute,
+  RundownRundownIdSegmentSegmentIdIndexRoute:
+    RundownRundownIdSegmentSegmentIdIndexRoute,
 }
 
 const RundownRundownIdRouteWithChildren =
@@ -123,12 +141,14 @@ export interface FileRoutesByFullPath {
   '/rundown/$rundownId': typeof RundownRundownIdRouteWithChildren
   '/': typeof RootIndexRoute
   '/rundown/$rundownId/': typeof RundownRundownIdIndexRoute
+  '/rundown/$rundownId/segment/$segmentId': typeof RundownRundownIdSegmentSegmentIdIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/settings': typeof RootSettingsRoute
   '/': typeof RootIndexRoute
   '/rundown/$rundownId': typeof RundownRundownIdIndexRoute
+  '/rundown/$rundownId/segment/$segmentId': typeof RundownRundownIdSegmentSegmentIdIndexRoute
 }
 
 export interface FileRoutesById {
@@ -138,6 +158,7 @@ export interface FileRoutesById {
   '/rundown/$rundownId': typeof RundownRundownIdRouteWithChildren
   '/_root/': typeof RootIndexRoute
   '/rundown/$rundownId/': typeof RundownRundownIdIndexRoute
+  '/rundown/$rundownId/segment/$segmentId/': typeof RundownRundownIdSegmentSegmentIdIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -148,8 +169,13 @@ export interface FileRouteTypes {
     | '/rundown/$rundownId'
     | '/'
     | '/rundown/$rundownId/'
+    | '/rundown/$rundownId/segment/$segmentId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/settings' | '/' | '/rundown/$rundownId'
+  to:
+    | '/settings'
+    | '/'
+    | '/rundown/$rundownId'
+    | '/rundown/$rundownId/segment/$segmentId'
   id:
     | '__root__'
     | '/_root'
@@ -157,6 +183,7 @@ export interface FileRouteTypes {
     | '/rundown/$rundownId'
     | '/_root/'
     | '/rundown/$rundownId/'
+    | '/rundown/$rundownId/segment/$segmentId/'
   fileRoutesById: FileRoutesById
 }
 
@@ -198,7 +225,8 @@ export const routeTree = rootRoute
     "/rundown/$rundownId": {
       "filePath": "rundown/$rundownId.tsx",
       "children": [
-        "/rundown/$rundownId/"
+        "/rundown/$rundownId/",
+        "/rundown/$rundownId/segment/$segmentId/"
       ]
     },
     "/_root/": {
@@ -207,6 +235,10 @@ export const routeTree = rootRoute
     },
     "/rundown/$rundownId/": {
       "filePath": "rundown/$rundownId/index.tsx",
+      "parent": "/rundown/$rundownId"
+    },
+    "/rundown/$rundownId/segment/$segmentId/": {
+      "filePath": "rundown/$rundownId/segment/$segmentId/index.tsx",
       "parent": "/rundown/$rundownId"
     }
   }

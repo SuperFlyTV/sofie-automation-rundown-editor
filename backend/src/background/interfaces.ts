@@ -260,7 +260,7 @@ export type MutationRundownUpdate = Rundown
 
 export type MutationRundownDelete = Pick<Rundown, 'id'>
 
-export type MutationSegmentCreate = Segment
+export type MutationSegmentCreate = SetOptional<Segment, 'id'>
 
 export type MutationSegmentRead = Pick<Segment, 'id' | 'rundownId'>
 

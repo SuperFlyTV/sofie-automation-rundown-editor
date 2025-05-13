@@ -327,22 +327,7 @@ const store = new Vuex.Store<State>({
 			)
 			commit('removeSegment', id)
 		},
-		newSegment: async ({ commit }, { playlistId, rundownId, rank }) => {
-			const rundown = await ipcRenderer.invoke(
-				'segments',
-				literal<IpcOperation>({
-					type: IpcOperationType.Create,
-					payload: {
-						name: `Segment ${rank + 1}`,
-						playlistId,
-						rundownId,
-						rank,
-						float: false
-					}
-				})
-			)
-			commit('addSegment', rundown)
-		},
+		newSegment: async ({ commit }, { playlistId, rundownId, rank }) => {},
 		updateSegment: async ({ commit }, update) => {
 			const rundown = await ipcRenderer.invoke(
 				'segments',

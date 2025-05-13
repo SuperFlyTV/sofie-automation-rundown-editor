@@ -3,6 +3,7 @@ import type { Action } from '@reduxjs/toolkit'
 import connectionStatusReducer from './connectionStatus.js'
 import playlistsReducer from './playlists.js'
 import rundownsReducer from './rundowns.js'
+import segmentsReducer from './segments.js'
 
 interface CounterState {
 	value: number
@@ -24,6 +25,7 @@ export const store = configureStore({
 		counter: counterReducer,
 		playlists: playlistsReducer,
 		rundowns: rundownsReducer,
+		segments: segmentsReducer,
 		coreConnectionStatus: connectionStatusReducer
 	}
 })

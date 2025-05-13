@@ -16,7 +16,12 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { contextBridge, ipcRenderer } = require('electron')
 import type { BackendApi } from './background/api/api.js'
-import { CoreConnectionInfo, MutationRundownCreate, Rundown } from './background/interfaces.js'
+import {
+	CoreConnectionInfo,
+	MutationRundownCreate,
+	MutationSegmentCreate,
+	Rundown
+} from './background/interfaces.js'
 
 const electronApi: BackendApi = {
 	onCoreConnectionInfo: (callback) => {
@@ -62,6 +67,21 @@ const electronApi: BackendApi = {
 			payload: {
 				id: rundownId
 			}
+		})
+	},
+
+	getSegments: (rundownId: string) => {
+		return ipcRenderer.invoke('segments', {
+			type: 'read',
+			payload: {
+				rundownId
+			}
+		})
+	},
+	addNewSegment: (segment: MutationSegmentCreate) => {
+		return ipcRenderer.invoke('segments', {
+			type: 'create',
+			payload: segment
 		})
 	}
 }
