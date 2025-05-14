@@ -1,0 +1,41 @@
+.rundown-sidebar {
+	//
+
+	button {
+		padding: 0.2em;
+		text-decoration: none;
+
+		display: block;
+		border: none;
+		width: 100%;
+		text-align: left;
+	}
+
+	.item-duration {
+		font-size: 0.7em;
+		color: #b2b2b2;
+		margin-left: 0.5em;
+	}
+
+	.floated {
+		text-decoration: line-through;
+	}
+
+	.segment-button {
+		background-color: #4b4b4b;
+		font-size: 1.2em;
+		line-height: 2em;
+		color: white;
+	}
+
+	.part-button {
+		background-color: #353535;
+		font-size: 1em;
+		line-height: 1.5em;
+		color: white;
+	}
+
+	.add-button {
+		color: #777;
+	}
+}

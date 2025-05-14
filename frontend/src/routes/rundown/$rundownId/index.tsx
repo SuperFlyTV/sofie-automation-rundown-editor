@@ -12,5 +12,9 @@ function RouteComponent() {
 	const rundown = useAppSelector((state) => state.rundowns.find((r) => r.id === rundownId))
 	if (!rundown) throw redirect({ to: '/' })
 
-	return <RundownPropertiesForm rundown={rundown} />
+	return (
+		<div className="p-4">
+			<RundownPropertiesForm rundown={rundown} />
+		</div>
+	)
 }

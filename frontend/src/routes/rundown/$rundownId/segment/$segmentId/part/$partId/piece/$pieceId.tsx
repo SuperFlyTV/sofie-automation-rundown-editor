@@ -36,11 +36,11 @@ function RouteComponent() {
 
 	return (
 		<Row>
-			<Col xs={6} style={{ backgroundColor: '#000000' }}>
+			<Col xs={6} style={{ backgroundColor: '#000000' }} className="p-4">
 				<PiecesList part={part} />
 			</Col>
 
-			<Col xs={6}>
+			<Col xs={6} className="p-4">
 				<PiecePropertiesForm piece={piece} />
 			</Col>
 		</Row>

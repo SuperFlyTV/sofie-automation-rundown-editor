@@ -24,11 +24,11 @@ function RouteComponent() {
 
 	return (
 		<Row>
-			<Col xs={6} style={{ backgroundColor: 'rgb(30, 30, 30)' }}>
+			<Col xs={6} style={{ backgroundColor: 'rgb(30, 30, 30)' }} className="p-4">
 				<PartPropertiesForm part={part} />
 			</Col>
 
-			<Col xs={6} style={{ backgroundColor: '#000000' }}>
+			<Col xs={6} style={{ backgroundColor: '#000000' }} className="p-4">
 				<PiecesList part={part} />
 			</Col>
 		</Row>

@@ -66,9 +66,7 @@ function RouteComponent() {
 			<div style={layoutStyle}>
 				<RundownSidebar rundownId={rundown.id} playlistId={rundown.playlistId} />
 
-				<div className="p-4">
-					<Outlet />
-				</div>
+				<Outlet />
 			</div>
 
 			<RundownBreadcrumbs rundownId={rundown.id} rundownName={rundown.name} />

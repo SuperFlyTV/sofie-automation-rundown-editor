@@ -18,6 +18,7 @@
 		"@tanstack/react-router": "^1.120.3",
 		"@tanstack/react-router-devtools": "^1.120.3",
 		"bootstrap": "^5.3.6",
+		"classnames": "^2.5.1",
 		"react": "^19.1.0",
 		"react-bootstrap": "^2.10.10",
 		"react-datepicker": "^8.3.0",

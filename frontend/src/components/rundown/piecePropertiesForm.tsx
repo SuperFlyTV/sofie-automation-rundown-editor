@@ -97,7 +97,7 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 					)}
 				/>
 
-				{manifest?.payload.map((fieldInfo) => {
+				{manifest?.payload?.map((fieldInfo) => {
 					return (
 						<form.Field
 							key={`payload.${fieldInfo.id}`}
@@ -144,6 +144,12 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 						/>
 					)
 				})}
+
+				{!manifest && (
+					<Form.Group className="mb-3">
+						<Form.Text>Piece type not found</Form.Text>
+					</Form.Group>
+				)}
 
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting, state.isPristine]}

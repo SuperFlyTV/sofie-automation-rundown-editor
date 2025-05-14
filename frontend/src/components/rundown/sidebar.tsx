@@ -3,6 +3,8 @@ import { useAppDispatch, useAppSelector } from '~/store/app'
 import { addNewPart } from '~/store/parts'
 import { addNewSegment } from '~/store/segments'
 import type { Segment } from '~backend/background/interfaces'
+import './sidebar.scss'
+import classNames from 'classnames'
 
 export function RundownSidebar({
 	rundownId,
@@ -26,11 +28,11 @@ export function RundownSidebar({
 	}
 
 	return (
-		<div>
+		<div className="rundown-sidebar">
 			{sortedSegments.map((segment) => (
 				<SidebarSegment key={segment.id} segment={segment} />
 			))}
-			<button style={addSegmentStyle} onClick={handleAddSegment}>
+			<button className="segment-button add-button" onClick={handleAddSegment}>
 				+ Add Segment
 			</button>
 		</div>
@@ -72,9 +74,13 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 				params={{ rundownId: segment.rundownId, segmentId: segment.id }}
 			>
 				{/* // TODO - highlight when active */}
-				<button style={segment.float ? floatedSegmentStyle : segmentStyle} className="mb-1">
+				<button
+					className={classNames('segment-button mb-1', {
+						floated: segment.float
+					})}
+				>
 					{segment.name}
-					<span style={timeStyle}>{displayTime(segmentDuration)}</span>
+					<span className="item-duration">{displayTime(segmentDuration)}</span>
 				</button>
 			</Link>
 
@@ -87,15 +93,16 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 					>
 						{/* // TODO - highlight when active */}
 						<button
-							style={segment.float || part.float ? floatedPartStyle : partStyle}
-							className="mb-1"
+							className={classNames('part-button mb-1', {
+								floated: segment.float || part.float
+							})}
 						>
 							{part.name}
-							<span style={timeStyle}>{displayTime(part.payload.duration)}</span>
+							<span className="item-duration">{displayTime(part.payload.duration)}</span>
 						</button>
 					</Link>
 				))}
-				<button style={addPartStyle} onClick={handleAddPart} className="mb-2">
+				<button className="part-button add-button mb-2" onClick={handleAddPart}>
 					+ Add Part
 				</button>
 			</div>
@@ -112,56 +119,4 @@ function displayTime(seconds: number | undefined) {
 	const pad = (t: number) => ('00' + t).substr(-2)
 
 	return `${h > 0 ? pad(h) + ':' : ''}${pad(m)}:${pad(s)}`
-}
-
-const baseButtonStyle: React.CSSProperties = {
-	padding: '0.2em',
-	textDecoration: 'none',
-
-	display: 'block',
-	border: 'none',
-	width: '100%',
-	textAlign: 'left'
-}
-
-const segmentStyle: React.CSSProperties = {
-	...baseButtonStyle,
-
-	backgroundColor: '#4b4b4b',
-	fontSize: '1.2em',
-	lineHeight: '2em',
-	color: 'white'
-}
-const floatedSegmentStyle: React.CSSProperties = {
-	...segmentStyle,
-	textDecoration: 'line-through'
-}
-
-const addSegmentStyle: React.CSSProperties = {
-	...segmentStyle,
-	color: '#777'
-}
-
-const partStyle: React.CSSProperties = {
-	...baseButtonStyle,
-
-	backgroundColor: '#353535',
-	fontSize: '1em',
-	lineHeight: '1.5em',
-	color: 'white'
-}
-const floatedPartStyle: React.CSSProperties = {
-	...partStyle,
-	textDecoration: 'line-through'
-}
-
-const addPartStyle: React.CSSProperties = {
-	...partStyle,
-	color: '#777'
-}
-
-const timeStyle: React.CSSProperties = {
-	fontSize: '0.7em',
-	color: '#b2b2b2',
-	marginLeft: '0.5em'
 }

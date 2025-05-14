@@ -14,5 +14,9 @@ function RouteComponent() {
 	)
 	if (!segment) throw redirect({ to: '/rundown/$rundownId', params: { rundownId } })
 
-	return <SegmentPropertiesForm segment={segment} />
+	return (
+		<div className="p-4">
+			<SegmentPropertiesForm segment={segment} />
+		</div>
+	)
 }
