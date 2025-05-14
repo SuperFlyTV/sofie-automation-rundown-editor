@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useCallback } from 'react'
 import { Button, ListGroup } from 'react-bootstrap'
+import { useToasts } from '~/components/toasts/toasts'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import { addNewRundown, importRundown } from '~/store/rundowns'
 import { verifyImportIsRundown } from '~/util/verifyImport'
@@ -13,12 +14,13 @@ function Index() {
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
 	const rundowns = useAppSelector((state) => state.rundowns)
+	const toasts = useToasts()
 
 	const createNewRundown = useCallback(() => {
 		dispatch(addNewRundown({ playlistId: null })).unwrap()
 	}, [dispatch])
 
-	const selectImportRundown = useCallback(() => {
+	const selectImportRundown = () => {
 		electronApi
 			.openFromFile({ title: 'Import rundown' })
 			.then(async (serializedRundown) => {
@@ -27,8 +29,10 @@ function Index() {
 				if (verifyImportIsRundown(serializedRundown)) {
 					const existing = rundowns.find((rd) => rd.id === serializedRundown.rundown.id)
 					if (existing) {
-						// nocommit TODO
-						// this.$bvModal.show('rundown-import-already-exists')
+						toasts.show({
+							headerContent: 'Importing rundown',
+							bodyContent: 'Rundown already exists'
+						})
 					} else {
 						try {
 							await dispatch(importRundown(serializedRundown))
@@ -41,21 +45,28 @@ function Index() {
 							})
 						} catch (e: unknown) {
 							console.error(e)
-							// nocommit TODO
-							// this.$bvModal.show('rundown-import-failed')
+							toasts.show({
+								headerContent: 'Importing rundown',
+								bodyContent: 'Encountered an unexepcted error'
+							})
 						}
 					}
 				} else {
-					// nocommit TODO
-					// this.$bvModal.show('rundown-import-is-invalid')
+					toasts.show({
+						headerContent: 'Importing rundown',
+						bodyContent: 'Imported file is not a valid rundown'
+					})
 				}
 			})
 			.catch((e) => {
 				// eslint-disable-next-line no-console
 				console.error(e)
-				// nocommit 'rundown-import-is-invalid'
+				toasts.show({
+					headerContent: 'Importing rundown',
+					bodyContent: 'Encountered an unexepcted error'
+				})
 			})
-	}, [])
+	}
 
 	return (
 		<div className="p-2">

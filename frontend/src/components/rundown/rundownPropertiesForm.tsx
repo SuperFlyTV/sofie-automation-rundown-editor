@@ -6,10 +6,12 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { removeRundown, updateRundown } from '~/store/rundowns'
 import { useAppDispatch, useAppSelector, useAppStore } from '~/store/app'
+import { useToasts } from '../toasts/toasts'
 
 export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 	const dispatch = useAppDispatch()
 	const store = useAppStore()
+	const toasts = useToasts()
 
 	const metadataFields = useAppSelector((state) => state.settings.settings?.rundownMetadata)
 
@@ -49,7 +51,10 @@ export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 			.catch((e) => {
 				// eslint-disable-next-line no-console
 				console.error(e)
-				// nocommit TODO
+				toasts.show({
+					headerContent: 'Exporting rundown',
+					bodyContent: 'Encountered an unexpected error'
+				})
 			})
 	}
 
@@ -235,6 +240,7 @@ function DeleteRundownButton({
 }) {
 	const navigate = useNavigate({ from: '/rundown/$rundownId' })
 	const dispatch = useAppDispatch()
+	const toasts = useToasts()
 
 	const [showDelete, setShowDelete] = useState(false)
 	const handleDeleteClose = () => setShowDelete(false)
@@ -250,7 +256,13 @@ function DeleteRundownButton({
 		navigate({ to: '/' })
 
 		// perform operation
-		dispatch(removeRundown({ id: rundownId })).unwrap()
+		dispatch(removeRundown({ id: rundownId })).catch((e) => {
+			console.error(e)
+			toasts.show({
+				headerContent: 'Deleting rundown',
+				bodyContent: 'Encountered an unexpected error'
+			})
+		})
 	}
 
 	return (

@@ -6,19 +6,29 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import { removePart, updatePart } from '~/store/parts'
+import { useToasts } from '../toasts/toasts'
 
 export function PartPropertiesForm({ part }: { part: Part }) {
 	const dispatch = useAppDispatch()
+	const toasts = useToasts()
 
 	const form = useForm({
 		defaultValues: part,
 		onSubmit: async (values) => {
 			console.log('submit', values)
 
-			await dispatch(updatePart({ part: values.value })).unwrap()
+			try {
+				await dispatch(updatePart({ part: values.value })).unwrap()
 
-			// Mark as pristine
-			form.reset()
+				// Mark as pristine
+				form.reset()
+			} catch (e) {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Saving part',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			}
 		}
 	})
 
@@ -189,6 +199,7 @@ function DeletePartButton({
 }) {
 	const navigate = useNavigate({ from: '/rundown/$rundownId/segment/$segmentId/part/$partId' })
 	const dispatch = useAppDispatch()
+	const toasts = useToasts()
 
 	const [showDelete, setShowDelete] = useState(false)
 	const handleDeleteClose = () => setShowDelete(false)
@@ -204,7 +215,13 @@ function DeletePartButton({
 		navigate({ to: '/rundown/$rundownId/segment/$segmentId', params: { rundownId, segmentId } })
 
 		// perform operation
-		dispatch(removePart({ id: partId })).unwrap()
+		dispatch(removePart({ id: partId })).catch((e) => {
+			console.error(e)
+			toasts.show({
+				headerContent: 'Deleting part',
+				bodyContent: 'Encountered an unexpected error'
+			})
+		})
 	}
 
 	return (

@@ -1,6 +1,7 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { useEffect } from 'react'
+import { ToastsProvider } from '~/components/toasts/toasts'
 import { useAppDispatch } from '~/store/app'
 import { initStore } from '~/store/init'
 import { MyErrorBoundary } from '~/util/errorBoundary'
@@ -19,7 +20,9 @@ function RootRoute() {
 	return (
 		<>
 			<MyErrorBoundary>
-				<Outlet />
+				<ToastsProvider>
+					<Outlet />
+				</ToastsProvider>
 			</MyErrorBoundary>
 			<TanStackRouterDevtools position="top-left" />
 		</>

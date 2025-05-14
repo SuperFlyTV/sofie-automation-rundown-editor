@@ -5,6 +5,7 @@ import { addNewSegment } from '~/store/segments'
 import type { Segment } from '~backend/background/interfaces'
 import './sidebar.scss'
 import classNames from 'classnames'
+import { useToasts } from '../toasts/toasts'
 
 export function RundownSidebar({
 	rundownId,
@@ -15,6 +16,7 @@ export function RundownSidebar({
 }) {
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
+	const toasts = useToasts()
 
 	const segments = useAppSelector((state) => state.segments.segments)
 	const sortedSegments = [...segments].sort((a, b) => a.rank - b.rank)
@@ -24,6 +26,13 @@ export function RundownSidebar({
 			.unwrap()
 			.then(async (segment) => {
 				await navigate({ to: `/rundown/${rundownId}/segment/${segment.id}` })
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Deleting segment',
+					bodyContent: 'Encountered an unexpected error'
+				})
 			})
 	}
 
@@ -42,6 +51,7 @@ export function RundownSidebar({
 function SidebarSegment({ segment }: { segment: Segment }) {
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
+	const toasts = useToasts()
 
 	const parts = useAppSelector((state) =>
 		state.parts.parts.filter((part) => part.segmentId === segment.id)
@@ -61,6 +71,13 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			.then(async (part) => {
 				await navigate({
 					to: `/rundown/${segment.rundownId}/segment/${segment.id}/part/${part.id}`
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Adding part',
+					bodyContent: 'Encountered an unexpected error'
 				})
 			})
 	}

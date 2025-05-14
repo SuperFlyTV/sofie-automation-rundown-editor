@@ -17,12 +17,20 @@ import {
 	removePiecesManifest,
 	updatePiecesManifest
 } from '~/store/piecesManifest'
+import { useToasts } from '../toasts/toasts'
 
 export function PieceTypesForm({ piecesManifest }: { piecesManifest: PiecesManifest }) {
 	const dispatch = useAppDispatch()
+	const toasts = useToasts()
 
 	const addPieceType = () => {
-		dispatch(addNewPiecesManifest())
+		dispatch(addNewPiecesManifest()).catch((e) => {
+			console.error(e)
+			toasts.show({
+				headerContent: 'Adding piece type',
+				bodyContent: 'Encountered an unexpected error'
+			})
+		})
 	}
 
 	const exportPieceTypes = () => {
@@ -62,21 +70,32 @@ export function PieceTypesForm({ piecesManifest }: { piecesManifest: PiecesManif
 								}
 							} catch (e) {
 								console.error(e)
-								// TODO - notify
+								toasts.show({
+									headerContent: 'Importing piece types',
+									bodyContent: 'Encountered an unexpected error'
+								})
 							}
 						})
 					).then(() => {
-						// TODO - notify
+						toasts.show({
+							headerContent: 'Importing piece types',
+							bodyContent: 'Successfully imported piece types'
+						})
 					})
 				} else {
-					// nocommit TODO
-					// this.$bvModal.show('rundown-import-is-invalid')
+					toasts.show({
+						headerContent: 'Importing piece types',
+						bodyContent: 'Imported file is not valid piece types'
+					})
 				}
 			})
 			.catch((e) => {
 				// eslint-disable-next-line no-console
 				console.error(e)
-				// nocommit 'rundown-import-is-invalid'
+				toasts.show({
+					headerContent: 'Importing piece types',
+					bodyContent: 'Encountered an unexpected error'
+				})
 			})
 	}
 
@@ -119,19 +138,28 @@ export function PieceTypesForm({ piecesManifest }: { piecesManifest: PiecesManif
 
 export function SinglePieceTypeForm({ manifest }: { manifest: PieceTypeManifest }) {
 	const dispatch = useAppDispatch()
+	const toasts = useToasts()
 
 	const form = useForm({
 		defaultValues: manifest,
 		onSubmit: async (values) => {
 			console.log('submit', values)
 
-			// TODO - this can have issues if the id is changed to be a duplicate of another
-			await dispatch(
-				updatePiecesManifest({ originalId: manifest.id, piecesManifest: values.value })
-			).unwrap()
+			try {
+				// TODO - this can have issues if the id is changed to be a duplicate of another
+				await dispatch(
+					updatePiecesManifest({ originalId: manifest.id, piecesManifest: values.value })
+				).unwrap()
 
-			// Mark as pristine
-			form.reset()
+				// Mark as pristine
+				form.reset()
+			} catch (e) {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Saving piece type',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			}
 		}
 	})
 
@@ -145,7 +173,13 @@ export function SinglePieceTypeForm({ manifest }: { manifest: PieceTypeManifest 
 	}
 
 	const deletePieceType = () => {
-		dispatch(removePiecesManifest({ id: manifest.id }))
+		dispatch(removePiecesManifest({ id: manifest.id })).catch((e) => {
+			console.error(e)
+			toasts.show({
+				headerContent: 'Deleting piece type',
+				bodyContent: 'Encountered an unexpected error'
+			})
+		})
 	}
 
 	return (

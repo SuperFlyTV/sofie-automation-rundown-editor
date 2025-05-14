@@ -6,6 +6,7 @@ import './piecesList.scss'
 import { addNewPiece } from '~/store/pieces'
 import type { Part, Piece } from '~backend/background/interfaces'
 import { toTime } from '~/util/lib'
+import { useToasts } from '../toasts/toasts'
 
 export function PiecesList({ part }: { part: Part }) {
 	const pieces = useAppSelector((state) =>
@@ -85,6 +86,7 @@ function NewPieceButton({
 }) {
 	const navigate = useNavigate({})
 	const dispatch = useAppDispatch()
+	const toasts = useToasts()
 
 	const piecesManifest = useAppSelector((state) => state.piecesManifest.manifest)
 
@@ -121,6 +123,13 @@ function NewPieceButton({
 				navigate({
 					to: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId',
 					params: { rundownId, segmentId, partId, pieceId: piece.id }
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Adding piece',
+					bodyContent: 'Encountered an unexpected error'
 				})
 			})
 	}

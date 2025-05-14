@@ -4,19 +4,29 @@ import type { ApplicationSettings } from '~backend/background/interfaces'
 import { FieldInfo } from '../form'
 import { useAppDispatch } from '~/store/app'
 import { updateSettings } from '~/store/settings'
+import { useToasts } from '../toasts/toasts'
 
 export function CoreConnectionSettingsForm({ settings }: { settings: ApplicationSettings }) {
 	const dispatch = useAppDispatch()
+	const toasts = useToasts()
 
 	const form = useForm({
 		defaultValues: settings,
 		onSubmit: async (values) => {
 			console.log('submit', values)
 
-			await dispatch(updateSettings({ settings: values.value })).unwrap()
+			try {
+				await dispatch(updateSettings({ settings: values.value })).unwrap()
 
-			// Mark as pristine
-			form.reset()
+				// Mark as pristine
+				form.reset()
+			} catch (e) {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Saving settings',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			}
 		}
 	})
 

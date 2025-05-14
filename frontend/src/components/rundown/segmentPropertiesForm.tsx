@@ -6,19 +6,29 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useAppDispatch } from '~/store/app'
 import { removeSegment, updateSegment } from '~/store/segments'
+import { useToasts } from '../toasts/toasts'
 
 export function SegmentPropertiesForm({ segment }: { segment: Segment }) {
 	const dispatch = useAppDispatch()
+	const toasts = useToasts()
 
 	const form = useForm({
 		defaultValues: segment,
 		onSubmit: async (values) => {
 			console.log('submit', values)
 
-			await dispatch(updateSegment({ segment: values.value })).unwrap()
+			try {
+				await dispatch(updateSegment({ segment: values.value })).unwrap()
 
-			// Mark as pristine
-			form.reset()
+				// Mark as pristine
+				form.reset()
+			} catch (e) {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Saving segment',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			}
 		}
 	})
 
@@ -115,6 +125,7 @@ function DeleteSegmentButton({
 }) {
 	const navigate = useNavigate({ from: '/rundown/$rundownId/segment/$segmentId' })
 	const dispatch = useAppDispatch()
+	const toasts = useToasts()
 
 	const [showDelete, setShowDelete] = useState(false)
 	const handleDeleteClose = () => setShowDelete(false)
@@ -130,7 +141,13 @@ function DeleteSegmentButton({
 		navigate({ to: '/rundown/$rundownId', params: { rundownId: rundownId } })
 
 		// perform operation
-		dispatch(removeSegment({ id: segmentId })).unwrap()
+		dispatch(removeSegment({ id: segmentId })).catch((e) => {
+			console.error(e)
+			toasts.show({
+				headerContent: 'Deleting segment',
+				bodyContent: 'Encountered an unexpected error'
+			})
+		})
 	}
 
 	return (
