@@ -289,3 +289,11 @@ export interface SerializedRundown {
 	parts: Part[]
 	pieces: Piece[]
 }
+
+export interface OpenFromFileArgs {
+	title: string
+}
+export interface SaveToFileArgs {
+	title: string
+	document: unknown
+}

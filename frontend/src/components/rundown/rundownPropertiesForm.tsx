@@ -1,14 +1,15 @@
 import { useForm } from '@tanstack/react-form'
 import { Button, ButtonGroup, Form, Modal } from 'react-bootstrap'
-import type { Rundown } from '~backend/background/interfaces'
+import type { Rundown, SerializedRundown } from '~backend/background/interfaces'
 import { CustomDateTimePicker, FieldInfo } from '../form'
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { removeRundown, updateRundown } from '~/store/rundowns'
-import { useAppDispatch } from '~/store/app'
+import { useAppDispatch, useAppStore } from '~/store/app'
 
 export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 	const dispatch = useAppDispatch()
+	const store = useAppStore()
 
 	const form = useForm({
 		defaultValues: rundown,
@@ -26,7 +27,28 @@ export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 		e.preventDefault()
 		e.stopPropagation()
 
-		// TODO
+		const state = store.getState()
+
+		const serializedRundown: SerializedRundown = {
+			rundown: state.rundowns.find((r) => r.id === rundown.id) as Rundown,
+			segments: state.segments.segments.filter((segment) => segment.rundownId === rundown.id),
+			parts: state.parts.parts.filter((part) => part.rundownId === rundown.id),
+			pieces: state.pieces.pieces.filter((piece) => piece.rundownId === rundown.id)
+		}
+
+		// Should never happen, but just in case
+		if (!serializedRundown.rundown) return
+
+		electronApi
+			.saveToFile({
+				title: 'Export rundown',
+				document: serializedRundown
+			})
+			.catch((e) => {
+				// eslint-disable-next-line no-console
+				console.error(e)
+				// nocommit TODO
+			})
 	}
 
 	return (

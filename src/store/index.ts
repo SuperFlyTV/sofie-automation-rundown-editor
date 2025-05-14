@@ -191,40 +191,9 @@ const store = new Vuex.Store<State>({
 		setCoreConnectionInfo: (state, coreConnnectionInfo: CoreConnectionInfo) => {}
 	},
 	actions: {
-		removePlaylist: async ({ commit }, id: string) => {
-			await ipcRenderer.invoke(
-				'playlists',
-				literal<IpcOperation>({
-					type: IpcOperationType.Delete,
-					payload: {
-						id
-					}
-				})
-			)
-			commit('removePlaylist', id)
-		},
-		newPlaylist: async ({ commit }, { name }) => {
-			const playlist = await ipcRenderer.invoke(
-				'playlists',
-				literal<IpcOperation>({
-					type: IpcOperationType.Create,
-					payload: {
-						name: name || 'New playlist'
-					}
-				})
-			)
-			commit('addPlaylist', playlist)
-		},
-		updatePlaylist: async ({ commit }, update) => {
-			const playlist = await ipcRenderer.invoke(
-				'playlists',
-				literal<IpcOperation>({
-					type: IpcOperationType.Update,
-					payload: update
-				})
-			)
-			commit('updatePlaylist', playlist)
-		},
+		removePlaylist: async ({ commit }, id: string) => {},
+		newPlaylist: async ({ commit }, { name }) => {},
+		updatePlaylist: async ({ commit }, update) => {},
 
 		loadRundown: async ({ commit }, id: string) => {},
 
@@ -232,49 +201,7 @@ const store = new Vuex.Store<State>({
 		newRundown: async ({ commit }, { playlistId }) => {},
 		updateRundown: async ({ commit }, update) => {},
 
-		importRundown: async ({ commit }, update: SerializedRundown) => {
-			const rundown = await ipcRenderer.invoke(
-				'rundowns',
-				literal<IpcOperation>({
-					type: IpcOperationType.Create,
-					payload: literal<MutationRundownCreate>(update.rundown)
-				})
-			)
-			commit('addRundown', rundown)
-
-			for (const segment of update.segments) {
-				const newSegment: Segment = await ipcRenderer.invoke(
-					'segments',
-					literal<IpcOperation>({
-						type: IpcOperationType.Create,
-						payload: literal<MutationSegmentCreate>(segment)
-					})
-				)
-				commit('addSegment', newSegment)
-			}
-
-			for (const part of update.parts) {
-				const newPart: Part = await ipcRenderer.invoke(
-					'parts',
-					literal<IpcOperation>({
-						type: IpcOperationType.Create,
-						payload: literal<MutationPartCreate>(part)
-					})
-				)
-				commit('addPart', newPart)
-			}
-
-			for (const piece of update.pieces) {
-				const newPiece: Piece = await ipcRenderer.invoke(
-					'pieces',
-					literal<IpcOperation>({
-						type: IpcOperationType.Create,
-						payload: literal<MutationPieceCreate>(piece)
-					})
-				)
-				commit('addPiece', newPiece)
-			}
-		},
+		importRundown: async ({ commit }, update: SerializedRundown) => {},
 
 		removeSegment: async ({ commit }, id: string) => {},
 		newSegment: async ({ commit }, { playlistId, rundownId, rank }) => {},
@@ -389,54 +316,3 @@ const store = new Vuex.Store<State>({
 })
 
 export default store
-
-export async function initStore() {
-	const playlists = await ipcRenderer.invoke(
-		'playlists',
-		literal<IpcOperation>({
-			type: IpcOperationType.Read,
-			payload: {}
-		})
-	)
-	store.commit('setPlaylists', playlists)
-
-	const rundowns = await ipcRenderer.invoke(
-		'rundowns',
-		literal<IpcOperation>({
-			type: IpcOperationType.Read,
-			payload: {}
-		})
-	)
-	store.commit('setRundowns', rundowns)
-
-	const pieceTypes = await ipcRenderer.invoke(
-		'pieceTypeManifests',
-		literal<IpcOperation>({
-			type: IpcOperationType.Read,
-			payload: {}
-		})
-	)
-	store.commit('setPieceTypeManifests', pieceTypes)
-
-	const settings = await ipcRenderer.invoke(
-		'settings',
-		literal<IpcOperation>({
-			type: IpcOperationType.Read,
-			payload: {}
-		})
-	)
-	store.commit('setSettings', settings)
-
-	const coreConnectionInfo = await ipcRenderer.invoke(
-		'coreConnectionInfo',
-		literal<IpcOperation>({
-			type: IpcOperationType.Read,
-			payload: {}
-		})
-	)
-	store.commit('setCoreConnectionInfo', coreConnectionInfo)
-
-	ipcRenderer.on('coreConnectionInfo', (_, newInfo: CoreConnectionInfo) => {
-		store.commit('setCoreConnectionInfo', newInfo)
-	})
-}

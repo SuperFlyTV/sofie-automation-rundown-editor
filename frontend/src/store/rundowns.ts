@@ -1,4 +1,4 @@
-import type { Rundown } from '~backend/background/interfaces.js'
+import type { Rundown, SerializedRundown } from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 
@@ -36,6 +36,20 @@ export const removeRundown = createAppAsyncThunk(
 	}
 )
 
+export const importRundown = createAppAsyncThunk(
+	'rundowns/importRundown',
+	async (rundown: SerializedRundown) => {
+		const createdRundown = await electronApi.addNewRundown(rundown.rundown)
+
+		// Note: we don't need to update the stores, that will happen when opening the rundown
+		await Promise.all(rundown.segments.map((segment) => electronApi.addNewSegment(segment)))
+		await Promise.all(rundown.parts.map((part) => electronApi.addNewPart(part)))
+		await Promise.all(rundown.pieces.map((piece) => electronApi.addNewPiece(piece)))
+
+		return createdRundown
+	}
+)
+
 const rundownsSlice = createSlice({
 	name: 'rundowns',
 	initialState: [] as Rundown[],
@@ -61,6 +75,10 @@ const rundownsSlice = createSlice({
 				if (index !== -1) {
 					state.splice(index, 1)
 				}
+			})
+			.addCase(importRundown.fulfilled, (state, action) => {
+				// This must be a new rundown
+				state.push(action.payload)
 			})
 	}
 })

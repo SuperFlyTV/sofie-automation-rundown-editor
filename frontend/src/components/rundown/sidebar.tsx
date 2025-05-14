@@ -65,7 +65,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			})
 	}
 
-	const segmentDuration = sortedParts.reduce((acc, part) => acc + (part.payload.duration ?? 0), 0)
+	const segmentDuration = sortedParts.reduce((acc, part) => acc + (part.payload?.duration ?? 0), 0)
 
 	return (
 		<div className="mb-1">
@@ -98,7 +98,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 							})}
 						>
 							{part.name}
-							<span className="item-duration">{displayTime(part.payload.duration)}</span>
+							<span className="item-duration">{displayTime(part.payload?.duration)}</span>
 						</button>
 					</Link>
 				))}

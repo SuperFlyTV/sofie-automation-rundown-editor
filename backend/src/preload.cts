@@ -26,11 +26,18 @@ import {
 	MutationRundownUpdate,
 	MutationSegmentCreate,
 	MutationSegmentUpdate,
-	Rundown,
-	Segment
+	OpenFromFileArgs,
+	SaveToFileArgs
 } from './background/interfaces.js'
 
 const electronApi: BackendApi = {
+	openFromFile: (args: OpenFromFileArgs) => {
+		return ipcRenderer.invoke('openFromFile', args)
+	},
+	saveToFile: (args: SaveToFileArgs) => {
+		return ipcRenderer.invoke('saveToFile', args)
+	},
+
 	onCoreConnectionInfo: (callback) => {
 		ipcRenderer.on('coreConnectionInfo', (event, newInfo: CoreConnectionInfo) => {
 			callback(newInfo)

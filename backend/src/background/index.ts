@@ -1,5 +1,6 @@
-import { BrowserWindow, ipcMain } from 'electron'
-import { IpcOperation, IpcOperationType } from './interfaces'
+import { BrowserWindow, dialog, ipcMain } from 'electron'
+import { IpcOperation, IpcOperationType, OpenFromFileArgs, SaveToFileArgs } from './interfaces'
+import fs from 'fs/promises'
 
 import './api/settings'
 import './api/pieceManifests'
@@ -31,6 +32,34 @@ export class ControlAPI {
 		ipcMain.handle('coreConnectionInfo', (_, operation: IpcOperation) => {
 			if (operation.type === IpcOperationType.Read) {
 				return coreHandler.connectionInfo
+			}
+		})
+		ipcMain.handle('openFromFile', async (_, args: OpenFromFileArgs) => {
+			const { canceled, filePaths } = await dialog.showOpenDialog({
+				title: args.title,
+				filters: [{ name: 'JSON', extensions: ['json'] }],
+				properties: ['openFile']
+			})
+
+			if (!canceled && filePaths && filePaths.length > 0) {
+				const result = await fs.readFile(filePaths[0], { encoding: 'utf-8' })
+				if (result) {
+					return JSON.parse(result)
+				}
+			}
+
+			return null
+		})
+		ipcMain.handle('saveToFile', async (_, args: SaveToFileArgs) => {
+			const { filePath, canceled } = await dialog.showSaveDialog({
+				title: args.title,
+				filters: [{ name: 'JSON', extensions: ['json'] }]
+			})
+
+			console.log('saveToFile', filePath, canceled)
+
+			if (filePath && !canceled) {
+				await fs.writeFile(filePath, JSON.stringify(args.document))
 			}
 		})
 	}

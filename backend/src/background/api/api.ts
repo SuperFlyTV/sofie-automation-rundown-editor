@@ -9,15 +9,20 @@ import type {
 	MutationRundownUpdate,
 	MutationSegmentCreate,
 	MutationSegmentUpdate,
+	OpenFromFileArgs,
 	Part,
 	Piece,
 	PiecesManifest,
 	Playlist,
 	Rundown,
+	SaveToFileArgs,
 	Segment
 } from '../interfaces'
 
 export interface BackendApi {
+	openFromFile(args: OpenFromFileArgs): Promise<any>
+	saveToFile(args: SaveToFileArgs): Promise<void>
+
 	onCoreConnectionInfo: (callback: (newInfo: CoreConnectionInfo) => void) => void
 	getCoreConnectionInfo: () => Promise<CoreConnectionInfo>
 
