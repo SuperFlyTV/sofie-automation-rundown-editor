@@ -63,7 +63,12 @@ export function RundownSettingsForm({ settings }: { settings: ApplicationSetting
 					)}
 				/>
 
-				<h3>Rundown Metadata Fields:</h3>
+				<h3>
+					Rundown Metadata Fields:
+					<Button size="sm" onClick={addRundownMetadataField} className="float-end">
+						+ Add field
+					</Button>
+				</h3>
 				<table className="table table-striped">
 					<thead>
 						<tr>
@@ -107,7 +112,6 @@ export function RundownSettingsForm({ settings }: { settings: ApplicationSetting
 										</td>
 										<td>
 											<form.Field
-												key={`rundownMetadata-${index}-label`}
 												name={`rundownMetadata[${index}].label`}
 												children={(field) => (
 													<>
@@ -125,7 +129,6 @@ export function RundownSettingsForm({ settings }: { settings: ApplicationSetting
 										</td>
 										<td>
 											<form.Field
-												key={`rundownMetadata-${index}-type`}
 												name={`rundownMetadata[${index}].type`}
 												children={(field) => (
 													<>
@@ -165,10 +168,6 @@ export function RundownSettingsForm({ settings }: { settings: ApplicationSetting
 						</form.Subscribe>
 					</tbody>
 				</table>
-
-				<Button size="sm" onClick={addRundownMetadataField}>
-					+ Add field
-				</Button>
 
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting, state.isPristine]}

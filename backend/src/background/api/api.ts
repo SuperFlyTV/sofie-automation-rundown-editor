@@ -13,6 +13,7 @@ import type {
 	Part,
 	Piece,
 	PiecesManifest,
+	PieceTypeManifest,
 	Playlist,
 	Rundown,
 	SaveToFileArgs,
@@ -20,7 +21,9 @@ import type {
 } from '../interfaces'
 
 export interface BackendApi {
+	// TODO: this should be replaced with a browser side api
 	openFromFile(args: OpenFromFileArgs): Promise<any>
+	// TODO: this should be replaced with a browser side api
 	saveToFile(args: SaveToFileArgs): Promise<void>
 
 	onCoreConnectionInfo: (callback: (newInfo: CoreConnectionInfo) => void) => void
@@ -29,7 +32,11 @@ export interface BackendApi {
 	resetSettings: () => Promise<void>
 	getSettings: () => Promise<ApplicationSettings>
 	updateSettings: (settings: ApplicationSettings) => Promise<ApplicationSettings>
+
 	getPiecesManifest: () => Promise<PiecesManifest>
+	addNewPieceManifest: (manifest: PieceTypeManifest) => Promise<PieceTypeManifest>
+	updatePiecesManifest: (id: string, manifest: PieceTypeManifest) => Promise<PieceTypeManifest>
+	removePiecesManifest: (id: string) => Promise<void>
 
 	getPlaylists: () => Promise<Playlist[]>
 

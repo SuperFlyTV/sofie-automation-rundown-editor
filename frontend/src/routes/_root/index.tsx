@@ -23,7 +23,6 @@ function Index() {
 			.openFromFile({ title: 'Import rundown' })
 			.then(async (serializedRundown) => {
 				console.log('opening rundown', serializedRundown)
-				// nocommit TODO
 
 				if (verifyImportIsRundown(serializedRundown)) {
 					const existing = rundowns.find((rd) => rd.id === serializedRundown.rundown.id)

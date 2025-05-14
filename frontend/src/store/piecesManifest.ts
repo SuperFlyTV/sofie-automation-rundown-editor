@@ -1,50 +1,49 @@
-import type { PiecesManifest } from '~backend/background/interfaces.js'
-import { createSlice } from '@reduxjs/toolkit'
+import type { PiecesManifest, PieceTypeManifest } from '~backend/background/interfaces.js'
+import { createSlice, nanoid } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 
-// export interface LoadPiecesManifestPayload {
-// 	rundownId: string
-// }
-// export interface NewSettingPayload {
-// 	playlistId: string | null // TODO - this should be handled by the server..
-// 	rundownId: string
-// 	segmentId: string
-// 	rank: number
-// }
-// export interface UpdateSettingPayload {
-// 	setting: Setting
-// }
-// export interface RemoveSettingPayload {
-// 	id: string
-// }
+export interface ImportPiecesManifestPayload {
+	piecesManifest: PieceTypeManifest
+}
+export interface UpdatePiecesManifestPayload {
+	originalId: string
+	piecesManifest: PieceTypeManifest
+}
+export interface RemovePiecesManifestPayload {
+	id: string
+}
 
-// export const addNewSetting = createAppAsyncThunk(
-// 	'piecesmanifest/addNewSetting',
-// 	async (payload: NewSettingPayload) => {
-// 		return electronApi.addNewSetting({
-// 			name: `Setting ${payload.rank + 1}`,
-// 			playlistId: payload.playlistId,
-// 			rundownId: payload.rundownId,
-// 			segmentId: payload.segmentId,
-// 			rank: payload.rank,
-// 			float: false,
-// 			payload: {}
-// 		})
-// 	}
-// )
-// export const updateSetting = createAppAsyncThunk(
-// 	'piecesmanifest/updateSetting',
-// 	async (payload: UpdateSettingPayload) => {
-// 		return electronApi.updateSetting(payload.setting)
-// 	}
-// )
-// export const removeSetting = createAppAsyncThunk(
-// 	'piecesmanifest/removeSetting',
-// 	async (payload: RemoveSettingPayload) => {
-// 		await electronApi.deleteSetting(payload.id)
-// 		return payload
-// 	}
-// )
+export const addNewPiecesManifest = createAppAsyncThunk(
+	'piecesManifest/addNewPiecesManifest',
+	async () => {
+		return electronApi.addNewPieceManifest({
+			id: nanoid(),
+			name: 'New Piece Type',
+			shortName: 'NPT',
+			colour: '#000000',
+			payload: []
+		})
+	}
+)
+export const importPiecesManifest = createAppAsyncThunk(
+	'piecesManifest/importPiecesManifest',
+	async (payload: ImportPiecesManifestPayload) => {
+		return electronApi.addNewPieceManifest(payload.piecesManifest)
+	}
+)
+export const updatePiecesManifest = createAppAsyncThunk(
+	'piecesManifest/updatePiecesManifest',
+	async (payload: UpdatePiecesManifestPayload) => {
+		return electronApi.updatePiecesManifest(payload.originalId, payload.piecesManifest)
+	}
+)
+export const removePiecesManifest = createAppAsyncThunk(
+	'piecesManifest/removePiecesManifest',
+	async (payload: RemovePiecesManifestPayload) => {
+		await electronApi.removePiecesManifest(payload.id)
+		return payload
+	}
+)
 
 interface PiecesManifestState {
 	manifest: PiecesManifest | null
@@ -89,21 +88,32 @@ const piecesManifestSlice = createSlice({
 				state.manifest = null
 				state.error = action.error.message ?? 'Unknown Error'
 			})
-		// .addCase(addNewSetting.fulfilled, (state, action) => {
-		// 	state.piecesmanifest.push(action.payload)
-		// })
-		// .addCase(updateSetting.fulfilled, (state, action) => {
-		// 	const index = state.piecesmanifest.findIndex((setting) => setting.id === action.payload.id)
-		// 	if (index !== -1) {
-		// 		state.piecesmanifest[index] = action.payload
-		// 	}
-		// })
-		// .addCase(removeSetting.fulfilled, (state, action) => {
-		// 	const index = state.piecesmanifest.findIndex((setting) => setting.id === action.payload.id)
-		// 	if (index !== -1) {
-		// 		state.piecesmanifest.splice(index, 1)
-		// 	}
-		// })
+			.addCase(importPiecesManifest.fulfilled, (state, action) => {
+				if (!state.manifest) throw new Error('Manifest is not loaded')
+
+				state.manifest.push(action.payload)
+			})
+			.addCase(addNewPiecesManifest.fulfilled, (state, action) => {
+				if (!state.manifest) throw new Error('Manifest is not loaded')
+
+				state.manifest.push(action.payload)
+			})
+			.addCase(updatePiecesManifest.fulfilled, (state, action) => {
+				if (!state.manifest) throw new Error('Manifest is not loaded')
+
+				const index = state.manifest.findIndex((setting) => setting.id === action.payload.id)
+				if (index !== -1) {
+					state.manifest[index] = action.payload
+				}
+			})
+			.addCase(removePiecesManifest.fulfilled, (state, action) => {
+				if (!state.manifest) throw new Error('Manifest is not loaded')
+
+				const index = state.manifest.findIndex((setting) => setting.id === action.payload.id)
+				if (index !== -1) {
+					state.manifest.splice(index, 1)
+				}
+			})
 	}
 })
 

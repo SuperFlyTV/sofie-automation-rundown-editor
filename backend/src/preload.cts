@@ -27,6 +27,7 @@ import {
 	MutationSegmentCreate,
 	MutationSegmentUpdate,
 	OpenFromFileArgs,
+	PieceTypeManifest,
 	SaveToFileArgs
 } from './background/interfaces.js'
 
@@ -68,10 +69,29 @@ const electronApi: BackendApi = {
 			payload: settings
 		})
 	},
+
 	getPiecesManifest: () => {
 		return ipcRenderer.invoke('pieceTypeManifests', {
 			type: 'read',
 			payload: {}
+		})
+	},
+	addNewPieceManifest: (manifest: PieceTypeManifest) => {
+		return ipcRenderer.invoke('pieceTypeManifests', {
+			type: 'create',
+			payload: manifest
+		})
+	},
+	updatePiecesManifest: (id: string, manifest: PieceTypeManifest) => {
+		return ipcRenderer.invoke('pieceTypeManifests', {
+			type: 'update',
+			payload: { update: manifest, id: id }
+		})
+	},
+	removePiecesManifest: (id: string) => {
+		return ipcRenderer.invoke('pieceTypeManifests', {
+			type: 'delete',
+			payload: { id }
 		})
 	},
 
