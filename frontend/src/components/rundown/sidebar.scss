@@ -1,5 +1,11 @@
 .rundown-sidebar {
-	//
+	a {
+		text-decoration: none;
+
+		&.active button {
+			border: 1px solid #009dff;
+		}
+	}
 
 	button {
 		padding: 0.2em;

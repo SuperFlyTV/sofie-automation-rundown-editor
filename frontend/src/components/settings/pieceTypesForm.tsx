@@ -72,32 +72,6 @@ export function PieceTypesForm({ piecesManifest }: { piecesManifest: PiecesManif
 					// nocommit TODO
 					// this.$bvModal.show('rundown-import-is-invalid')
 				}
-
-				// if (verifyImportIsRundown(serializedRundown)) {
-				// 	const existing = rundowns.find((rd) => rd.id === serializedRundown.rundown.id)
-				// 	if (existing) {
-				// 		// nocommit TODO
-				// 		// this.$bvModal.show('rundown-import-already-exists')
-				// 	} else {
-				// 		try {
-				// 			await dispatch(importRundown(serializedRundown))
-
-				// 			await navigate({
-				// 				to: '/rundown/$rundownId',
-				// 				params: {
-				// 					rundownId: serializedRundown.rundown.id
-				// 				}
-				// 			})
-				// 		} catch (e: unknown) {
-				// 			console.error(e)
-				// 			// nocommit TODO
-				// 			// this.$bvModal.show('rundown-import-failed')
-				// 		}
-				// 	}
-				// } else {
-				// 	// nocommit TODO
-				// 	// this.$bvModal.show('rundown-import-is-invalid')
-				// }
 			})
 			.catch((e) => {
 				// eslint-disable-next-line no-console

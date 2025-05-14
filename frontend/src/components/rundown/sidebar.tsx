@@ -73,7 +73,6 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 				to="/rundown/$rundownId/segment/$segmentId"
 				params={{ rundownId: segment.rundownId, segmentId: segment.id }}
 			>
-				{/* // TODO - highlight when active */}
 				<button
 					className={classNames('segment-button mb-1', {
 						floated: segment.float
@@ -91,7 +90,6 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 						to="/rundown/$rundownId/segment/$segmentId/part/$partId"
 						params={{ rundownId: segment.rundownId, segmentId: segment.id, partId: part.id }}
 					>
-						{/* // TODO - highlight when active */}
 						<button
 							className={classNames('part-button mb-1', {
 								floated: segment.float || part.float
