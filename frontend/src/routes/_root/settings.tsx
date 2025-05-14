@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
 import { Tab, Tabs } from 'react-bootstrap'
+import { MyErrorBoundary } from '~/util/errorBoundary'
 
 export const Route = createFileRoute('/_root/settings')({
 	component: RouteComponent
@@ -29,7 +30,9 @@ function RouteComponent() {
 				<Tab eventKey="piece-types" title="Piece types"></Tab>
 			</Tabs>
 
-			<Outlet />
+			<MyErrorBoundary>
+				<Outlet />
+			</MyErrorBoundary>
 		</div>
 	)
 }

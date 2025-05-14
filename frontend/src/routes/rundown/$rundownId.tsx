@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from '~/store/app'
 import { loadParts } from '~/store/parts'
 import { loadPieces } from '~/store/pieces'
 import { loadSegments } from '~/store/segments'
+import { MyErrorBoundary } from '~/util/errorBoundary'
 
 export const Route = createFileRoute('/rundown/$rundownId')({
 	component: RouteComponent
@@ -66,7 +67,9 @@ function RouteComponent() {
 			<div style={layoutStyle}>
 				<RundownSidebar rundownId={rundown.id} playlistId={rundown.playlistId} />
 
-				<Outlet />
+				<MyErrorBoundary>
+					<Outlet />
+				</MyErrorBoundary>
 			</div>
 
 			<RundownBreadcrumbs rundownId={rundown.id} rundownName={rundown.name} />

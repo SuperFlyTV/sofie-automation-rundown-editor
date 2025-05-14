@@ -3,6 +3,7 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { useEffect } from 'react'
 import { useAppDispatch } from '~/store/app'
 import { initStore } from '~/store/init'
+import { MyErrorBoundary } from '~/util/errorBoundary'
 
 export const Route = createRootRoute({
 	component: RootRoute
@@ -17,7 +18,9 @@ function RootRoute() {
 
 	return (
 		<>
-			<Outlet />
+			<MyErrorBoundary>
+				<Outlet />
+			</MyErrorBoundary>
 			<TanStackRouterDevtools position="top-left" />
 		</>
 	)

@@ -23,6 +23,7 @@
 		"react-bootstrap": "^2.10.10",
 		"react-datepicker": "^8.3.0",
 		"react-dom": "^19.1.0",
+		"react-error-boundary": "^6.0.0",
 		"react-redux": "^9.2.0"
 	},
 	"devDependencies": {
