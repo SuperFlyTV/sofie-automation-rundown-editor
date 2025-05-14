@@ -173,7 +173,7 @@ export interface IpcOperation {
 	payload: any
 }
 
-export type MutationPieceCreate = Piece
+export type MutationPieceCreate = SetOptional<Piece, 'id'>
 
 export type MutationPieceRead = Pick<Piece, 'id' | 'rundownId' | 'segmentId' | 'partId'>
 

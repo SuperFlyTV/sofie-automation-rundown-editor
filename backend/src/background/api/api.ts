@@ -4,6 +4,7 @@ import type {
 	MutationPartCreate,
 	MutationPartUpdate,
 	MutationPieceCreate,
+	MutationPieceUpdate,
 	MutationRundownCreate,
 	MutationRundownUpdate,
 	MutationSegmentCreate,
@@ -36,10 +37,12 @@ export interface BackendApi {
 	deleteSegment: (segmentId: string) => Promise<void>
 
 	getParts: (rundownId: string) => Promise<Part[]>
-	addNewPart: (segment: MutationPartCreate) => Promise<Part>
+	addNewPart: (part: MutationPartCreate) => Promise<Part>
 	updatePart: (part: MutationPartUpdate) => Promise<Part>
 	deletePart: (partId: string) => Promise<void>
 
 	getPieces: (rundownId: string) => Promise<Piece[]>
-	addNewPiece: (segment: MutationPieceCreate) => Promise<Piece>
+	addNewPiece: (piece: MutationPieceCreate) => Promise<Piece>
+	updatePiece: (piece: MutationPieceUpdate) => Promise<Piece>
+	deletePiece: (pieceId: string) => Promise<void>
 }

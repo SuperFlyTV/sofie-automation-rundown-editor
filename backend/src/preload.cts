@@ -21,6 +21,7 @@ import {
 	MutationPartCreate,
 	MutationPartUpdate,
 	MutationPieceCreate,
+	MutationPieceUpdate,
 	MutationRundownCreate,
 	MutationRundownUpdate,
 	MutationSegmentCreate,
@@ -159,6 +160,20 @@ const electronApi: BackendApi = {
 		return ipcRenderer.invoke('pieces', {
 			type: 'create',
 			payload: segment
+		})
+	},
+	updatePiece: (piece: MutationPieceUpdate) => {
+		return ipcRenderer.invoke('pieces', {
+			type: 'update',
+			payload: piece
+		})
+	},
+	deletePiece: (pieceId: string) => {
+		return ipcRenderer.invoke('pieces', {
+			type: 'delete',
+			payload: {
+				id: pieceId
+			}
 		})
 	}
 }

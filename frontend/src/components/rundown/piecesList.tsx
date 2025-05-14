@@ -40,7 +40,7 @@ export function PiecesList({ part }: { part: Part }) {
 }
 
 function PieceRow({ piece }: { piece: Piece }) {
-	const navigate = useNavigate({ from: '/rundown/$rundownId/segment/$segmentId/part/$partId' })
+	const navigate = useNavigate()
 
 	const manifest = useAppSelector((state) =>
 		state.piecesManifest.manifest?.find((p) => p.id === piece.pieceType)
@@ -83,7 +83,7 @@ function NewPieceButton({
 	segmentId: string
 	partId: string
 }) {
-	const navigate = useNavigate({ from: '/rundown/$rundownId/segment/$segmentId/part/$partId' })
+	const navigate = useNavigate({})
 	const dispatch = useAppDispatch()
 
 	const piecesManifest = useAppSelector((state) => state.piecesManifest.manifest)
@@ -101,6 +101,8 @@ function NewPieceButton({
 		if (!selectedPieceType) return
 
 		const manifest = piecesManifest?.find((piece) => piece.id === selectedPieceType)
+
+		setShow(false)
 
 		// perform operation
 		dispatch(

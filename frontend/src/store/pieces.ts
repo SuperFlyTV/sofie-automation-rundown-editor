@@ -14,12 +14,12 @@ export interface NewPiecePayload {
 	name: string
 	pieceType: string
 }
-// export interface UpdatePiecePayload {
-// 	piece: Piece
-// }
-// export interface RemovePiecePayload {
-// 	id: string
-// }
+export interface UpdatePiecePayload {
+	piece: Piece
+}
+export interface RemovePiecePayload {
+	id: string
+}
 
 export const addNewPiece = createAppAsyncThunk(
 	'pieces/addNewPiece',
@@ -35,19 +35,19 @@ export const addNewPiece = createAppAsyncThunk(
 		})
 	}
 )
-// export const updatePiece = createAppAsyncThunk(
-// 	'pieces/updatePiece',
-// 	async (payload: UpdatePiecePayload) => {
-// 		return electronApi.updatePiece(payload.piece)
-// 	}
-// )
-// export const removePiece = createAppAsyncThunk(
-// 	'pieces/removePiece',
-// 	async (payload: RemovePiecePayload) => {
-// 		await electronApi.deletePiece(payload.id)
-// 		return payload
-// 	}
-// )
+export const updatePiece = createAppAsyncThunk(
+	'pieces/updatePiece',
+	async (payload: UpdatePiecePayload) => {
+		return electronApi.updatePiece(payload.piece)
+	}
+)
+export const removePiece = createAppAsyncThunk(
+	'pieces/removePiece',
+	async (payload: RemovePiecePayload) => {
+		await electronApi.deletePiece(payload.id)
+		return payload
+	}
+)
 
 interface PiecesState {
 	rundownId: string | null
@@ -104,22 +104,22 @@ const piecesSlice = createSlice({
 			.addCase(addNewPiece.fulfilled, (state, action) => {
 				state.pieces.push(action.payload)
 			})
-		// 	.addCase(updatePiece.fulfilled, (state, action) => {
-		// 		const index = state.findIndex((piece) => piece.id === action.payload.id)
-		// 		if (index !== -1) {
-		// 			state[index] = action.payload
-		// 		}
-		// 	})
-		// 	.addCase(removePiece.fulfilled, (state, action) => {
-		// 		const index = state.findIndex((piece) => piece.id === action.payload.id)
-		// 		if (index !== -1) {
-		// 			state.splice(index, 1)
-		// 		}
-		// 	})
+			.addCase(updatePiece.fulfilled, (state, action) => {
+				const index = state.pieces.findIndex((piece) => piece.id === action.payload.id)
+				if (index !== -1) {
+					state.pieces[index] = action.payload
+				}
+			})
+			.addCase(removePiece.fulfilled, (state, action) => {
+				const index = state.pieces.findIndex((piece) => piece.id === action.payload.id)
+				if (index !== -1) {
+					state.pieces.splice(index, 1)
+				}
+			})
 	}
 })
 
 // Export the auto-generated action creator with the same name
-export const {} = piecesSlice.actions
+// export const {} = piecesSlice.actions
 
 export default piecesSlice.reducer

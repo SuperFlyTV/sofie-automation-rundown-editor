@@ -1,21 +1,25 @@
 import { useForm } from '@tanstack/react-form'
 import { Button, ButtonGroup, Form, Modal } from 'react-bootstrap'
-import type { Part } from '~backend/background/interfaces'
+import type { Piece } from '~backend/background/interfaces'
 import { FieldInfo } from '../form'
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '~/store/app'
-import { removePart, updatePart } from '~/store/parts'
+import { removePiece, updatePiece } from '~/store/pieces'
 
-export function PartPropertiesForm({ part }: { part: Part }) {
+export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 	const dispatch = useAppDispatch()
 
+	const manifest = useAppSelector((state) =>
+		state.piecesManifest.manifest?.find((p) => p.id === piece.pieceType)
+	)
+
 	const form = useForm({
-		defaultValues: part,
+		defaultValues: piece,
 		onSubmit: async (values) => {
 			console.log('submit', values)
 
-			await dispatch(updatePart({ part: values.value })).unwrap()
+			await dispatch(updatePiece({ piece: values.value })).unwrap()
 
 			// Mark as pristine
 			form.reset()
@@ -24,7 +28,7 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 
 	return (
 		<div>
-			<h2>Part</h2>
+			<h2>Piece</h2>
 
 			<Form
 				onSubmit={(e) => {
@@ -33,6 +37,10 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 					form.handleSubmit()
 				}}
 			>
+				<Form.Group className="mb-3">
+					<Form.Text>Piece type: {piece.pieceType}</Form.Text>
+				</Form.Group>
+
 				<form.Field
 					name="name"
 					children={(field) => (
@@ -51,46 +59,27 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 						</>
 					)}
 				/>
+
 				<form.Field
-					name="float"
+					name="start"
 					children={(field) => (
 						<>
 							<Form.Group className="mb-3">
-								<Form.Label htmlFor={field.name}>Float:</Form.Label>
-								<Form.Switch
+								<Form.Label htmlFor={field.name}>Start (seconds):</Form.Label>
+								<Form.Control
 									name={field.name}
-									type="text"
-									checked={field.state.value}
+									type="number"
+									value={Number(field.state.value)}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.checked)}
+									onChange={(e) => field.handleChange(Number(e.target.value))}
 								/>
 							</Form.Group>
 							<FieldInfo field={field} />
 						</>
 					)}
 				/>
-
 				<form.Field
-					name="payload.type"
-					children={(field) => (
-						<>
-							<Form.Group className="mb-3">
-								<Form.Label htmlFor={field.name}>Type:</Form.Label>
-								<Form.Select
-									name={field.name}
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-								>
-									<PartTypeOptions />
-								</Form.Select>
-							</Form.Group>
-							<FieldInfo field={field} />
-						</>
-					)}
-				/>
-				<form.Field
-					name="payload.duration"
+					name="duration"
 					children={(field) => (
 						<>
 							<Form.Group className="mb-3">
@@ -107,35 +96,65 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 						</>
 					)}
 				/>
-				<form.Field
-					name="payload.script"
-					children={(field) => (
-						<>
-							<Form.Group className="mb-3">
-								<Form.Label htmlFor={field.name}>Script:</Form.Label>
-								<Form.Control
-									name={field.name}
-									as="textarea"
-									rows={3}
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-							</Form.Group>
-							<FieldInfo field={field} />
-						</>
-					)}
-				/>
+
+				{manifest?.payload.map((fieldInfo) => {
+					return (
+						<form.Field
+							key={`payload.${fieldInfo.id}`}
+							name={`payload.${fieldInfo.id}`}
+							children={(field) => (
+								<>
+									<Form.Group className="mb-3">
+										<Form.Label htmlFor={field.name}>{fieldInfo.label}:</Form.Label>
+
+										{fieldInfo.type === 'string' && (
+											<Form.Control
+												name={field.name}
+												type="text"
+												// eslint-disable-next-line @typescript-eslint/no-explicit-any
+												value={field.state.value as any}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+											/>
+										)}
+
+										{fieldInfo.type === 'number' && (
+											<Form.Control
+												name={field.name}
+												type="number"
+												value={Number(field.state.value)}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(Number(e.target.value))}
+											/>
+										)}
+
+										{fieldInfo.type === 'boolean' && (
+											<Form.Switch
+												name={field.name}
+												type="text"
+												checked={Boolean(field.state.value)}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.checked)}
+											/>
+										)}
+									</Form.Group>
+									<FieldInfo field={field} />
+								</>
+							)}
+						/>
+					)
+				})}
 
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting, state.isPristine]}
 					children={([canSubmit, isSubmitting, isPristine]) => (
 						<div className="d-flex justify-content-between">
-							<DeletePartButton
-								rundownId={part.rundownId}
-								segmentId={part.segmentId}
-								partId={part.id}
-								partName={part.name}
+							<DeletePieceButton
+								rundownId={piece.rundownId}
+								segmentId={piece.segmentId}
+								partId={piece.id}
+								pieceId={piece.id}
+								pieceName={piece.name}
 								disabled={!canSubmit}
 							/>
 
@@ -160,69 +179,62 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 	)
 }
 
-function PartTypeOptions() {
-	const types = useAppSelector((state) => state.settings.settings?.partTypes)
-	if (!types) return <></>
-
-	// Remove duplicates
-	const typesUnique = Array.from(new Set(types))
-
-	return typesUnique.map((type) => (
-		<option key={type} value={type}>
-			{type}
-		</option>
-	))
-}
-
-function DeletePartButton({
+function DeletePieceButton({
 	rundownId,
 	segmentId,
 	partId,
-	partName,
+	pieceId,
+	pieceName,
 	disabled
 }: {
 	rundownId: string
 	segmentId: string
 	partId: string
-	partName: string
+	pieceId: string
+	pieceName: string
 	disabled: boolean
 }) {
-	const navigate = useNavigate({ from: '/rundown/$rundownId/segment/$segmentId/part/$partId' })
+	const navigate = useNavigate({
+		from: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId'
+	})
 	const dispatch = useAppDispatch()
 
 	const [showDelete, setShowDelete] = useState(false)
 	const handleDeleteClose = () => setShowDelete(false)
 
-	const deletePart = (e: React.MouseEvent) => {
+	const deleteSegment = (e: React.MouseEvent) => {
 		e.preventDefault()
 		e.stopPropagation()
 
 		setShowDelete(true)
 	}
-	const performDeletePart = () => {
+	const performDeleteSegment = () => {
 		// Navigate user to the list of segments
-		navigate({ to: '/rundown/$rundownId/segment/$segmentId', params: { rundownId, segmentId } })
+		navigate({
+			to: '/rundown/$rundownId/segment/$segmentId/part/$partId',
+			params: { rundownId, segmentId, partId }
+		})
 
 		// perform operation
-		dispatch(removePart({ id: partId })).unwrap()
+		dispatch(removePiece({ id: pieceId })).unwrap()
 	}
 
 	return (
 		<>
-			<Button onClick={deletePart} disabled={disabled} variant="danger">
+			<Button onClick={deleteSegment} disabled={disabled} variant="danger">
 				Delete
 			</Button>
 
 			<Modal show={showDelete} onHide={handleDeleteClose}>
 				<Modal.Header closeButton>
-					<Modal.Title>Delete part</Modal.Title>
+					<Modal.Title>Delete piece</Modal.Title>
 				</Modal.Header>
-				<Modal.Body>Are you sure you want to delete "{partName}"?</Modal.Body>
+				<Modal.Body>Are you sure you want to delete "{pieceName}"?</Modal.Body>
 				<Modal.Footer>
 					<Button variant="secondary" onClick={handleDeleteClose}>
 						Cancel
 					</Button>
-					<Button variant="danger" onClick={performDeletePart}>
+					<Button variant="danger" onClick={performDeleteSegment}>
 						Delete
 					</Button>
 				</Modal.Footer>
