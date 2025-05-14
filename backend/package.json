@@ -26,20 +26,13 @@
 	},
 	"main": "index.js",
 	"dependencies": {
-		"@fortawesome/fontawesome-svg-core": "^1.2.34",
-		"@fortawesome/free-solid-svg-icons": "^5.15.3",
-		"@popperjs/core": "^2.9.2",
 		"@sofie-automation/server-core-integration": "1.53.0-nightly-release53-20250423-081454-dc957dd.0",
 		"@types/sqlite3": "^3.1.7",
 		"@types/uuid": "^8.3.1",
-		"bootstrap": "^4.6.2",
-		"core-js": "^3.26.0",
 		"electron-is-dev": "^2",
 		"sqlite3": "^5.1.2",
 		"type-fest": "^4.41.0",
-		"uid": "^2.0.0",
-		"uuid": "^8.3.2",
-		"yaml": "^1.10.0"
+		"uuid": "^8.3.2"
 	},
 	"devDependencies": {
 		"@electron/remote": "^2.0.8",
