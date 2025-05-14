@@ -50,10 +50,22 @@ const electronApi: BackendApi = {
 		})
 	},
 
+	resetSettings: () => {
+		return ipcRenderer.invoke('settings', {
+			type: 'reset',
+			payload: {}
+		})
+	},
 	getSettings: () => {
 		return ipcRenderer.invoke('settings', {
 			type: 'read',
 			payload: {}
+		})
+	},
+	updateSettings: (settings) => {
+		return ipcRenderer.invoke('settings', {
+			type: 'update',
+			payload: settings
 		})
 	},
 	getPiecesManifest: () => {

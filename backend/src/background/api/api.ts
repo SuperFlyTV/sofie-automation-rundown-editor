@@ -26,7 +26,9 @@ export interface BackendApi {
 	onCoreConnectionInfo: (callback: (newInfo: CoreConnectionInfo) => void) => void
 	getCoreConnectionInfo: () => Promise<CoreConnectionInfo>
 
+	resetSettings: () => Promise<void>
 	getSettings: () => Promise<ApplicationSettings>
+	updateSettings: (settings: ApplicationSettings) => Promise<ApplicationSettings>
 	getPiecesManifest: () => Promise<PiecesManifest>
 
 	getPlaylists: () => Promise<Playlist[]>

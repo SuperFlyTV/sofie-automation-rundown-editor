@@ -1,4 +1,4 @@
-import type { ApplicationSettings, Setting } from '~backend/background/interfaces.js'
+import type { ApplicationSettings } from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 
@@ -11,9 +11,9 @@ import { createAppAsyncThunk } from './app'
 // 	segmentId: string
 // 	rank: number
 // }
-// export interface UpdateSettingPayload {
-// 	setting: Setting
-// }
+export interface UpdateSettingsPayload {
+	settings: ApplicationSettings
+}
 // export interface RemoveSettingPayload {
 // 	id: string
 // }
@@ -32,12 +32,12 @@ import { createAppAsyncThunk } from './app'
 // 		})
 // 	}
 // )
-// export const updateSetting = createAppAsyncThunk(
-// 	'settings/updateSetting',
-// 	async (payload: UpdateSettingPayload) => {
-// 		return electronApi.updateSetting(payload.setting)
-// 	}
-// )
+export const updateSettings = createAppAsyncThunk(
+	'settings/updateSettings',
+	async (payload: UpdateSettingsPayload) => {
+		return electronApi.updateSettings(payload.settings)
+	}
+)
 // export const removeSetting = createAppAsyncThunk(
 // 	'settings/removeSetting',
 // 	async (payload: RemoveSettingPayload) => {
@@ -86,15 +86,12 @@ const settingsSlice = createSlice({
 				state.settings = null
 				state.error = action.error.message ?? 'Unknown Error'
 			})
-		// .addCase(addNewSetting.fulfilled, (state, action) => {
-		// 	state.settings.push(action.payload)
-		// })
-		// .addCase(updateSetting.fulfilled, (state, action) => {
-		// 	const index = state.settings.findIndex((setting) => setting.id === action.payload.id)
-		// 	if (index !== -1) {
-		// 		state.settings[index] = action.payload
-		// 	}
-		// })
+			// .addCase(addNewSetting.fulfilled, (state, action) => {
+			// 	state.settings.push(action.payload)
+			// })
+			.addCase(updateSettings.fulfilled, (state, action) => {
+				state.settings = action.payload
+			})
 		// .addCase(removeSetting.fulfilled, (state, action) => {
 		// 	const index = state.settings.findIndex((setting) => setting.id === action.payload.id)
 		// 	if (index !== -1) {
