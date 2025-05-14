@@ -5,11 +5,13 @@ import { CustomDateTimePicker, FieldInfo } from '../form'
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { removeRundown, updateRundown } from '~/store/rundowns'
-import { useAppDispatch, useAppStore } from '~/store/app'
+import { useAppDispatch, useAppSelector, useAppStore } from '~/store/app'
 
 export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 	const dispatch = useAppDispatch()
 	const store = useAppStore()
+
+	const metadataFields = useAppSelector((state) => state.settings.settings?.rundownMetadata)
 
 	const form = useForm({
 		defaultValues: rundown,
@@ -136,6 +138,54 @@ export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 						</>
 					)}
 				/>
+
+				{metadataFields?.map((fieldInfo) => {
+					return (
+						<form.Field
+							key={`metaData.${fieldInfo.id}`}
+							name={`metaData.${fieldInfo.id}`}
+							children={(field) => (
+								<>
+									<Form.Group className="mb-3">
+										<Form.Label htmlFor={field.name}>{fieldInfo.label}:</Form.Label>
+
+										{fieldInfo.type === 'string' && (
+											<Form.Control
+												name={field.name}
+												type="text"
+												// eslint-disable-next-line @typescript-eslint/no-explicit-any
+												value={field.state.value as any}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+											/>
+										)}
+
+										{fieldInfo.type === 'number' && (
+											<Form.Control
+												name={field.name}
+												type="number"
+												value={Number(field.state.value)}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(Number(e.target.value))}
+											/>
+										)}
+
+										{fieldInfo.type === 'boolean' && (
+											<Form.Switch
+												name={field.name}
+												type="text"
+												checked={Boolean(field.state.value)}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.checked)}
+											/>
+										)}
+									</Form.Group>
+									<FieldInfo field={field} />
+								</>
+							)}
+						/>
+					)
+				})}
 
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting, state.isPristine]}
