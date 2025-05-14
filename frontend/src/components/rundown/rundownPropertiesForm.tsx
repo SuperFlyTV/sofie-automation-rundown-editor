@@ -140,7 +140,7 @@ export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 										Discard
 									</Button>
 									<Button type="submit" disabled={!canSubmit || isPristine} variant="primary">
-										{isSubmitting ? '...' : 'Submit'}
+										{isSubmitting ? '...' : 'Save'}
 									</Button>
 								</ButtonGroup>
 							</div>

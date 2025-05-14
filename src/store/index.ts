@@ -282,69 +282,13 @@ const store = new Vuex.Store<State>({
 			}
 		},
 
-		removeSegment: async ({ commit }, id: string) => {
-			await ipcRenderer.invoke(
-				'segments',
-				literal<IpcOperation>({
-					type: IpcOperationType.Delete,
-					payload: {
-						id
-					}
-				})
-			)
-			commit('removeSegment', id)
-		},
+		removeSegment: async ({ commit }, id: string) => {},
 		newSegment: async ({ commit }, { playlistId, rundownId, rank }) => {},
-		updateSegment: async ({ commit }, update) => {
-			const rundown = await ipcRenderer.invoke(
-				'segments',
-				literal<IpcOperation>({
-					type: IpcOperationType.Update,
-					payload: update
-				})
-			)
-			commit('updateSegment', rundown)
-		},
+		updateSegment: async ({ commit }, update) => {},
 
-		removePart: async ({ commit }, id: string) => {
-			await ipcRenderer.invoke(
-				'parts',
-				literal<IpcOperation>({
-					type: IpcOperationType.Delete,
-					payload: {
-						id
-					}
-				})
-			)
-			commit('removePart', id)
-		},
-		newPart: async ({ commit }, { playlistId, rundownId, segmentId, rank }) => {
-			const part = await ipcRenderer.invoke(
-				'parts',
-				literal<IpcOperation>({
-					type: IpcOperationType.Create,
-					payload: {
-						name: `Part ${rank + 1}`,
-						playlistId,
-						rundownId,
-						segmentId,
-						rank,
-						float: false
-					}
-				})
-			)
-			commit('addPart', part)
-		},
-		updatePart: async ({ commit }, update) => {
-			const rundown = await ipcRenderer.invoke(
-				'parts',
-				literal<IpcOperation>({
-					type: IpcOperationType.Update,
-					payload: update
-				})
-			)
-			commit('updatePart', rundown)
-		},
+		removePart: async ({ commit }, id: string) => {},
+		newPart: async ({ commit }, { playlistId, rundownId, segmentId, rank }) => {},
+		updatePart: async ({ commit }, update) => {},
 
 		removePiece: async ({ commit }, id: string) => {
 			await ipcRenderer.invoke(

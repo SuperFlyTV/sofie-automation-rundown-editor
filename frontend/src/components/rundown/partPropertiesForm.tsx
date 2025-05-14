@@ -1,21 +1,21 @@
 import { useForm } from '@tanstack/react-form'
 import { Button, ButtonGroup, Form, Modal } from 'react-bootstrap'
-import type { Segment } from '~backend/background/interfaces'
+import type { Part } from '~backend/background/interfaces'
 import { FieldInfo } from '../form'
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useAppDispatch } from '~/store/app'
-import { removeSegment, updateSegment } from '~/store/segments'
+import { useAppDispatch, useAppSelector } from '~/store/app'
+import { removePart, updatePart } from '~/store/parts'
 
-export function SegmentPropertiesForm({ segment }: { segment: Segment }) {
+export function PartPropertiesForm({ part }: { part: Part }) {
 	const dispatch = useAppDispatch()
 
 	const form = useForm({
-		defaultValues: segment,
+		defaultValues: part,
 		onSubmit: async (values) => {
 			console.log('submit', values)
 
-			await dispatch(updateSegment({ segment: values.value })).unwrap()
+			await dispatch(updatePart({ part: values.value })).unwrap()
 
 			// Mark as pristine
 			form.reset()
@@ -24,7 +24,7 @@ export function SegmentPropertiesForm({ segment }: { segment: Segment }) {
 
 	return (
 		<div>
-			<h2>Segment</h2>
+			<h2>Part</h2>
 
 			<Form
 				onSubmit={(e) => {
@@ -70,14 +70,72 @@ export function SegmentPropertiesForm({ segment }: { segment: Segment }) {
 					)}
 				/>
 
+				<form.Field
+					name="payload.type"
+					children={(field) => (
+						<>
+							<Form.Group className="mb-3">
+								<Form.Label htmlFor={field.name}>Type:</Form.Label>
+								<Form.Select
+									name={field.name}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={(e) => field.handleChange(e.target.value)}
+								>
+									<PartTypeOptions />
+								</Form.Select>
+							</Form.Group>
+							<FieldInfo field={field} />
+						</>
+					)}
+				/>
+				<form.Field
+					name="payload.duration"
+					children={(field) => (
+						<>
+							<Form.Group className="mb-3">
+								<Form.Label htmlFor={field.name}>Duration (seconds):</Form.Label>
+								<Form.Control
+									name={field.name}
+									type="number"
+									value={Number(field.state.value)}
+									onBlur={field.handleBlur}
+									onChange={(e) => field.handleChange(Number(e.target.value))}
+								/>
+							</Form.Group>
+							<FieldInfo field={field} />
+						</>
+					)}
+				/>
+				<form.Field
+					name="payload.script"
+					children={(field) => (
+						<>
+							<Form.Group className="mb-3">
+								<Form.Label htmlFor={field.name}>Script:</Form.Label>
+								<Form.Control
+									name={field.name}
+									as="textarea"
+									rows={3}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={(e) => field.handleChange(e.target.value)}
+								/>
+							</Form.Group>
+							<FieldInfo field={field} />
+						</>
+					)}
+				/>
+
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting, state.isPristine]}
 					children={([canSubmit, isSubmitting, isPristine]) => (
 						<div className="d-flex justify-content-between">
 							<DeleteSegmentButton
-								rundownId={segment.rundownId}
-								segmentId={segment.id}
-								segmentName={segment.name}
+								rundownId={part.rundownId}
+								segmentId={part.segmentId}
+								partId={part.id}
+								partName={part.name}
 								disabled={!canSubmit}
 							/>
 
@@ -102,18 +160,34 @@ export function SegmentPropertiesForm({ segment }: { segment: Segment }) {
 	)
 }
 
+function PartTypeOptions() {
+	const types = useAppSelector((state) => state.settings.settings?.partTypes)
+	if (!types) return <></>
+
+	// Remove duplicates
+	const typesUnique = Array.from(new Set(types))
+
+	return typesUnique.map((type) => (
+		<option key={type} value={type}>
+			{type}
+		</option>
+	))
+}
+
 function DeleteSegmentButton({
 	rundownId,
 	segmentId,
-	segmentName,
+	partId,
+	partName,
 	disabled
 }: {
 	rundownId: string
 	segmentId: string
-	segmentName: string
+	partId: string
+	partName: string
 	disabled: boolean
 }) {
-	const navigate = useNavigate({ from: '/rundown/$rundownId/segment/$segmentId' })
+	const navigate = useNavigate({ from: '/rundown/$rundownId/segment/$segmentId/part/$partId' })
 	const dispatch = useAppDispatch()
 
 	const [showDelete, setShowDelete] = useState(false)
@@ -127,10 +201,10 @@ function DeleteSegmentButton({
 	}
 	const performDeleteSegment = () => {
 		// Navigate user to the list of segments
-		navigate({ to: '/rundown/$rundownId', params: { rundownId: rundownId } })
+		navigate({ to: '/rundown/$rundownId/segment/$segmentId', params: { rundownId, segmentId } })
 
 		// perform operation
-		dispatch(removeSegment({ id: segmentId })).unwrap()
+		dispatch(removePart({ id: partId })).unwrap()
 	}
 
 	return (
@@ -143,7 +217,7 @@ function DeleteSegmentButton({
 				<Modal.Header closeButton>
 					<Modal.Title>Delete segment</Modal.Title>
 				</Modal.Header>
-				<Modal.Body>Are you sure you want to delete "{segmentName}"?</Modal.Body>
+				<Modal.Body>Are you sure you want to delete "{partName}"?</Modal.Body>
 				<Modal.Footer>
 					<Button variant="secondary" onClick={handleDeleteClose}>
 						Cancel

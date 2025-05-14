@@ -2,6 +2,7 @@ import type { AppDispatch } from './app'
 import { updateConnectionStatus } from './connectionStatus'
 import { initPlaylists } from './playlists'
 import { initRundowns } from './rundowns'
+import { loadSettings } from './settings'
 
 export function initStore(dispatch: AppDispatch): void {
 	if (!electronApi) throw new Error('electronApi is not available')
@@ -33,14 +34,9 @@ export function initStore(dispatch: AppDispatch): void {
 	// )
 	// store.commit('setPieceTypeManifests', pieceTypes)
 
-	// const settings = await ipcRenderer.invoke(
-	// 	'settings',
-	// 	literal<IpcOperation>({
-	// 		type: IpcOperationType.Read,
-	// 		payload: {}
-	// 	})
-	// )
-	// store.commit('setSettings', settings)
+	dispatch(loadSettings()).catch((error) => {
+		console.error('Error fetching playlists:', error)
+	})
 
 	electronApi
 		.getCoreConnectionInfo()

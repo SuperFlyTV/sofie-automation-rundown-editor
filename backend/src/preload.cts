@@ -19,9 +19,12 @@ import type { BackendApi } from './background/api/api.js'
 import {
 	CoreConnectionInfo,
 	MutationPartCreate,
+	MutationPartUpdate,
 	MutationPieceCreate,
 	MutationRundownCreate,
+	MutationRundownUpdate,
 	MutationSegmentCreate,
+	MutationSegmentUpdate,
 	Rundown,
 	Segment
 } from './background/interfaces.js'
@@ -32,13 +35,20 @@ const electronApi: BackendApi = {
 			callback(newInfo)
 		})
 	},
-
 	getCoreConnectionInfo: () => {
 		return ipcRenderer.invoke('coreConnectionInfo', {
 			type: 'read',
 			payload: {}
 		})
 	},
+
+	getSettings: () => {
+		return ipcRenderer.invoke('settings', {
+			type: 'read',
+			payload: {}
+		})
+	},
+
 	getPlaylists: () => {
 		return ipcRenderer.invoke('playlists', {
 			type: 'read',
@@ -58,7 +68,7 @@ const electronApi: BackendApi = {
 			payload: rundown
 		})
 	},
-	updateRundown: (rundown: Rundown) => {
+	updateRundown: (rundown: MutationRundownUpdate) => {
 		return ipcRenderer.invoke('rundowns', {
 			type: 'update',
 			payload: rundown
@@ -87,7 +97,7 @@ const electronApi: BackendApi = {
 			payload: segment
 		})
 	},
-	updateSegment: (segment: Segment) => {
+	updateSegment: (segment: MutationSegmentUpdate) => {
 		return ipcRenderer.invoke('segments', {
 			type: 'update',
 			payload: segment
@@ -114,6 +124,20 @@ const electronApi: BackendApi = {
 		return ipcRenderer.invoke('parts', {
 			type: 'create',
 			payload: part
+		})
+	},
+	updatePart: (part: MutationPartUpdate) => {
+		return ipcRenderer.invoke('parts', {
+			type: 'update',
+			payload: part
+		})
+	},
+	deletePart: (partId: string) => {
+		return ipcRenderer.invoke('parts', {
+			type: 'delete',
+			payload: {
+				id: partId
+			}
 		})
 	},
 

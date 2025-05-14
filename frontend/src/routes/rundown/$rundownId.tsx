@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { EditorNavbar } from '~/components/navbar/navbar'
+import { RundownBreadcrumbs } from '~/components/rundown/breadcrumbs'
 import { RundownNavbar } from '~/components/rundown/navbar'
 import { RundownSidebar } from '~/components/rundown/sidebar'
 import { useAppDispatch, useAppSelector } from '~/store/app'
@@ -43,6 +44,7 @@ function RouteComponent() {
 		loadStatus.partsRundownId,
 		loadStatus.piecesStatus,
 		loadStatus.piecesRundownId,
+		rundownId,
 		dispatch
 	])
 
@@ -69,7 +71,7 @@ function RouteComponent() {
 				</div>
 			</div>
 
-			<div>Breadcrumbs: TODO (sticky bottom)</div>
+			<RundownBreadcrumbs rundownId={rundown.id} rundownName={rundown.name} />
 		</>
 	)
 }

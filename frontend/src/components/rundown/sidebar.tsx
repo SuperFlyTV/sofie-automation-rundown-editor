@@ -63,6 +63,8 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			})
 	}
 
+	const segmentDuration = sortedParts.reduce((acc, part) => acc + (part.payload.duration ?? 0), 0)
+
 	return (
 		<div className="mb-1">
 			<Link
@@ -70,8 +72,9 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 				params={{ rundownId: segment.rundownId, segmentId: segment.id }}
 			>
 				{/* // TODO - highlight when active */}
-				<button style={segmentStyle} className="mb-1">
+				<button style={segment.float ? floatedSegmentStyle : segmentStyle} className="mb-1">
 					{segment.name}
+					<span style={timeStyle}>{displayTime(segmentDuration)}</span>
 				</button>
 			</Link>
 
@@ -83,8 +86,12 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 						params={{ rundownId: segment.rundownId, segmentId: segment.id, partId: part.id }}
 					>
 						{/* // TODO - highlight when active */}
-						<button style={partStyle} className="mb-1">
+						<button
+							style={segment.float || part.float ? floatedPartStyle : partStyle}
+							className="mb-1"
+						>
 							{part.name}
+							<span style={timeStyle}>{displayTime(part.payload.duration)}</span>
 						</button>
 					</Link>
 				))}
@@ -94,6 +101,17 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			</div>
 		</div>
 	)
+}
+
+function displayTime(seconds: number | undefined) {
+	if (!seconds) return
+
+	const h = Math.floor(seconds / 3600)
+	const m = Math.floor((seconds % 3600) / 60)
+	const s = Math.floor(seconds % 60)
+	const pad = (t: number) => ('00' + t).substr(-2)
+
+	return `${h > 0 ? pad(h) + ':' : ''}${pad(m)}:${pad(s)}`
 }
 
 const baseButtonStyle: React.CSSProperties = {
@@ -114,6 +132,10 @@ const segmentStyle: React.CSSProperties = {
 	lineHeight: '2em',
 	color: 'white'
 }
+const floatedSegmentStyle: React.CSSProperties = {
+	...segmentStyle,
+	textDecoration: 'line-through'
+}
 
 const addSegmentStyle: React.CSSProperties = {
 	...segmentStyle,
@@ -128,8 +150,18 @@ const partStyle: React.CSSProperties = {
 	lineHeight: '1.5em',
 	color: 'white'
 }
+const floatedPartStyle: React.CSSProperties = {
+	...partStyle,
+	textDecoration: 'line-through'
+}
 
 const addPartStyle: React.CSSProperties = {
 	...partStyle,
 	color: '#777'
+}
+
+const timeStyle: React.CSSProperties = {
+	fontSize: '0.7em',
+	color: '#b2b2b2',
+	marginLeft: '0.5em'
 }
