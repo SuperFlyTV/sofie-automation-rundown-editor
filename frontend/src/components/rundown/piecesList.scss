@@ -1,0 +1,52 @@
+.rundown-pieces-list {
+	width: 100%;
+
+	tr {
+		min-height: 2em;
+		line-height: 2em;
+		cursor: pointer;
+
+		&:hover {
+			background-color: #777;
+			color: white;
+		}
+	}
+
+	td {
+		padding: 0 0.25em;
+	}
+
+	.piece-type {
+		width: 80px;
+
+		text-align: center;
+	}
+
+	.piece-start,
+	.piece-duration {
+		width: 60px;
+
+		text-align: center;
+	}
+
+	.add-piece-button {
+		grid-column: 1/5;
+
+		text-decoration: none;
+
+		display: block;
+		border: none;
+		width: 100%;
+		text-align: left;
+
+		// font-size: 1.2em;
+		// line-height: 2em;
+		color: #777;
+		background: none;
+
+		&:hover {
+			background-color: #777;
+			color: white;
+		}
+	}
+}

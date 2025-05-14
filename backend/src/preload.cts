@@ -48,6 +48,12 @@ const electronApi: BackendApi = {
 			payload: {}
 		})
 	},
+	getPiecesManifest: () => {
+		return ipcRenderer.invoke('pieceTypeManifests', {
+			type: 'read',
+			payload: {}
+		})
+	},
 
 	getPlaylists: () => {
 		return ipcRenderer.invoke('playlists', {

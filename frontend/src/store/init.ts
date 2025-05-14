@@ -1,5 +1,6 @@
 import type { AppDispatch } from './app'
 import { updateConnectionStatus } from './connectionStatus'
+import { loadPiecesManifest } from './piecesManifest'
 import { initPlaylists } from './playlists'
 import { initRundowns } from './rundowns'
 import { loadSettings } from './settings'
@@ -25,17 +26,12 @@ export function initStore(dispatch: AppDispatch): void {
 			console.error('Error fetching rundowns:', error)
 		})
 
-	// const pieceTypes = await ipcRenderer.invoke(
-	// 	'pieceTypeManifests',
-	// 	literal<IpcOperation>({
-	// 		type: IpcOperationType.Read,
-	// 		payload: {}
-	// 	})
-	// )
-	// store.commit('setPieceTypeManifests', pieceTypes)
+	dispatch(loadPiecesManifest()).catch((error) => {
+		console.error('Error fetching pieces manifest:', error)
+	})
 
 	dispatch(loadSettings()).catch((error) => {
-		console.error('Error fetching playlists:', error)
+		console.error('Error fetching settings:', error)
 	})
 
 	electronApi

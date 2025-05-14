@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Col, Row } from 'react-bootstrap'
 import { PartPropertiesForm } from '~/components/rundown/partPropertiesForm'
+import { PiecesList } from '~/components/rundown/piecesList'
 import { useAppSelector } from '~/store/app'
 
 export const Route = createFileRoute('/rundown/$rundownId/segment/$segmentId/part/$partId/')({
@@ -28,7 +29,7 @@ function RouteComponent() {
 			</Col>
 
 			<Col xs={6} style={{ backgroundColor: '#000000' }}>
-				TEST2
+				<PiecesList part={part} />
 			</Col>
 		</Row>
 	)

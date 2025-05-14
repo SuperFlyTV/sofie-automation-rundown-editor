@@ -10,6 +10,7 @@ import type {
 	MutationSegmentUpdate,
 	Part,
 	Piece,
+	PiecesManifest,
 	Playlist,
 	Rundown,
 	Segment
@@ -20,6 +21,7 @@ export interface BackendApi {
 	getCoreConnectionInfo: () => Promise<CoreConnectionInfo>
 
 	getSettings: () => Promise<ApplicationSettings>
+	getPiecesManifest: () => Promise<PiecesManifest>
 
 	getPlaylists: () => Promise<Playlist[]>
 

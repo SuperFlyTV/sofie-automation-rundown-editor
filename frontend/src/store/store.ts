@@ -6,6 +6,7 @@ import segmentsReducer from './segments.js'
 import partsReducer from './parts.js'
 import piecesReducer from './pieces.js'
 import settingsReducer from './settings.js'
+import piecesManifestReducer from './piecesManifest.js'
 
 export const store = configureStore({
 	reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
 		parts: partsReducer,
 		pieces: piecesReducer,
 		settings: settingsReducer,
+		piecesManifest: piecesManifestReducer,
 		coreConnectionStatus: connectionStatusReducer
 	}
 })

@@ -5,11 +5,15 @@ import { createAppAsyncThunk } from './app'
 export interface LoadPiecesPayload {
 	rundownId: string
 }
-// export interface NewPiecePayload {
-// 	playlistId: string | null // TODO - this should be handled by the server..
-// 	rundownId: string
-// 	rank: number
-// }
+export interface NewPiecePayload {
+	playlistId: string | null // TODO - this should be handled by the server..
+	rundownId: string
+	segmentId: string
+	partId: string
+
+	name: string
+	pieceType: string
+}
 // export interface UpdatePiecePayload {
 // 	piece: Piece
 // }
@@ -17,18 +21,20 @@ export interface LoadPiecesPayload {
 // 	id: string
 // }
 
-// export const addNewPiece = createAppAsyncThunk(
-// 	'pieces/addNewPiece',
-// 	async (payload: NewPiecePayload) => {
-// 		return electronApi.addNewPiece({
-// 			name: `Piece ${payload.rank + 1}`,
-// 			playlistId: payload.playlistId,
-// 			rundownId: payload.rundownId,
-// 			rank: payload.rank,
-// 			float: false
-// 		})
-// 	}
-// )
+export const addNewPiece = createAppAsyncThunk(
+	'pieces/addNewPiece',
+	async (payload: NewPiecePayload) => {
+		return electronApi.addNewPiece({
+			name: payload.name,
+			playlistId: payload.playlistId,
+			rundownId: payload.rundownId,
+			segmentId: payload.segmentId,
+			partId: payload.partId,
+			pieceType: payload.pieceType,
+			payload: {}
+		})
+	}
+)
 // export const updatePiece = createAppAsyncThunk(
 // 	'pieces/updatePiece',
 // 	async (payload: UpdatePiecePayload) => {
@@ -95,9 +101,9 @@ const piecesSlice = createSlice({
 				state.pieces = []
 				state.error = action.error.message ?? 'Unknown Error'
 			})
-		// .addCase(addNewPiece.fulfilled, (state, action) => {
-		// 	state.pieces.push(action.payload)
-		// })
+			.addCase(addNewPiece.fulfilled, (state, action) => {
+				state.pieces.push(action.payload)
+			})
 		// 	.addCase(updatePiece.fulfilled, (state, action) => {
 		// 		const index = state.findIndex((piece) => piece.id === action.payload.id)
 		// 		if (index !== -1) {

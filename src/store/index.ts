@@ -166,9 +166,7 @@ const store = new Vuex.Store<State>({
 			}
 		},
 
-		setPieceTypeManifests: (state, pieceTypeManifests) => {
-			Vue.set(state, 'piecesManifest', pieceTypeManifests)
-		},
+		setPieceTypeManifests: (state, pieceTypeManifests) => {},
 		removePieceTypeManifest: (state, id) => {
 			for (let i = 0; i < state.piecesManifest.length; i++) {
 				if (state.piecesManifest[i].id === id) {
@@ -188,13 +186,9 @@ const store = new Vuex.Store<State>({
 			}
 		},
 
-		setSettings: (state, pieceTypeManifests) => {
-			Vue.set(state, 'settings', pieceTypeManifests)
-		},
+		setSettings: (state, pieceTypeManifests) => {},
 
-		setCoreConnectionInfo: (state, coreConnnectionInfo: CoreConnectionInfo) => {
-			Vue.set(state, 'coreConnectionInfo', coreConnnectionInfo)
-		}
+		setCoreConnectionInfo: (state, coreConnnectionInfo: CoreConnectionInfo) => {}
 	},
 	actions: {
 		removePlaylist: async ({ commit }, id: string) => {
