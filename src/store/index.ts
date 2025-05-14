@@ -284,50 +284,12 @@ const store = new Vuex.Store<State>({
 		newPart: async ({ commit }, { playlistId, rundownId, segmentId, rank }) => {},
 		updatePart: async ({ commit }, update) => {},
 
-		removePiece: async ({ commit }, id: string) => {
-			await ipcRenderer.invoke(
-				'pieces',
-				literal<IpcOperation>({
-					type: IpcOperationType.Delete,
-					payload: {
-						id
-					}
-				})
-			)
-			commit('removePiece', id)
-		},
+		removePiece: async ({ commit }, id: string) => {},
 		newPiece: async (
 			{ commit, state },
 			{ playlistId, rundownId, segmentId, partId, pieceType }
-		) => {
-			const manifest = state.piecesManifest.find((m) => m.id === pieceType)
-			const piece = await ipcRenderer.invoke(
-				'pieces',
-				literal<IpcOperation>({
-					type: IpcOperationType.Create,
-					payload: {
-						name: manifest && manifest.includeTypeInName ? manifest.name : 'New piece',
-						playlistId,
-						rundownId,
-						segmentId,
-						partId,
-						pieceType
-					}
-				})
-			)
-			commit('addPiece', piece)
-			return piece
-		},
-		updatePiece: async ({ commit }, update) => {
-			const rundown = await ipcRenderer.invoke(
-				'pieces',
-				literal<IpcOperation>({
-					type: IpcOperationType.Update,
-					payload: update
-				})
-			)
-			commit('updatePiece', rundown)
-		},
+		) => {},
+		updatePiece: async ({ commit }, update) => {},
 
 		removePieceTypeManifest: async ({ commit }, id: string) => {
 			await ipcRenderer.invoke(

@@ -1,0 +1,14 @@
+.rundown-navbar {
+	background: #2689ba;
+
+	.timing {
+		display: grid;
+		grid-template-columns: auto auto auto;
+		grid-template-rows: auto auto;
+		gap: 0 0.2em;
+		grid-auto-flow: column;
+	}
+	.timing .label {
+		font-size: 0.8em;
+	}
+}
