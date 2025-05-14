@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { EditorNavbar } from '~/components/navbar/navbar'
 import { RundownBreadcrumbs } from '~/components/rundown/breadcrumbs'
@@ -50,7 +50,7 @@ function RouteComponent() {
 
 	const rundown = useAppSelector((state) => state.rundowns.find((r) => r.id === rundownId))
 	if (!rundown) {
-		// TODO - or redirect back to the list?
+		// Note: this can't redirect, or it gets stuck in a loop
 		return (
 			<>
 				<EditorNavbar />
@@ -60,7 +60,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<>
+		<div style={rootStyle}>
 			<RundownNavbar rundown={rundown} />
 
 			<div style={layoutStyle}>
@@ -70,12 +70,20 @@ function RouteComponent() {
 			</div>
 
 			<RundownBreadcrumbs rundownId={rundown.id} rundownName={rundown.name} />
-		</>
+		</div>
 	)
+}
+
+const rootStyle: React.CSSProperties = {
+	display: 'grid',
+	height: '100%',
+	gridTemplateRows: 'auto 1fr auto',
+	overflowX: 'hidden'
 }
 
 const layoutStyle: React.CSSProperties = {
 	display: 'grid',
 	gridAutoFlow: 'column',
-	gridTemplateColumns: '1fr 3fr'
+	gridTemplateColumns: '1fr 3fr',
+	overflowX: 'hidden'
 }

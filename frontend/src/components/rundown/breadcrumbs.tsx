@@ -75,7 +75,7 @@ export function RundownBreadcrumbs({
 	}
 
 	return (
-		<Navbar expand="lg" style={{ background: '#888888' }} fixed="bottom">
+		<Navbar expand="lg" style={{ background: '#888888' }}>
 			<Container fluid>
 				<Nav className="me-auto">
 					<Nav.Link as={Link} to={`/rundown/${rundownId}`}>
