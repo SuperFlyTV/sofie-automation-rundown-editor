@@ -9,7 +9,7 @@ export default defineConfig({
 		alias: {
 			'~': path.resolve(__dirname, './src/'),
 			'~backend': path.resolve(__dirname, '../backend/src/'),
-			'~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap')
+			'~bootstrap': path.resolve(__dirname, '../node_modules/bootstrap')
 		}
 	},
 	plugins: [
