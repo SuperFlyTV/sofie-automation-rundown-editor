@@ -9,9 +9,8 @@ import {
 	MutationPieceTypeManifestUpdate,
 	PieceTypeManifest
 } from '../interfaces'
-import { db, InsertResolution, UpdateResolution } from '../db'
+import { db } from '../db'
 import { v4 as uuid } from 'uuid'
-import { RunResult } from 'sqlite3'
 
 export const mutations = {
 	async create(
@@ -23,57 +22,32 @@ export const mutations = {
 		}
 		delete document.id
 
-		const { result, error } = await new Promise<InsertResolution>((resolve) =>
-			db.run(
-				`
-			INSERT INTO pieceTypeManifests (id,document)
-			VALUES (?,json(?));
-		`,
-				[id, JSON.stringify(document)],
-				function (e: Error | null) {
-					if (e) {
-						resolve({ result: undefined, error: e })
-					} else if (this) {
-						resolve({ result: this.lastID, error: undefined })
-					}
-				}
-			)
-		)
+		try {
+			const stmt = db.prepare(`
+				INSERT INTO pieceTypeManifests (id,document)
+				VALUES (?,json(?));
+			`)
 
-		if (result) {
-			const { result: returnResult, error } = await mutations.read({ id })
+			const result = stmt.run(id, JSON.stringify(document))
+			if (result.changes === 0) throw new Error('No rows were inserted')
 
-			if (returnResult && !Array.isArray(returnResult)) {
-				return { result: returnResult }
-			}
-			if (error) {
-				return { error }
-			}
-
-			return { error: new Error('Unknonw error') }
+			return this.readOne(id)
+		} catch (e) {
+			return { error: e as Error }
 		}
-
-		return { error: error as Error }
 	},
-	async read(
-		payload: Partial<MutationPieceTypeManifestRead>
-	): Promise<{ result?: PieceTypeManifest | PieceTypeManifest[] | undefined; error?: Error }> {
-		if (payload && payload.id) {
-			const document = await new Promise<DBPieceTypeManifest | undefined>((resolve, reject) =>
-				db.get<DBPieceTypeManifest>(
-					`
+	async readOne(id: string): Promise<{ result?: PieceTypeManifest; error?: Error }> {
+		try {
+			const stmt = db.prepare(`
 				SELECT *
 				FROM pieceTypeManifests
 				WHERE id = ?
 				LIMIT 1;
-			`,
-					[payload.id],
-					(e, r) => (e ? reject(e) : resolve(r))
-				)
-			)
+			`)
 
+			const document = stmt.get() as DBPieceTypeManifest | undefined
 			if (!document) {
-				return { result: undefined }
+				return { error: new Error(`PieceTypeManifest with id ${id} not found`) }
 			}
 
 			return {
@@ -82,22 +56,32 @@ export const mutations = {
 					id: document.id
 				}
 			}
+		} catch (e) {
+			return { error: e as Error }
+		}
+	},
+	async read(
+		payload: Partial<MutationPieceTypeManifestRead>
+	): Promise<{ result?: PieceTypeManifest | PieceTypeManifest[] | undefined; error?: Error }> {
+		if (payload && payload.id) {
+			return this.readOne(payload.id)
 		} else {
-			const documents = await new Promise<DBPieceTypeManifest[]>((resolve, reject) =>
-				db.all<DBPieceTypeManifest>(
-					`
-				SELECT *
-				FROM pieceTypeManifests
-			`,
-					(e, r) => (e ? reject(e) : resolve(r))
-				)
-			)
+			try {
+				const stmt = db.prepare(`
+					SELECT *
+					FROM pieceTypeManifests
+				`)
 
-			return {
-				result: documents.map((d) => ({
-					...JSON.parse(d.document),
-					id: d.id
-				}))
+				const documents = stmt.all() as unknown as DBPieceTypeManifest[]
+
+				return {
+					result: documents.map((d) => ({
+						...JSON.parse(d.document),
+						id: d.id
+					}))
+				}
+			} catch (e) {
+				return { error: e as Error }
 			}
 		}
 	},
@@ -108,47 +92,36 @@ export const mutations = {
 			...payload.update,
 			id: null
 		}
-		const { result, error } = await new Promise<UpdateResolution>((resolve) =>
-			db.run(
-				`
-			UPDATE pieceTypeManifests
-			SET id = ?, document = (SELECT json_patch(pieceTypeManifests.document, json(?)) FROM pieceTypeManifests WHERE id = ?)
-			WHERE id = "${payload.id}";
-		`,
-				[payload.update.id, JSON.stringify(update), payload.id],
-				(e) =>
-					e ? resolve({ result: undefined, error: e }) : resolve({ result: true, error: undefined })
-			)
-		)
 
-		if (result) {
-			const { result: returnResult, error } = await mutations.read({
-				id: payload.update.id
-			})
+		try {
+			const stmt = db.prepare(`
+				UPDATE pieceTypeManifests
+				SET id = ?, document = (SELECT json_patch(pieceTypeManifests.document, json(?)) FROM pieceTypeManifests WHERE id = ?)
+				WHERE id = ?;
+			`)
 
-			if (returnResult && !Array.isArray(returnResult)) {
-				return { result: returnResult }
-			}
-			if (error) {
-				return { error }
+			const result = stmt.run(payload.update.id, JSON.stringify(update), payload.id, payload.id)
+			if (result.changes === 0) {
+				throw new Error('No rows were updated')
 			}
 
-			return { error: new Error('Unknown error') }
+			return this.readOne(payload.id)
+		} catch (e) {
+			return { error: e as Error }
 		}
-
-		return { error }
 	},
 	async delete(payload: MutationPieceTypeManifestDelete): Promise<{ error?: Error }> {
-		return new Promise((resolve) =>
-			db.run(
-				`
-			DELETE FROM pieceTypeManifests
-			WHERE id = "${payload.id}";
-		`,
-				(r: RunResult, e: Error | null) =>
-					e ? resolve({ error: e }) : resolve({ error: undefined })
-			)
-		)
+		try {
+			const stmt = db.prepare(`
+				DELETE FROM pieceTypeManifests
+				WHERE id = ?;
+			`)
+
+			stmt.run(payload.id)
+			return {}
+		} catch (e) {
+			return { error: e as Error }
+		}
 	}
 }
 

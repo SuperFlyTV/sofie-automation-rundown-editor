@@ -7,7 +7,7 @@ import {
 	MutationApplicationSettingsCreate,
 	MutationApplicationSettingsUpdate
 } from '../interfaces'
-import { db, InsertResolution, UpdateResolution } from '../db'
+import { db } from '../db'
 import { PARTS_MANIFEST, PIECES_MANIFEST } from '../manifest'
 import { mutations as pieceTypeManifestMutations } from './pieceManifests'
 
@@ -19,60 +19,44 @@ export const mutations = {
 			...payload
 		}
 
-		const { result, error } = await new Promise<InsertResolution>((resolve) =>
-			db.run(
-				`
-			INSERT INTO settings (id,document)
-			VALUES ("settings",json(?));
-		`,
-				[JSON.stringify(document)],
-				function (e: Error | null) {
-					if (e) {
-						resolve({ result: undefined, error: e })
-					} else if (this) {
-						resolve({ result: this.lastID, error: undefined })
-					}
-				}
-			)
-		)
+		try {
+			const stmt = db.prepare(`
+				INSERT INTO settings (id,document)
+				VALUES ('settings',json(?));
+			`)
 
-		if (result) {
+			const result = stmt.run(JSON.stringify(document))
+			if (result.changes === 0) throw new Error('No rows were inserted')
+
 			console.log(result)
-			const { result: returnResult, error } = await mutations.read()
 
-			if (returnResult && !Array.isArray(returnResult)) {
-				return { result: returnResult }
-			}
-			if (error) {
-				return { error }
-			}
-
-			return { error: new Error('Unknonw error') }
+			return this.read()
+		} catch (e) {
+			return { error: e as Error }
 		}
-
-		return { error: error as Error }
 	},
 	async read(): Promise<{ result?: ApplicationSettings; error?: Error }> {
-		const { result, error } = await new Promise<{ error?: Error; result?: DBSettings }>((resolve) =>
-			db.get<DBSettings>(
-				`
-			SELECT *
-			FROM settings
-			WHERE id = "settings"
-			LIMIT 1;
-		`,
-				(error, result) => resolve({ error: error || undefined, result })
-			)
-		)
+		try {
+			const stmt = db.prepare(`
+				SELECT *
+				FROM settings
+				WHERE id = 'settings'
+				LIMIT 1;
+			`)
 
-		if (result) {
-			return {
-				result: {
-					...JSON.parse(result.document)
+			const result = stmt.get() as DBSettings | undefined
+
+			if (result) {
+				return {
+					result: {
+						...JSON.parse(result.document)
+					}
 				}
+			} else {
+				return {}
 			}
-		} else {
-			return { error }
+		} catch (e) {
+			return { error: e as Error }
 		}
 	},
 	async update(
@@ -81,33 +65,20 @@ export const mutations = {
 		const update = {
 			...payload
 		}
-		const { result, error } = await new Promise<UpdateResolution>((resolve) =>
-			db.run(
-				`
-			UPDATE settings
-			SET document = (SELECT json_patch(settings.document, json(?)) FROM settings WHERE id = "settings")
-			WHERE id = "settings";
-		`,
-				[JSON.stringify(update)],
-				(e) =>
-					e ? resolve({ result: undefined, error: e }) : resolve({ result: true, error: undefined })
-			)
-		)
 
-		if (result) {
-			const { result: returnResult, error } = await mutations.read()
+		try {
+			const stmt = db.prepare(`
+				UPDATE settings
+				SET document = (SELECT json_patch(settings.document, json(?)) FROM settings WHERE id = 'settings')
+				WHERE id = 'settings';
+			`)
 
-			if (returnResult && !Array.isArray(returnResult)) {
-				return { result: returnResult }
-			}
-			if (error) {
-				return { error }
-			}
+			stmt.run(JSON.stringify(update))
 
-			return { error: new Error('Unknown error') }
+			return this.read()
+		} catch (e) {
+			return { error: e as Error }
 		}
-
-		return { error }
 	},
 	async reset(): Promise<{ result?: ApplicationSettings; error?: Error }> {
 		// Reset to defaults from manifest

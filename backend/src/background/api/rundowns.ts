@@ -10,7 +10,7 @@ import {
 	MutatedRundown,
 	Rundown
 } from '../interfaces'
-import { db, InsertResolution, UpdateResolution } from '../db'
+import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { getMutatedSegmentsFromRundown } from './segments'
@@ -53,95 +53,70 @@ export const mutations = {
 		delete document.id
 		delete document.playlistId
 
-		const { result, error } = await new Promise<InsertResolution>((resolve) =>
-			db.run(
-				`
-			INSERT INTO rundowns (id,playlistId,document)
-			VALUES (?,?,json(?));
-		`,
-				[id, payload.playlistId || null, JSON.stringify(document)],
-				function (e: Error | null) {
-					if (e) {
-						resolve({ result: undefined, error: e })
-					} else if (this) {
-						resolve({ result: this.lastID, error: undefined })
-					}
-				}
-			)
-		)
+		try {
+			const stmt = db.prepare(`
+				INSERT INTO rundowns (id,playlistId,document)
+				VALUES (?,?,json(?));
+			`)
 
-		if (result) {
-			const document = await new Promise<DBRundown>((resolve, reject) =>
-				db.get<DBRundown>(
-					`
-				SELECT *
-				FROM rundowns
-				WHERE id = ?
-				LIMIT 1;
-			`,
-					[id],
-					(e, r) => {
-						if (e) {
-							reject(e)
-						} else {
-							resolve(r)
-						}
-					}
-				)
-			)
+			const result = stmt.run(id, payload.playlistId || null, JSON.stringify(document))
+			if (result.changes === 0) throw new Error('No rows were inserted')
+
+			console.log(result)
+
+			return this.readOne(id)
+		} catch (e) {
+			return { error: e as Error }
+		}
+	},
+	async readOne(id: string): Promise<{ result?: Rundown; error?: Error }> {
+		try {
+			const stmt = db.prepare(`
+					SELECT *
+					FROM rundowns
+					WHERE id = ?
+					LIMIT 1;
+				`)
+
+			const document = stmt.get() as DBRundown | undefined
+			if (!document) {
+				return { error: new Error(`Rundown with id ${id} not found`) }
+			}
 
 			return {
 				result: {
 					...JSON.parse(document.document),
 					id: document.id,
 					playlistId: document.playlistId
-				} as Rundown
+				}
 			}
+		} catch (e) {
+			return { error: e as Error }
 		}
-
-		return { error: error as Error }
 	},
 	async read(
 		payload: Partial<MutationRundownRead>
 	): Promise<{ result?: Rundown | Rundown[]; error?: Error }> {
 		if (payload && payload.id) {
-			const document = await new Promise<DBRundown>((resolve, reject) =>
-				db.get<DBRundown>(
-					`
-				SELECT *
-				FROM rundowns
-				WHERE id = ?
-				LIMIT 1;
-			`,
-					[payload.id],
-					(e, r) => (e ? reject(e) : resolve(r))
-				)
-			)
-
-			return {
-				result: {
-					...JSON.parse(document.document),
-					id: document.id,
-					playlistId: document.playlistId
-				}
-			}
+			return this.readOne(payload.id)
 		} else {
-			const documents = await new Promise<DBRundown[]>((resolve, reject) =>
-				db.all<DBRundown>(
-					`
-				SELECT *
-				FROM rundowns
-			`,
-					(e, r) => (e ? reject(e) : resolve(r))
-				)
-			)
+			try {
+				const stmt = db.prepare(`
+							SELECT *
+							FROM rundowns
+						`)
 
-			return {
-				result: documents.map((d) => ({
-					...JSON.parse(d.document),
-					id: d.id,
-					playlistId: d.playlistId
-				}))
+				const documents = stmt.all() as unknown as DBRundown[]
+
+				return {
+					result: documents.map((d) => ({
+						...JSON.parse(d.document),
+						id: d.id,
+						playlistId: d.playlistId
+					}))
+				}
+			} catch (e) {
+				return { error: e as Error }
 			}
 		}
 	},
@@ -151,68 +126,49 @@ export const mutations = {
 			id: null,
 			playlistId: null
 		}
-		const { result, error } = await new Promise<UpdateResolution>((resolve) =>
-			db.run(
-				`
-			UPDATE rundowns
-			SET playlistId = ?, document = (SELECT json_patch(rundowns.document, json(?)) FROM rundowns WHERE id = ?)
-			WHERE id = "${payload.id}";
-		`,
-				[payload.playlistId || null, JSON.stringify(update), payload.id],
-				(e) =>
-					e ? resolve({ result: undefined, error: e }) : resolve({ result: true, error: undefined })
-			)
-		)
 
-		if (result) {
-			const document = await new Promise<DBRundown>((resolve, reject) =>
-				db.get<DBRundown>(
-					`
-				SELECT *
-				FROM rundowns
-				WHERE id = ?
-				LIMIT 1;
-			`,
-					[payload.id],
-					(e, r) => {
-						if (e) {
-							reject(e)
-						} else {
-							resolve(r)
-						}
-					}
-				)
-			)
+		try {
+			const stmt = db.prepare(`
+				UPDATE rundowns
+				SET playlistId = ?, document = (SELECT json_patch(rundowns.document, json(?)) FROM rundowns WHERE id = ?)
+				WHERE id = ?;
+			`)
 
-			return {
-				result: {
-					...JSON.parse(document.document),
-					id: document.id,
-					playlistId: document.playlistId
-				}
+			const result = stmt.run(
+				payload.playlistId || null,
+				JSON.stringify(update),
+				payload.id,
+				payload.id
+			)
+			if (result.changes === 0) {
+				throw new Error('No rows were updated')
 			}
-		}
 
-		return { error }
+			return this.readOne(payload.id)
+		} catch (e) {
+			return { error: e as Error }
+		}
 	},
 	async delete(payload: MutationRundownDelete): Promise<{ error?: Error }> {
-		return new Promise((resolve) =>
-			db.exec(
-				`
-			BEGIN TRANSACTION;
-			DELETE FROM rundowns
-			WHERE id = "${payload.id}";
-			DELETE FROM segments
-			WHERE rundownId = "${payload.id}";
-			DELETE FROM parts
-			WHERE rundownId = "${payload.id}";
-			DELETE FROM pieces
-			WHERE rundownId = "${payload.id}";
-			COMMIT;
-		`,
-				(error: Error | null) => resolve({ error: error || undefined })
-			)
-		)
+		try {
+			const stmt = db.prepare(`
+				BEGIN TRANSACTION;
+				DELETE FROM rundowns
+				WHERE id = ?;
+				DELETE FROM segments
+				WHERE rundownId = ?;
+				DELETE FROM parts
+				WHERE rundownId = ?;
+				DELETE FROM pieces
+				WHERE rundownId = ?;
+				COMMIT;
+			`)
+
+			stmt.run(payload.id, payload.id, payload.id, payload.id)
+			return {}
+		} catch (e) {
+			return { error: e as Error }
+		}
 	}
 }
 

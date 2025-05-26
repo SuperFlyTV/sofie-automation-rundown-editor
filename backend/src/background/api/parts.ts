@@ -10,7 +10,7 @@ import {
 	MutatedPart,
 	Part
 } from '../interfaces'
-import { db, InsertResolution, UpdateResolution } from '../db'
+import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { getMutatedPiecesFromPart } from './pieces'
@@ -78,48 +78,39 @@ export const mutations = {
 		if (!payload.rundownId || !payload.segmentId)
 			return { error: new Error('Missing rundown or segment id') }
 
-		const { result, error } = await new Promise<InsertResolution>((resolve) =>
-			db.run(
-				`
-			INSERT INTO parts (id,playlistId,rundownId,segmentId,document)
-			VALUES (?,?,?,?,json(?));
-		`,
-				[
-					id,
-					payload.playlistId || null,
-					payload.rundownId,
-					payload.segmentId,
-					JSON.stringify(document)
-				],
-				function (e: Error | null) {
-					if (e) {
-						resolve({ result: undefined, error: e })
-					} else if (this) {
-						resolve({ result: this.lastID, error: undefined })
-					}
-				}
-			)
-		)
+		try {
+			const stmt = db.prepare(`
+				INSERT INTO parts (id,playlistId,rundownId,segmentId,document)
+				VALUES (?,?,?,?,json(?));
+			`)
 
-		if (result) {
-			const document = await new Promise<DBPart>((resolve, reject) =>
-				db.get<DBPart>(
-					`
-				SELECT *
-				FROM parts
-				WHERE id = ?
-				LIMIT 1;
-			`,
-					[id],
-					(e, r) => {
-						if (e) {
-							reject(e)
-						} else {
-							resolve(r)
-						}
-					}
-				)
+			const result = stmt.run(
+				id,
+				payload.playlistId || null,
+				payload.rundownId,
+				payload.segmentId,
+				JSON.stringify(document)
 			)
+			if (result.changes === 0) throw new Error('No rows were inserted')
+
+			return this.readOne(id)
+		} catch (e) {
+			return { error: e as Error }
+		}
+	},
+	async readOne(id: string): Promise<{ result?: Part; error?: Error }> {
+		try {
+			const stmt = db.prepare(`
+					SELECT *
+					FROM parts
+					WHERE id = ?
+					LIMIT 1;
+				`)
+
+			const document = stmt.get() as DBPart | undefined
+			if (!document) {
+				return { error: new Error(`Part with id ${id} not found`) }
+			}
 
 			return {
 				result: {
@@ -130,13 +121,17 @@ export const mutations = {
 					segmentId: document.segmentId
 				}
 			}
+		} catch (e) {
+			return { error: e as Error }
 		}
-
-		return { error }
 	},
 	async read(
 		payload: Partial<MutationPartRead>
 	): Promise<{ result?: Part | Part[]; error?: Error }> {
+		if (payload && payload.id) {
+			return this.readOne(payload.id)
+		}
+
 		let query = `
 			SELECT *
 			FROM parts
@@ -155,41 +150,13 @@ export const mutations = {
 			args.push(payload.segmentId)
 		}
 
-		if (payload.id) {
-			query += `\nLIMIT 1`
+		try {
+			const stmt = db.prepare(query)
 
-			const { result, error } = await new Promise<{ result?: DBPart; error?: Error }>((resolve) =>
-				db.get(query, args, (e, r: DBPart) =>
-					e ? resolve({ error: e, result: undefined }) : resolve({ result: r, error: undefined })
-				)
-			)
-
-			if (!result) {
-				return { error }
-			}
+			const documents = stmt.all(...args) as unknown as DBPart[]
 
 			return {
-				result: {
-					...JSON.parse(result.document),
-					id: result.id,
-					playlistId: result.playlistId,
-					rundownId: result.rundownId,
-					segmentId: result.segmentId
-				}
-			}
-		} else {
-			const { result, error } = await new Promise<{ result?: DBPart[]; error?: Error }>((resolve) =>
-				db.all(query, args, (e, r: DBPart[]) =>
-					e ? resolve({ error: e, result: undefined }) : resolve({ result: r, error: undefined })
-				)
-			)
-
-			if (!result) {
-				return { error }
-			}
-
-			return {
-				result: result.map((d) => ({
+				result: documents.map((d) => ({
 					...JSON.parse(d.document),
 					id: d.id,
 					playlistId: d.playlistId,
@@ -197,6 +164,8 @@ export const mutations = {
 					segmentId: d.segmentId
 				}))
 			}
+		} catch (e) {
+			return { error: e as Error }
 		}
 	},
 	async update(payload: MutationPartUpdate): Promise<{ result?: Part; error?: Error }> {
@@ -208,47 +177,45 @@ export const mutations = {
 			segmentId: null
 		}
 
-		const { result, error } = await new Promise<UpdateResolution>((resolve) =>
-			db.run(
-				`
-			UPDATE parts
-			SET playlistId = ?, segmentId = ?, document = (SELECT json_patch(parts.document, json(?)) FROM parts WHERE id = ?)
-			WHERE id = "${payload.id}";
-		`,
-				[payload.playlistId || null, payload.segmentId || null, JSON.stringify(update), payload.id],
-				(e) =>
-					e ? resolve({ error: e, result: undefined }) : resolve({ error: undefined, result: true })
+		try {
+			const stmt = db.prepare(`
+				UPDATE parts
+				SET playlistId = ?, segmentId = ?, document = (SELECT json_patch(parts.document, json(?)) FROM parts WHERE id = ?)
+				WHERE id = ?;
+			`)
+
+			const result = stmt.run(
+				payload.playlistId || null,
+				payload.segmentId || null,
+				JSON.stringify(update),
+				payload.id,
+				payload.id
 			)
-		)
+			if (result.changes === 0) {
+				throw new Error('No rows were updated')
+			}
 
-		if (!result || error) {
-			return { error }
+			return this.readOne(payload.id)
+		} catch (e) {
+			return { error: e as Error }
 		}
-
-		const { result: readResult, error: readError } = await mutations.read({
-			id: payload.id
-		})
-
-		if ((readResult && Array.isArray(result)) || error) {
-			return { error: readError }
-		}
-
-		return { result: readResult as Part }
 	},
 	async delete(payload: MutationPartDelete): Promise<{ error?: Error }> {
-		return new Promise((resolve) =>
-			db.exec(
-				`
-			BEGIN TRANSACTION;
-			DELETE FROM parts
-			WHERE id = "${payload.id}";
-			DELETE FROM pieces
-			WHERE partId = "${payload.id}";
-			COMMIT;
-		`,
-				(error: Error | null) => resolve({ error: error || undefined })
-			)
-		)
+		try {
+			const stmt = db.prepare(`
+				BEGIN TRANSACTION;
+				DELETE FROM parts
+				WHERE id = ?;
+				DELETE FROM pieces
+				WHERE partId = ?;
+				COMMIT;
+			`)
+
+			stmt.run(payload.id, payload.id)
+			return {}
+		} catch (e) {
+			return { error: e as Error }
+		}
 	}
 }
 

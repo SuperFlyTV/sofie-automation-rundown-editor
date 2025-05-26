@@ -1,8 +1,32 @@
 import { ipcMain } from 'electron'
-import { DBPlaylist, IpcOperation, IpcOperationType } from '../interfaces'
-import { db, InsertResolution } from '../db'
+import { DBPlaylist, IpcOperation, IpcOperationType, Playlist } from '../interfaces'
+import { db } from '../db'
 import { v4 as uuid } from 'uuid'
-import { RunResult } from 'sqlite3'
+
+async function readOne(id: string): Promise<{ result?: Playlist; error?: Error }> {
+	try {
+		const stmt = db.prepare(`
+			SELECT *
+			FROM playlists
+			WHERE id = ?
+			LIMIT 1;
+		`)
+
+		const document = stmt.get() as DBPlaylist | undefined
+		if (!document) {
+			return { error: new Error(`Playlist with id ${id} not found`) }
+		}
+
+		return {
+			result: {
+				...JSON.parse(document.document),
+				id: document.id
+			}
+		}
+	} catch (e) {
+		return { error: e as Error }
+	}
+}
 
 ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 	if (operation.type === IpcOperationType.Create) {
@@ -12,138 +36,74 @@ ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 		}
 		delete document.id
 
-		const { result, error } = await new Promise<InsertResolution>((resolve) =>
-			db.run(
-				`
-			INSERT INTO playlists (id,document)
-			VALUES (?,json(?));
-		`,
-				[id, JSON.stringify(document)],
-				function (e: Error | null) {
-					if (e) {
-						resolve({ result: undefined, error: e })
-					} else if (this) {
-						resolve({ result: this.lastID, error: undefined })
-					}
-				}
-			)
-		)
+		try {
+			const stmt = db.prepare(`
+				INSERT INTO playlists (id,document)
+				VALUES (?,json(?));
+			`)
 
-		if (result) {
-			const document = await new Promise<DBPlaylist>((resolve, reject) =>
-				db.get<DBPlaylist>(
-					`
-				SELECT *
-				FROM playlists
-				WHERE id = ?
-				LIMIT 1;
-			`,
-					[id],
-					(e, r) => {
-						if (e) {
-							reject(e)
-						} else {
-							resolve(r)
-						}
-					}
-				)
-			)
+			const result = stmt.run(id, JSON.stringify(document))
+			if (result.changes === 0) throw new Error('No rows were inserted')
 
-			return {
-				...JSON.parse(document.document),
-				id: document.id
-			}
+			return readOne(id)
+		} catch (e) {
+			return { error: e as Error }
 		}
-
-		return error
 	} else if (operation.type === IpcOperationType.Read) {
 		if (operation.payload && operation.payload.id) {
-			const document = await new Promise<DBPlaylist>((resolve, reject) =>
-				db.get<DBPlaylist>(
-					`
-				SELECT *
-				FROM playlists
-				WHERE id = ?
-				LIMIT 1;
-			`,
-					[operation.payload.id],
-					(e, r) => (e ? reject(e) : resolve(r))
-				)
-			)
-
-			return {
-				...JSON.parse(document.document),
-				id: document.id
-			}
+			return readOne(operation.payload.id)
 		} else {
-			const documents = await new Promise<DBPlaylist[]>((resolve, reject) =>
-				db.all<DBPlaylist>(
-					`
-				SELECT *
-				FROM playlists
-			`,
-					(e, r) => (e ? reject(e) : resolve(r))
-				)
-			)
+			try {
+				const stmt = db.prepare(`
+					SELECT *
+					FROM playlists
+				`)
 
-			return documents.map((d) => ({
-				...JSON.parse(d.document),
-				id: d.id
-			}))
+				const documents = stmt.all() as unknown as DBPlaylist[]
+
+				return {
+					result: documents.map((d) => ({
+						...JSON.parse(d.document),
+						id: d.id
+					}))
+				}
+			} catch (e) {
+				return { error: e as Error }
+			}
 		}
 	} else if (operation.type === IpcOperationType.Update) {
 		const update = {
 			...operation.payload,
 			id: null
 		}
-		const result = await new Promise((resolve, reject) =>
-			db.run(
-				`
-			UPDATE playlists
-			SET document = (SELECT json_patch(playlists.document, json(?)) FROM playlists WHERE id = ?)
-			WHERE id = "${operation.payload.id}";
-		`,
-				[JSON.stringify(update), operation.payload.id],
-				(e) => (e ? reject(e) : resolve(true))
-			)
-		)
 
-		if (result) {
-			const document = await new Promise<DBPlaylist>((resolve, reject) =>
-				db.get<DBPlaylist>(
-					`
-				SELECT *
-				FROM playlists
-				WHERE id = ?
-				LIMIT 1;
-			`,
-					[operation.payload.id],
-					(e, r) => {
-						if (e) {
-							reject(e)
-						} else {
-							resolve(r)
-						}
-					}
-				)
-			)
+		try {
+			const stmt = db.prepare(`
+				UPDATE playlists
+				SET document = (SELECT json_patch(playlists.document, json(?)) FROM playlists WHERE id = ?)
+				WHERE id = ?;
+			`)
 
-			return {
-				...JSON.parse(document.document),
-				id: operation.payload.id
+			const result = stmt.run(JSON.stringify(update), operation.payload.id, operation.payload.id)
+			if (result.changes === 0) {
+				throw new Error('No rows were updated')
 			}
-		}
 
-		return
+			return readOne(operation.payload.id)
+		} catch (e) {
+			return { error: e as Error }
+		}
 	} else if (operation.type === IpcOperationType.Delete) {
-		return new Promise((resolve, reject) =>
-			db.run(
-				`
-			DELETE FROM playlists
-			WHERE id = "${operation.payload.id}";
-		`,
-				(r: RunResult, e: Error | null) => (e ? reject(e) : resolve(r))
-			)
-		)
+		try {
+			const stmt = db.prepare(`
+				DELETE FROM playlists
+				WHERE id = ?;
+			`)
+
+			stmt.run(operation.payload.id)
+			return {}
+		} catch (e) {
+			return { error: e as Error }
+		}
 	}
 })

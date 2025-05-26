@@ -10,7 +10,7 @@ import {
 	MutationPieceUpdate,
 	Piece
 } from '../interfaces'
-import { db, InsertResolution, UpdateResolution } from '../db'
+import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { sendPartUpdateToCore } from './parts'
 import { stringifyError } from '../util'
@@ -29,63 +29,62 @@ export const mutations = {
 		if (!payload.rundownId || !payload.partId)
 			return { error: new Error('Missing rundown id or part id') }
 
-		const { result, error } = await new Promise<InsertResolution>((resolve) =>
-			db.run(
-				`
-			INSERT INTO pieces (id,playlistId,rundownId,segmentId,partId,document)
-			VALUES (?,?,?,?,?,json(?));
-		`,
-				[
-					id,
-					payload.playlistId || null,
-					payload.rundownId,
-					payload.segmentId,
-					payload.partId,
-					JSON.stringify(document)
-				],
-				function (e: Error | null) {
-					if (e) {
-						resolve({ result: undefined, error: e })
-					} else if (this) {
-						resolve({ result: this.lastID, error: undefined })
-					}
-				}
+		try {
+			const stmt = db.prepare(`
+				INSERT INTO pieces (id,playlistId,rundownId,segmentId,partId,document)
+				VALUES (?,?,?,?,?,json(?));
+			`)
+
+			const result = stmt.run(
+				id,
+				payload.playlistId || null,
+				payload.rundownId,
+				payload.segmentId,
+				payload.partId,
+				JSON.stringify(document)
 			)
-		)
+			if (result.changes === 0) throw new Error('No rows were inserted')
 
-		if (result) {
-			const { result: document, error: readError } = await mutations.read({ id })
+			return this.readOne(id)
+		} catch (e) {
+			return { error: e as Error }
+		}
+	},
+	async readOne(id: string): Promise<{ result?: Piece; error?: Error }> {
+		try {
+			const stmt = db.prepare(`
+						SELECT *
+						FROM pieces
+						WHERE id = ?
+						LIMIT 1;
+					`)
 
-			if (document && !Array.isArray(document)) {
-				return { result: document }
+			const document = stmt.get() as DBPiece | undefined
+			if (!document) {
+				return { error: new Error(`Piece with id ${id} not found`) }
 			}
 
-			return { error: readError }
-			// const document = await new Promise<DBPiece>((resolve, reject) => db.get(`
-			// 	SELECT *
-			// 	FROM pieces
-			// 	WHERE id = ?
-			// 	LIMIT 1;
-			// `, [ id ], (e, r) => {
-			// 	console.log(e, r)
-			// 	resolve(r)
-			// }))
-
-			// return {
-			// 	...JSON.parse(document.document),
-			// 	id: document.id,
-			// 	playlistId: document.playlistId,
-			// 	rundownId: document.rundownId,
-			// 	segmentId: document.segmentId,
-			// 	partId: document.partId
-			// }
+			return {
+				result: {
+					...JSON.parse(document.document),
+					id: document.id,
+					playlistId: document.playlistId,
+					rundownId: document.rundownId,
+					segmentId: document.segmentId,
+					partId: document.partId
+				}
+			}
+		} catch (e) {
+			return { error: e as Error }
 		}
-
-		return { error }
 	},
 	async read(
 		payload: Partial<MutationPieceRead>
 	): Promise<{ result?: Piece | Piece[]; error?: Error }> {
+		if (payload && payload.id) {
+			return this.readOne(payload.id)
+		}
+
 		let query = `
 			SELECT *
 			FROM pieces
@@ -108,43 +107,13 @@ export const mutations = {
 			args.push(payload.partId)
 		}
 
-		if (payload.id) {
-			query += `\nLIMIT 1`
+		try {
+			const stmt = db.prepare(query)
 
-			const { result, error } = await new Promise<{ result?: DBPiece; error?: Error }>((resolve) =>
-				db.get(query, args, (e, r: DBPiece) =>
-					e ? resolve({ error: e, result: undefined }) : resolve({ result: r, error: undefined })
-				)
-			)
-
-			if (!result) {
-				return { error }
-			}
+			const documents = stmt.all(...args) as unknown as DBPiece[]
 
 			return {
-				result: {
-					...JSON.parse(result.document),
-					id: result.id,
-					playlistId: result.playlistId,
-					rundownId: result.rundownId,
-					segmentId: result.segmentId,
-					partId: result.partId
-				}
-			}
-		} else {
-			const { result, error } = await new Promise<{ result?: DBPiece[]; error?: Error }>(
-				(resolve) =>
-					db.all(query, args, (e, r: DBPiece[]) =>
-						e ? resolve({ error: e, result: undefined }) : resolve({ result: r, error: undefined })
-					)
-			)
-
-			if (!result) {
-				return { error }
-			}
-
-			return {
-				result: result.map((d) => ({
+				result: documents.map((d) => ({
 					...JSON.parse(d.document),
 					id: d.id,
 					playlistId: d.playlistId,
@@ -153,6 +122,8 @@ export const mutations = {
 					partId: d.partId
 				}))
 			}
+		} catch (e) {
+			return { error: e as Error }
 		}
 	},
 	async update(payload: MutationPieceUpdate): Promise<{ result?: Piece; error?: Error }> {
@@ -165,42 +136,40 @@ export const mutations = {
 			partId: null
 		}
 
-		const { result, error } = await new Promise<UpdateResolution>((resolve) =>
-			db.run(
-				`
-			UPDATE pieces
-			SET playlistId = ?, document = (SELECT json_patch(pieces.document, json(?)) FROM pieces WHERE id = ?)
-			WHERE id = "${payload.id}";
-		`,
-				[payload.playlistId || null, JSON.stringify(update), payload.id],
-				(e) => resolve({ error: e ?? undefined, result: e ? undefined : true })
+		try {
+			const stmt = db.prepare(`
+				UPDATE pieces
+				SET playlistId = ?, document = (SELECT json_patch(pieces.document, json(?)) FROM pieces WHERE id = ?)
+				WHERE id = ?;
+			`)
+
+			const result = stmt.run(
+				payload.playlistId || null,
+				JSON.stringify(update),
+				payload.id,
+				payload.id
 			)
-		)
-
-		if (result) {
-			const { result: document, error: readError } = await mutations.read({
-				id: payload.id
-			})
-
-			if (document && !Array.isArray(document)) {
-				return { result: document }
+			if (result.changes === 0) {
+				throw new Error('No rows were updated')
 			}
 
-			return { error: readError }
+			return this.readOne(payload.id)
+		} catch (e) {
+			return { error: e as Error }
 		}
-
-		return { error }
 	},
 	async delete(payload: MutationPieceDelete): Promise<{ error?: Error }> {
-		return new Promise((resolve) =>
-			db.run(
-				`
-			DELETE FROM pieces
-			WHERE id = "${payload.id}";
-		`,
-				(e) => resolve({ error: e || undefined })
-			)
-		)
+		try {
+			const stmt = db.prepare(`
+				DELETE FROM pieces
+				WHERE id = ?;
+			`)
+
+			stmt.run(payload.id)
+			return {}
+		} catch (e) {
+			return { error: e as Error }
+		}
 	}
 }
 
