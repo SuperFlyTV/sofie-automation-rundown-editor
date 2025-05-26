@@ -35,7 +35,8 @@ const options: electronBuilder.Configuration = {
 		hardenedRuntime: true,
 		gatekeeperAssess: false,
 		entitlements: 'backend/entitlements.mac.plist',
-		entitlementsInherit: 'backend/entitlements.mac.plist'
+		entitlementsInherit: 'backend/entitlements.mac.plist',
+		notarize: !!process.env.CSC_LINK
 	},
 	dmg: {
 		artifactName: 'Sofie-Rundown-Editor.dmg',
