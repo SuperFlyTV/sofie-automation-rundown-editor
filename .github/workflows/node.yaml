@@ -67,7 +67,7 @@ jobs:
           yarn build
       - name: Build binaries
         run: |
-          yarn build:binary -- --publish=never
+          yarn electron:build -- --publish=never
         env:
           CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
@@ -98,6 +98,7 @@ jobs:
             node_modules
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Prepare Environment
+        shell: bash
         run: |
           corepack enable
 
@@ -107,7 +108,7 @@ jobs:
           yarn --immutable
       - name: Build binaries
         run: |
-          yarn electron:build -- -- --publish=never
+          yarn electron:build -- --publish=never
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
