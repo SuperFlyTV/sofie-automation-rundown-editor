@@ -18,9 +18,6 @@ import { BrowserWindow } from 'electron'
 import { CoreConnectionInfo, CoreConnectionStatus } from './interfaces'
 import { mutateRundown, mutations as rundownMutations } from './api/rundowns'
 import { PeripheralDeviceCommandId } from '@sofie-automation/shared-lib/dist/core/model/Ids'
-const serverCoreIntegrationVersion =
-	// eslint-disable-next-line @typescript-eslint/no-var-requires
-	require('@sofie-automation/server-core-integration/package.json').version
 
 export interface DeviceConfig {
 	deviceId: string
@@ -33,8 +30,8 @@ export class CoreHandler {
 		return Object.freeze({ ...this._connectionInfo })
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private _observers: Array<Observer<any>> = []
-	private _subscriptions: Array<string> = []
 	private _executedFunctions = new Set<PeripheralDeviceCommandId>()
 	private _connectionInfo: CoreConnectionInfo = {
 		url: undefined,
@@ -278,7 +275,7 @@ export class CoreHandler {
 					.catch((e) => {
 						cb(stringifyError(e), null)
 					})
-			} catch (e: any) {
+			} catch (e) {
 				cb(stringifyError(e), null)
 			}
 		}
@@ -288,9 +285,7 @@ export class CoreHandler {
 	}
 
 	private _getVersions() {
-		const versions: { [packageName: string]: string } = {
-			'@sofie-automation/server-core-integration': serverCoreIntegrationVersion
-		}
+		const versions: { [packageName: string]: string } = {}
 
 		if (process.env.npm_package_version) {
 			versions['_process'] = process.env.npm_package_version

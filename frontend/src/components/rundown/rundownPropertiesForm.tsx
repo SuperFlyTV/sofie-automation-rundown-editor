@@ -49,7 +49,6 @@ export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 				document: serializedRundown
 			})
 			.catch((e) => {
-				// eslint-disable-next-line no-console
 				console.error(e)
 				toasts.show({
 					headerContent: 'Exporting rundown',

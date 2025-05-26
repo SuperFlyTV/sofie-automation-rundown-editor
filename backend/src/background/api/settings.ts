@@ -132,7 +132,7 @@ ipcMain.handle('settings', async (_, operation: IpcOperation) => {
 		const { result, error } = await mutations.update(operation.payload)
 
 		return result || error
-	} else if ((operation.type as any) === 'reset') {
+	} else if ((operation.type as string) === 'reset') {
 		await mutations.reset()
 	} else {
 		throw new Error('Unknown operation type')

@@ -90,7 +90,6 @@ export function PieceTypesForm({ piecesManifest }: { piecesManifest: PiecesManif
 				}
 			})
 			.catch((e) => {
-				// eslint-disable-next-line no-console
 				console.error(e)
 				toasts.show({
 					headerContent: 'Importing piece types',

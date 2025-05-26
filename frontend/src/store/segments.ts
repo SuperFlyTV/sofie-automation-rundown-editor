@@ -114,6 +114,6 @@ const segmentsSlice = createSlice({
 })
 
 // Export the auto-generated action creator with the same name
-export const {} = segmentsSlice.actions
+// export const {} = segmentsSlice.actions
 
 export default segmentsSlice.reducer

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /** Make a string out of an error (or other equivalents), including any additional data such as stack trace if available */
 export function stringifyError(error: unknown, noStack = false): string {
 	const o = stringifyErrorInner(error)

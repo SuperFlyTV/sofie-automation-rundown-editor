@@ -22,6 +22,7 @@ import type {
 
 export interface BackendApi {
 	// TODO: this should be replaced with a browser side api
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	openFromFile(args: OpenFromFileArgs): Promise<any>
 	// TODO: this should be replaced with a browser side api
 	saveToFile(args: SaveToFileArgs): Promise<void>
