@@ -1,4 +1,4 @@
-import { SetOptional } from 'type-fest'
+import type { SetOptional } from 'type-fest'
 
 export interface Playlist {
 	/** Id of the playlist. */

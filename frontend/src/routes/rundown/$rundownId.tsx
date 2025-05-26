@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
+import { createFileRoute, Outlet } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { EditorNavbar } from '~/components/navbar/navbar'
 import { RundownBreadcrumbs } from '~/components/rundown/breadcrumbs'

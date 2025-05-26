@@ -16,7 +16,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { contextBridge, ipcRenderer } = require('electron')
 import type { BackendApi } from './background/api/api.js'
-import {
+import type {
 	CoreConnectionInfo,
 	MutationPartCreate,
 	MutationPartUpdate,
@@ -40,7 +40,7 @@ const electronApi: BackendApi = {
 	},
 
 	onCoreConnectionInfo: (callback) => {
-		ipcRenderer.on('coreConnectionInfo', (event, newInfo: CoreConnectionInfo) => {
+		ipcRenderer.on('coreConnectionInfo', (_event: unknown, newInfo: CoreConnectionInfo) => {
 			callback(newInfo)
 		})
 	},

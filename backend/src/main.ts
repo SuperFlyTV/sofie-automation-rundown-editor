@@ -130,11 +130,11 @@ app.on('activate', () => {
 // Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
 	if (isDev && !process.env.IS_TEST) {
-		// Install Vue Devtools
+		// Install React Devtools
 		try {
 			await installExtension(REACT_DEVELOPER_TOOLS)
 		} catch (e) {
-			console.error('Vue Devtools failed to install:', (e as Error).toString())
+			console.error('React Devtools failed to install:', (e as Error).toString())
 		}
 	}
 	createWindow()

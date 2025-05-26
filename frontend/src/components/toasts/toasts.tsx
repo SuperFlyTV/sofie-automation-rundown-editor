@@ -80,13 +80,13 @@ const Toasts = forwardRef<ToastsHandle>((_props, ref) => {
 	)
 })
 
-export const ToastsProvider = ({ children }: React.PropsWithChildren<Record<string, never>>) => {
+export const ToastsProvider = ({ children }: React.PropsWithChildren) => {
 	const toastsRef = useRef<ToastsHandle>(null)
 
 	return (
 		<ToastsContext.Provider value={toastsRef}>
 			{children}
-			<Toasts ref={toastsRef}></Toasts>
+			<Toasts ref={toastsRef} />
 		</ToastsContext.Provider>
 	)
 }
