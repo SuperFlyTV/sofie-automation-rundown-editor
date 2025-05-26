@@ -103,7 +103,7 @@ export const mutations = {
 
 		if (result) {
 			const document = await new Promise<DBPart>((resolve, reject) =>
-				db.get(
+				db.get<DBPart>(
 					`
 				SELECT *
 				FROM parts

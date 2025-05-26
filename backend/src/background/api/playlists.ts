@@ -31,7 +31,7 @@ ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 
 		if (result) {
 			const document = await new Promise<DBPlaylist>((resolve, reject) =>
-				db.get(
+				db.get<DBPlaylist>(
 					`
 				SELECT *
 				FROM playlists
@@ -59,7 +59,7 @@ ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 	} else if (operation.type === IpcOperationType.Read) {
 		if (operation.payload && operation.payload.id) {
 			const document = await new Promise<DBPlaylist>((resolve, reject) =>
-				db.get(
+				db.get<DBPlaylist>(
 					`
 				SELECT *
 				FROM playlists
@@ -77,7 +77,7 @@ ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 			}
 		} else {
 			const documents = await new Promise<DBPlaylist[]>((resolve, reject) =>
-				db.all(
+				db.all<DBPlaylist>(
 					`
 				SELECT *
 				FROM playlists
@@ -110,7 +110,7 @@ ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 
 		if (result) {
 			const document = await new Promise<DBPlaylist>((resolve, reject) =>
-				db.get(
+				db.get<DBPlaylist>(
 					`
 				SELECT *
 				FROM playlists

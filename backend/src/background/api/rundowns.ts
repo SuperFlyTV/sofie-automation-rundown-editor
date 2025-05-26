@@ -72,7 +72,7 @@ export const mutations = {
 
 		if (result) {
 			const document = await new Promise<DBRundown>((resolve, reject) =>
-				db.get(
+				db.get<DBRundown>(
 					`
 				SELECT *
 				FROM rundowns
@@ -106,7 +106,7 @@ export const mutations = {
 	): Promise<{ result?: Rundown | Rundown[]; error?: Error }> {
 		if (payload && payload.id) {
 			const document = await new Promise<DBRundown>((resolve, reject) =>
-				db.get(
+				db.get<DBRundown>(
 					`
 				SELECT *
 				FROM rundowns
@@ -127,7 +127,7 @@ export const mutations = {
 			}
 		} else {
 			const documents = await new Promise<DBRundown[]>((resolve, reject) =>
-				db.all(
+				db.all<DBRundown>(
 					`
 				SELECT *
 				FROM rundowns
@@ -166,7 +166,7 @@ export const mutations = {
 
 		if (result) {
 			const document = await new Promise<DBRundown>((resolve, reject) =>
-				db.get(
+				db.get<DBRundown>(
 					`
 				SELECT *
 				FROM rundowns

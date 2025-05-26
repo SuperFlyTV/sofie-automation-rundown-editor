@@ -54,7 +54,7 @@ export const mutations = {
 	},
 	async read(): Promise<{ result?: ApplicationSettings; error?: Error }> {
 		const { result, error } = await new Promise<{ error?: Error; result?: DBSettings }>((resolve) =>
-			db.get(
+			db.get<DBSettings>(
 				`
 			SELECT *
 			FROM settings

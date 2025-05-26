@@ -84,7 +84,7 @@ export const mutations = {
 
 		if (result) {
 			const document = await new Promise<DBSegment>((resolve, reject) =>
-				db.get(
+				db.get<DBSegment>(
 					`
 				SELECT *
 				FROM segments
@@ -119,7 +119,7 @@ export const mutations = {
 	): Promise<{ result?: Segment | Segment[]; error?: Error }> {
 		if (payload && payload.id) {
 			const document = await new Promise<DBSegment>((resolve, reject) =>
-				db.get(
+				db.get<DBSegment>(
 					`
 				SELECT *
 				FROM segments
@@ -141,7 +141,7 @@ export const mutations = {
 			}
 		} else if (payload && payload.rundownId) {
 			const documents = await new Promise<DBSegment[]>((resolve, reject) =>
-				db.all(
+				db.all<DBSegment>(
 					`
 				SELECT *
 				FROM segments
@@ -162,7 +162,7 @@ export const mutations = {
 			}
 		} else {
 			const documents = await new Promise<DBSegment[]>((resolve, reject) =>
-				db.all(
+				db.all<DBSegment>(
 					`
 				SELECT *
 				FROM segments
@@ -203,7 +203,7 @@ export const mutations = {
 
 		if (result) {
 			const document = await new Promise<DBSegment>((resolve, reject) =>
-				db.get(
+				db.get<DBSegment>(
 					`
 				SELECT *
 				FROM segments

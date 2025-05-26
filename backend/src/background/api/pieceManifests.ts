@@ -60,7 +60,7 @@ export const mutations = {
 	): Promise<{ result?: PieceTypeManifest | PieceTypeManifest[] | undefined; error?: Error }> {
 		if (payload && payload.id) {
 			const document = await new Promise<DBPieceTypeManifest | undefined>((resolve, reject) =>
-				db.get(
+				db.get<DBPieceTypeManifest>(
 					`
 				SELECT *
 				FROM pieceTypeManifests
@@ -84,7 +84,7 @@ export const mutations = {
 			}
 		} else {
 			const documents = await new Promise<DBPieceTypeManifest[]>((resolve, reject) =>
-				db.all(
+				db.all<DBPieceTypeManifest>(
 					`
 				SELECT *
 				FROM pieceTypeManifests
