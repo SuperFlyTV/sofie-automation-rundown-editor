@@ -85,7 +85,10 @@ const options: electronBuilder.Configuration = {
 // try {
 // perform the electron build
 await electronBuilder.build({
-	targets: electronBuilder.Platform.current().createTarget(null),
+	targets: electronBuilder.Platform.current().createTarget(
+		null,
+		...(process.platform === 'darwin' ? [electronBuilder.Arch.universal] : [])
+	),
 	config: options,
 	projectDir: 'backend'
 })
