@@ -43,8 +43,16 @@ yarn install
 
 ### Compiles and hot-reloads for development
 
+In one terminal
+
 ```
-yarn electron:serve
+yarn dev:ui
+```
+
+In another terminal
+
+```
+yarn dev:electron
 ```
 
 ### Compiles and minifies for production
@@ -58,10 +66,6 @@ yarn electron:build
 ```
 yarn lint
 ```
-
-### Customize configuration
-
-See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ### Making a new release
 
