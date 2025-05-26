@@ -37,3 +37,80 @@ jobs:
           yarn lint
         env:
           CI: true
+
+  macos-build:
+    name: Build on macOS
+    runs-on: macos-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+      - name: restore node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Prepare Environment
+        run: |
+          corepack enable
+
+          # try and avoid timeout errors
+          yarn config set httpTimeout 100000
+
+          yarn --immutable
+      - name: Build
+        run: |
+          yarn build
+      - name: Build binaries
+        run: |
+          yarn build:binary -- --publish=never
+        env:
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLEID: ${{ secrets.APPLEID }}
+          APPLEIDTEAM: ${{ secrets.APPLEIDTEAM }}
+          APPLEIDPASS: ${{ secrets.APPLEIDPASS }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dist
+          path: dist_electron
+          retention-days: 1
+
+  windows-build:
+    name: Build on Windows
+    runs-on: windows-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+      - name: restore node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Prepare Environment
+        run: |
+          corepack enable
+
+          # try and avoid timeout errors
+          yarn config set httpTimeout 100000
+
+          yarn --immutable
+      - name: Build binaries
+        run: |
+          yarn electron:build -- -- --publish=never
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: win-dist
+          path: dist_electron
+          retention-days: 1
