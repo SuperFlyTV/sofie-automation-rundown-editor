@@ -105,7 +105,10 @@ async function createWindow() {
 		if (!process.env.IS_TEST) win.webContents.openDevTools()
 	} else {
 		// Load the index.html when not in development
-		win.loadURL(`file://${app.getAppPath()}/dist/index.html`)
+		const baseUrl = `file://${app.getAppPath()}/../frontend`
+		win.loadURL(`${baseUrl}/index.html`, {
+			baseURLForDataURL: baseUrl
+		})
 	}
 }
 

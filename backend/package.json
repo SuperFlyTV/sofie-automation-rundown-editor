@@ -24,6 +24,7 @@
 	},
 	"main": "dist/main.js",
 	"dependencies": {
+		"@electron/remote": "^2.0.8",
 		"@sofie-automation/server-core-integration": "1.53.0-nightly-release53-20250423-081454-dc957dd.0",
 		"@types/sqlite3": "^3.1.7",
 		"@types/uuid": "^8.3.1",
@@ -33,11 +34,10 @@
 		"uuid": "^8.3.2"
 	},
 	"devDependencies": {
-		"@electron/remote": "^2.0.8",
 		"@types/electron-devtools-installer": "^2.2.0",
 		"@types/node": "^14.14.6",
 		"electron": "36.2.0",
-		"electron-builder": "26.0.15",
+		"electron-builder": "25",
 		"electron-devtools-installer": "^3.1.0",
 		"husky": "^8.0.1",
 		"license-checker": "^25.0.1",
