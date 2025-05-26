@@ -1,7 +1,6 @@
 'use strict'
 
 import { app, protocol, BrowserWindow } from 'electron'
-import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import { ControlAPI } from './background/index'
 import path from 'path'
 import { initializeDefaults as initializeSettingsDefaults } from './background/api/settings'
@@ -132,7 +131,8 @@ app.on('ready', async () => {
 	if (isDev && !process.env.IS_TEST) {
 		// Install React Devtools
 		try {
-			await installExtension(REACT_DEVELOPER_TOOLS)
+			const devToolsInstaller = await import('electron-devtools-installer')
+			await devToolsInstaller.default(devToolsInstaller.REACT_DEVELOPER_TOOLS)
 		} catch (e) {
 			console.error('React Devtools failed to install:', (e as Error).toString())
 		}
