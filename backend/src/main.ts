@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { ControlAPI } from './background/index'
 import path from 'path'
 import { initializeDefaults as initializeSettingsDefaults } from './background/api/settings'

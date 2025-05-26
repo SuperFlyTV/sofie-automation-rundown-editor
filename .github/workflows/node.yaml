@@ -33,7 +33,7 @@ jobs:
           CI: true
       - name: Run typecheck and linter
         run: |
-          yarn lint
           yarn build
+          yarn lint
         env:
           CI: true
