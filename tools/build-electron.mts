@@ -11,11 +11,13 @@ if (process.platform === 'win32') {
 await fs.remove('./dist_electron')
 
 const options: electronBuilder.Configuration = {
-	publish: [
-		{
-			provider: 'github'
-		}
-	],
+	publish: process.env.GH_TOKEN
+		? [
+				{
+					provider: 'github'
+				}
+		  ]
+		: null,
 	productName: 'Sofie Rundown Editor',
 	appId: 'rundown-editor.sofie.superfly.tv',
 	npmRebuild: false,
