@@ -9,10 +9,10 @@ import isDev from 'electron-is-dev'
 
 remote.initialize()
 
-// Scheme must be registered before the app is ready
-protocol.registerSchemesAsPrivileged([
-	{ scheme: 'app', privileges: { secure: true, standard: true } }
-])
+// // Scheme must be registered before the app is ready
+// protocol.registerSchemesAsPrivileged([
+// 	{ scheme: 'app', privileges: { secure: true, standard: true } }
+// ])
 
 async function createWindow() {
 	// Ensure defaults are ready before creating the browser window.
@@ -27,7 +27,6 @@ async function createWindow() {
 			// See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
 			// nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION as unknown as boolean,
 			preload: path.join(__dirname, '../dist/preload.cjs') // TODO - check/rework this
-			// contextIsolation: false
 		}
 	})
 
@@ -105,10 +104,9 @@ async function createWindow() {
 		if (!process.env.IS_TEST) win.webContents.openDevTools()
 	} else {
 		// Load the index.html when not in development
-		const baseUrl = `file://${app.getAppPath()}/../frontend`
-		win.loadURL(`${baseUrl}/index.html`, {
-			baseURLForDataURL: baseUrl
-		})
+		const indexUrl = `file://${process.resourcesPath}/frontend/index.html`
+		console.log(`Loading index URL: ${indexUrl}`)
+		win.loadURL(indexUrl)
 	}
 }
 

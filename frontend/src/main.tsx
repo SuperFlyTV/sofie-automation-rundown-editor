@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { RouterProvider, createHashHistory, createRouter } from '@tanstack/react-router'
 import { Provider } from 'react-redux'
 import { store } from '~/store/store.js'
 
@@ -8,7 +8,8 @@ import { store } from '~/store/store.js'
 import { routeTree } from './routeTree.gen'
 
 // Create a new router instance
-const router = createRouter({ routeTree })
+const hashHistory = createHashHistory() // Use hash history, to make it work properly in packaged Electron
+const router = createRouter({ routeTree, history: hashHistory })
 
 // Register the router instance for type safety
 declare module '@tanstack/react-router' {
