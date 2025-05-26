@@ -1,12 +1,12 @@
 # Sofie Rundown Editor
 
-> A tool for creating and editing rundowns in a _demo_ environment of [Sofie](https://github.com/nrkno/Sofie-TV-automation/).
+> A tool for creating and editing rundowns in a _demo_ environment of [Sofie](https://github.com/Sofie-Automation/Sofie-TV-automation/).
 
 ![App preview image](docs/app-preview-image.png)
 
 ## Prerequisites
 
-Sofie Rundown Editor requires that you have a working instance of [Sofie Core](https://github.com/nrkno/sofie-core) release 46 with the [demo blueprints](https://github.com/SuperFlyTV/sofie-demo-blueprints) uploaded to it. You do not need to install the [spreadsheet-gateway](https://github.com/SuperFlyTV/spreadsheet-gateway).
+Sofie Rundown Editor requires that you have a working instance of [Sofie Core](https://github.com/Sofie-Automation/sofie-core) release 46 with the [demo blueprints](https://github.com/SuperFlyTV/sofie-demo-blueprints) uploaded to it. You do not need to install the [spreadsheet-gateway](https://github.com/SuperFlyTV/spreadsheet-gateway).
 
 ## Installation
 
@@ -18,10 +18,10 @@ Head to the [releases](https://github.com/SuperFlyTV/sofie-automation-rundown-ed
 2. Enter the URL and port of your Sofie instance (defaults to `127.0.0.1:3000`).
    - ❗ Restart the program after changing this setting! (be sure to hit "Save" first, though)
 3. Click "Save".
-4. Download and import [this demo set of Piece Types](https://raw.githubusercontent.com/SuperFlyTV/sofie-demo-blueprints/master/assets/sofie-rundown-editor-piece-types.json) (right click and "Save link as...") on the Settings page.
+4. Download and import [this demo set of Piece Types](https://raw.githubusercontent.com/SuperFlyTV/sofie-demo-blueprints/main/assets/sofie-rundown-editor-piece-types.json) (right click and "Save link as...") on the Settings page.
 5. Before continuing, open the Sofie Core interface, navigate to the Settings page, click on your Studio, and attach `sofie-rundown-editor` as a Device by clicking the plus sign (+) under "Attached Devices".
 6. Back in Rundown Editor, navigate to the Rundowns page in the top right.
-7. Download and import [this demo Rundown](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/raw/master/demo-rundown.json) (right click and "Save link as...")
+7. Download and import [this demo Rundown](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/raw/main/demo-rundown.json) (right click and "Save link as...")
 8. Click on the Rundown and ensure that the "Sync to Sofie" box is checked. Be sure to click Save if you changed the setting.
 9. Open the Rundown in Sofie.
 
