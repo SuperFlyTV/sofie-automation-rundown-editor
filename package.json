@@ -14,7 +14,7 @@
 		"dev:ui": "yarn workspace @sofie-rundown-editor/frontend dev",
 		"lint": "yarn workspaces foreach --topological-dev --all --verbose run lint",
 		"build": "yarn workspaces foreach --topological-dev --all --verbose run build",
-		"electron:build": "run build && tsx ./tools/build-electron.ts",
+		"electron:build": "run build && tsx ./tools/build-electron.mts",
 		"license-validate": "license-checker -r --filter MIT --filter 0BSD --filter BSD --filter ISC --filter Apache --filter Unlicense --plain --border ascii",
 		"validate:dependencies": "yarn npm audit --environment production && yarn license-validate",
 		"validate:dev-dependencies": "yarn npm audit --environment development"

@@ -62,9 +62,6 @@ jobs:
           yarn config set httpTimeout 100000
 
           yarn --immutable
-      - name: Build
-        run: |
-          yarn build
       - name: Build binaries
         run: |
           yarn electron:build -- --publish=never
