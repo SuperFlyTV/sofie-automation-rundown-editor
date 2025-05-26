@@ -12,11 +12,9 @@ await fs.remove('./dist_electron')
 
 const options: electronBuilder.Configuration = {
 	publish: [
-		// {
-		// 	provider: 'generic',
-		// 	publishAutoUpdate: false,
-		// 	url: 'https://api.bitfocus.io/v1/product/electron-updater/companion-satellite'
-		// }
+		{
+			provider: 'github'
+		}
 	],
 	productName: 'Sofie Rundown Editor',
 	appId: 'rundown-editor.sofie.superfly.tv',
