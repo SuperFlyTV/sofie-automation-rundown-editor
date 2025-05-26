@@ -12,7 +12,7 @@ async function readOne(id: string): Promise<{ result?: Playlist; error?: Error }
 			LIMIT 1;
 		`)
 
-		const document = stmt.get() as DBPlaylist | undefined
+		const document = stmt.get(id) as DBPlaylist | undefined
 		if (!document) {
 			return { error: new Error(`Playlist with id ${id} not found`) }
 		}

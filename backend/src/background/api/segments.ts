@@ -93,7 +93,7 @@ export const mutations = {
 				LIMIT 1;
 			`)
 
-			const document = stmt.get() as DBSegment | undefined
+			const document = stmt.get(id) as DBSegment | undefined
 			if (!document) {
 				return { error: new Error(`Segment with id ${id} not found`) }
 			}

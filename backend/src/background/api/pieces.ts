@@ -59,7 +59,7 @@ export const mutations = {
 						LIMIT 1;
 					`)
 
-			const document = stmt.get() as DBPiece | undefined
+			const document = stmt.get(id) as DBPiece | undefined
 			if (!document) {
 				return { error: new Error(`Piece with id ${id} not found`) }
 			}

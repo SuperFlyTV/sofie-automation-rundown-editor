@@ -107,7 +107,7 @@ export const mutations = {
 					LIMIT 1;
 				`)
 
-			const document = stmt.get() as DBPart | undefined
+			const document = stmt.get(id) as DBPart | undefined
 			if (!document) {
 				return { error: new Error(`Part with id ${id} not found`) }
 			}

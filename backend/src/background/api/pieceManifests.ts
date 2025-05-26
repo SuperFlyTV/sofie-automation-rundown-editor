@@ -45,7 +45,7 @@ export const mutations = {
 				LIMIT 1;
 			`)
 
-			const document = stmt.get() as DBPieceTypeManifest | undefined
+			const document = stmt.get(id) as DBPieceTypeManifest | undefined
 			if (!document) {
 				return { error: new Error(`PieceTypeManifest with id ${id} not found`) }
 			}
@@ -105,7 +105,7 @@ export const mutations = {
 				throw new Error('No rows were updated')
 			}
 
-			return this.readOne(payload.id)
+			return this.readOne(payload.update.id)
 		} catch (e) {
 			return { error: e as Error }
 		}

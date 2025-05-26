@@ -78,7 +78,7 @@ export const mutations = {
 					LIMIT 1;
 				`)
 
-			const document = stmt.get() as DBRundown | undefined
+			const document = stmt.get(id) as DBRundown | undefined
 			if (!document) {
 				return { error: new Error(`Rundown with id ${id} not found`) }
 			}

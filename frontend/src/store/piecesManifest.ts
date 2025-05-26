@@ -34,7 +34,14 @@ export const importPiecesManifest = createAppAsyncThunk(
 export const updatePiecesManifest = createAppAsyncThunk(
 	'piecesManifest/updatePiecesManifest',
 	async (payload: UpdatePiecesManifestPayload) => {
-		return electronApi.updatePiecesManifest(payload.originalId, payload.piecesManifest)
+		const newDoc = await electronApi.updatePiecesManifest(
+			payload.originalId,
+			payload.piecesManifest
+		)
+		return {
+			newDoc,
+			oldId: payload.originalId
+		}
 	}
 )
 export const removePiecesManifest = createAppAsyncThunk(
@@ -101,9 +108,13 @@ const piecesManifestSlice = createSlice({
 			.addCase(updatePiecesManifest.fulfilled, (state, action) => {
 				if (!state.manifest) throw new Error('Manifest is not loaded')
 
-				const index = state.manifest.findIndex((setting) => setting.id === action.payload.id)
+				let index = state.manifest.findIndex((setting) => setting.id === action.payload.newDoc.id)
+				if (index === -1) {
+					index = state.manifest.findIndex((setting) => setting.id === action.payload.oldId)
+				}
+
 				if (index !== -1) {
-					state.manifest[index] = action.payload
+					state.manifest[index] = action.payload.newDoc
 				}
 			})
 			.addCase(removePiecesManifest.fulfilled, (state, action) => {
