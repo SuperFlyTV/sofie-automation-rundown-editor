@@ -37,12 +37,9 @@
 		"electron": "36.3.1",
 		"electron-builder": "25.1.8",
 		"electron-devtools-installer": "^4.0.0",
-		"husky": "^8.0.3",
-		"license-checker": "^25.0.1",
-		"lint-staged": "^10.5.4",
 		"nodemon": "^3.1.10",
 		"prettier": "^2.8.8",
-		"typescript": "~4.6.4"
+		"typescript": "~5.8.3"
 	},
 	"license": "MIT",
 	"packageManager": "yarn@4.9.1"

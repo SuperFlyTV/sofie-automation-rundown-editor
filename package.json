@@ -9,6 +9,7 @@
 		"url": "https://superfly.tv"
 	},
 	"scripts": {
+		"prepare": "husky",
 		"dev:electron": "yarn workspace @sofie-rundown-editor/backend dev",
 		"dev:ui": "yarn workspace @sofie-rundown-editor/frontend dev",
 		"lint": "yarn workspaces foreach --topological-dev --all --verbose run lint",
@@ -34,6 +35,9 @@
 		"eslint": "^9.27.0",
 		"eslint-plugin-react-hooks": "^5.2.0",
 		"eslint-plugin-react-refresh": "^0.4.20",
+		"husky": "^9.1.7",
+		"license-checker": "^25.0.1",
+		"lint-staged": "^16.0.0",
 		"rimraf": "^6.0.1",
 		"tsx": "^4.19.4",
 		"typescript": "^5.8.3",
