@@ -28,10 +28,6 @@ const options: electronBuilder.Configuration = {
 	mac: {
 		category: 'tv.superfly.sofie.rundown-editor',
 		target: 'dmg',
-		extendInfo: {
-			LSBackgroundOnly: 1,
-			LSUIElement: 1
-		},
 		hardenedRuntime: true,
 		gatekeeperAssess: false,
 		entitlements: 'backend/entitlements.mac.plist',
