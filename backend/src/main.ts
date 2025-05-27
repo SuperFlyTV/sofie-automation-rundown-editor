@@ -32,12 +32,6 @@ async function createWindow() {
 
 	remote.enable(win.webContents)
 
-	const api = new ControlAPI(win)
-	await api.init().catch((error) => {
-		console.error(error)
-		process.exit(1)
-	})
-
 	// const menu = Menu.buildFromTemplate([
 	// 	{
 	// 		label: 'File',
@@ -138,6 +132,13 @@ app.on('ready', async () => {
 			console.error('React Devtools failed to install:', (e as Error).toString())
 		}
 	}
+
+	const api = new ControlAPI()
+	await api.init().catch((error) => {
+		console.error(error)
+		process.exit(1)
+	})
+
 	createWindow()
 })
 

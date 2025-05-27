@@ -17,18 +17,12 @@ export interface BasicPayload extends Record<string, unknown> {
 }
 
 export class ControlAPI {
-	private _window: BrowserWindow
-
-	constructor(window: BrowserWindow) {
-		this._window = window
-	}
-
 	async init(): Promise<void> {
-		await coreHandler.init(this._window)
-		await initRundowns(this._window)
-		await initSegments(this._window)
-		await initParts(this._window)
-		await initPieces(this._window)
+		await coreHandler.init()
+		await initRundowns()
+		await initSegments()
+		await initParts()
+		await initPieces()
 		ipcMain.handle('coreConnectionInfo', (_, operation: IpcOperation) => {
 			if (operation.type === IpcOperationType.Read) {
 				return coreHandler.connectionInfo

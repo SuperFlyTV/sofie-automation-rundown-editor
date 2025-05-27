@@ -14,7 +14,7 @@ import { StatusCode } from '@sofie-automation/shared-lib/dist/lib/status'
 import { protectString } from '@sofie-automation/shared-lib/dist/lib/protectedString'
 import { DEVICE_CONFIG_MANIFEST } from './configManifest'
 import { mutations as settingsMutations } from './api/settings'
-import { BrowserWindow } from 'electron'
+import { BrowserWindow, ipcMain, webContents } from 'electron'
 import { CoreConnectionInfo, CoreConnectionStatus } from './interfaces'
 import { mutateRundown, mutations as rundownMutations } from './api/rundowns'
 import { PeripheralDeviceCommandId } from '@sofie-automation/shared-lib/dist/core/model/Ids'
@@ -52,20 +52,27 @@ export class CoreHandler {
 		)
 	}
 
-	async init(window: BrowserWindow) {
+	async init() {
 		const { result: settings } = await settingsMutations.read()
+
+		const sendConnectionInfo = () => {
+			webContents.getAllWebContents().forEach((window) => {
+				if (window.isDestroyed()) return
+				window.send('coreConnectionInfo', this._connectionInfo)
+			})
+		}
 
 		this.core.onConnected(() => {
 			console.log('Core Connected!')
 			this._connectionInfo.status = CoreConnectionStatus.CONNECTED
-			window.webContents.send('coreConnectionInfo', this._connectionInfo)
+			sendConnectionInfo()
 			this.setStatus(StatusCode.GOOD, [])
 			// if (this._isInitialized) this.onConnectionRestored()
 		})
 		this.core.onDisconnected(() => {
 			console.log('Core Disconnected!')
 			this._connectionInfo.status = CoreConnectionStatus.DISCONNECTED
-			window.webContents.send('coreConnectionInfo', this._connectionInfo)
+			sendConnectionInfo()
 		})
 		this.core.onError((err) => {
 			console.log('Core Error: ' + (typeof err === 'string' ? err : err.message))
@@ -77,7 +84,7 @@ export class CoreHandler {
 		}
 		this._connectionInfo.url = ddpConfig.host
 		this._connectionInfo.port = ddpConfig.port
-		window.webContents.send('coreConnectionInfo', this._connectionInfo)
+		sendConnectionInfo()
 		// if (this._process && this._process.certificates.length) {
 		// 	ddpConfig.tlsOpts = {
 		// 		ca: this._process.certificates
@@ -91,7 +98,10 @@ export class CoreHandler {
 			.catch((error) => {
 				console.error('Core Initialization Error:', error instanceof Error ? error.message : error)
 				this.core.destroy() // Cleanup to prevent EventEmitter leaks.
-				this.init(window) // Keep retrying until successful.
+
+				setTimeout(() => {
+					this.init() // Keep retrying until successful.
+				}, 1000) // Debounce to ensure it doesnt cause an infinite loop on an EHOSTUNREACH
 			})
 	}
 

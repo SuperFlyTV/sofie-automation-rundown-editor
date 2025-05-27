@@ -173,8 +173,8 @@ export const mutations = {
 	}
 }
 
-export async function init(window: BrowserWindow): Promise<void> {
-	ipcMain.handle('pieces', async (_, operation: IpcOperation) => {
+export async function init(): Promise<void> {
+	ipcMain.handle('pieces', async (event, operation: IpcOperation) => {
 		if (operation.type === IpcOperationType.Create) {
 			const { result, error } = await mutations.create(operation.payload)
 
@@ -183,7 +183,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					await sendPartUpdateToCore(result.partId)
 				} catch (error) {
 					console.error(error)
-					window.webContents.send('error', stringifyError(error, true))
+					event.sender.send('error', stringifyError(error, true))
 				}
 			}
 
@@ -200,7 +200,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					await sendPartUpdateToCore(result.partId)
 				} catch (error) {
 					console.error(error)
-					window.webContents.send('error', stringifyError(error, true))
+					event.sender.send('error', stringifyError(error, true))
 				}
 			}
 
@@ -214,7 +214,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					await sendPartUpdateToCore(document.partId)
 				} catch (error) {
 					console.error(error)
-					window.webContents.send('error', stringifyError(error, true))
+					event.sender.send('error', stringifyError(error, true))
 				}
 			}
 

@@ -172,8 +172,8 @@ export const mutations = {
 	}
 }
 
-export async function init(window: BrowserWindow): Promise<void> {
-	ipcMain.handle('rundowns', async (_, operation: IpcOperation) => {
+export async function init(): Promise<void> {
+	ipcMain.handle('rundowns', async (event, operation: IpcOperation) => {
 		if (operation.type === IpcOperationType.Create) {
 			const { result, error } = await mutations.create(operation.payload)
 			if (result && result.sync) {
@@ -182,7 +182,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					await coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(result))
 				} catch (error) {
 					console.error(error)
-					window.webContents.send('error', stringifyError(error, true))
+					event.sender.send('error', stringifyError(error, true))
 				}
 			}
 
@@ -200,7 +200,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					await sendRundownDiffToCore(document, result)
 				} catch (error) {
 					console.error(error)
-					window.webContents.send('error', stringifyError(error, true))
+					event.sender.send('error', stringifyError(error, true))
 				}
 			}
 
@@ -214,7 +214,7 @@ export async function init(window: BrowserWindow): Promise<void> {
 					await coreHandler.core.coreMethods.dataRundownDelete(document.id)
 				} catch (error) {
 					console.error(error)
-					window.webContents.send('error', stringifyError(error, true))
+					event.sender.send('error', stringifyError(error, true))
 				}
 			}
 
