@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.2](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.0.1...v2.0.2) (2025-06-27)
+
+
+### Bug Fixes
+
+* force version bump ([1f500f8](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/1f500f883e2ad45b73f7cd31e17e6d5b5ca32022))
+* release-please config ([16cd388](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/16cd38815c8d414574a4414e7330910908dce253))
+
 ## [2.0.1](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.0.0...v2.0.1) (2025-06-27)
 
 
