@@ -16,6 +16,7 @@
 		"prepare": "husky",
 		"dev:electron": "yarn workspace @sofie-rundown-editor/backend dev",
 		"dev:ui": "yarn workspace @sofie-rundown-editor/frontend dev",
+		"dev": "yarn dev:electron & yarn dev:ui",
 		"lint": "yarn workspaces foreach --topological-dev --all --verbose run lint",
 		"build": "yarn workspaces foreach --topological-dev --all --verbose run build",
 		"electron:build": "run build && tsx ./tools/build-electron.mts",
