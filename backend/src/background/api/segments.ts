@@ -190,18 +190,14 @@ export const mutations = {
 	},
 	async delete(payload: MutationSegmentDelete): Promise<{ error?: Error }> {
 		try {
-			const stmt = db.prepare(`
-				BEGIN TRANSACTION;
-				DELETE FROM segments
-				WHERE id = ?;
-				DELETE FROM parts
-				WHERE segmentId = ?;
-				DELETE FROM pieces
-				WHERE segmentId = ?;
-				COMMIT;
-			`)
+			db.exec('BEGIN TRANSACTION')
 
-			stmt.run(payload.id, payload.id, payload.id)
+			db.prepare('DELETE FROM segments WHERE id = ?').run(payload.id)
+			db.prepare('DELETE FROM parts WHERE segmentId = ?').run(payload.id)
+			db.prepare('DELETE FROM pieces WHERE segmentId = ?').run(payload.id)
+
+			db.exec('COMMIT')
+
 			return {}
 		} catch (e) {
 			return { error: e as Error }

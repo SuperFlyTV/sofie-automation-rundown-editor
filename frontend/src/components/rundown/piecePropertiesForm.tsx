@@ -168,7 +168,7 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 							<DeletePieceButton
 								rundownId={piece.rundownId}
 								segmentId={piece.segmentId}
-								partId={piece.id}
+								partId={piece.partId}
 								pieceId={piece.id}
 								pieceName={piece.name}
 								disabled={!canSubmit}
@@ -226,7 +226,7 @@ function DeletePieceButton({
 		setShowDelete(true)
 	}
 	const performDeleteSegment = () => {
-		// Navigate user to the list of segments
+		// Navigate user to the list of parts
 		navigate({
 			to: '/rundown/$rundownId/segment/$segmentId/part/$partId',
 			params: { rundownId, segmentId, partId }
