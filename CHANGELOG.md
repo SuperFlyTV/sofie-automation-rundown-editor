@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.1](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.0.0...v2.0.1) (2025-06-27)
+
+
+### Bug Fixes
+
+* delete behavior ([e0d6594](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/e0d65940b4a0f7fc28abf6f82d7adedb980f62da))
+* delete button bug ([51e73d0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/51e73d03642174fc15578e1334fc8d53ac29b61f))
+* redirect to the correct parent part on deleting a piece ([ca13a18](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/ca13a18ec39415c8110beacb1bc3be777bf32e06))
+
 ## [2.0.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v1.3.1...v2.0.0) (2025-05-27)
 
 
