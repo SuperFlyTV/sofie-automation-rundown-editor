@@ -6,6 +6,8 @@ import type { Segment } from '~backend/background/interfaces'
 import './sidebar.scss'
 import classNames from 'classnames'
 import { useToasts } from '../toasts/toasts'
+import { DragTypes } from '~/components/drag-and-drop/DragTypes'
+import { DraggableComponentContainer } from '../drag-and-drop/DraggableComponentContainer'
 
 export function RundownSidebar({
 	rundownId,
@@ -30,7 +32,7 @@ export function RundownSidebar({
 			.catch((e) => {
 				console.error(e)
 				toasts.show({
-					headerContent: 'Deleting segment',
+					headerContent: 'Adding segment',
 					bodyContent: 'Encountered an unexpected error'
 				})
 			})
@@ -38,9 +40,11 @@ export function RundownSidebar({
 
 	return (
 		<div className="rundown-sidebar">
-			{sortedSegments.map((segment) => (
-				<SidebarSegment key={segment.id} segment={segment} />
-			))}
+			<DraggableComponentContainer
+				items={sortedSegments}
+				itemType={DragTypes.SEGMENT}
+				Component={({ data: segment }) => <SidebarSegment key={segment.id} segment={segment} />}
+			/>
 			<button className="segment-button add-button" onClick={handleAddSegment}>
 				+ Add Segment
 			</button>
@@ -101,22 +105,30 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			</Link>
 
 			<div className="ps-3">
-				{sortedParts.map((part) => (
-					<Link
-						key={part.id}
-						to="/rundown/$rundownId/segment/$segmentId/part/$partId"
-						params={{ rundownId: segment.rundownId, segmentId: segment.id, partId: part.id }}
-					>
-						<button
-							className={classNames('part-button mb-1', {
-								floated: segment.float || part.float
-							})}
+				<DraggableComponentContainer
+					items={sortedParts}
+					itemType={DragTypes.PART}
+					Component={({ data: part }) => (
+						<Link
+							key={part.id}
+							to="/rundown/$rundownId/segment/$segmentId/part/$partId"
+							params={{
+								rundownId: segment.rundownId,
+								segmentId: segment.id,
+								partId: part.id
+							}}
 						>
-							{part.name}
-							<span className="item-duration">{displayTime(part.payload?.duration)}</span>
-						</button>
-					</Link>
-				))}
+							<button
+								className={classNames('part-button mb-1', {
+									floated: segment.float || part.float
+								})}
+							>
+								{part.name}
+								<span className="item-duration">{displayTime(part.payload?.duration)}</span>
+							</button>
+						</Link>
+					)}
+				/>
 				<button className="part-button add-button mb-2" onClick={handleAddPart}>
 					+ Add Part
 				</button>
