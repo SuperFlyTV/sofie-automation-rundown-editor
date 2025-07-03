@@ -192,9 +192,9 @@ export const mutations = {
 		try {
 			db.exec('BEGIN TRANSACTION')
 
-			db.prepare('DELETE FROM segments WHERE id = ?').run(payload.id)
-			db.prepare('DELETE FROM parts WHERE segmentId = ?').run(payload.id)
 			db.prepare('DELETE FROM pieces WHERE segmentId = ?').run(payload.id)
+			db.prepare('DELETE FROM parts WHERE segmentId = ?').run(payload.id)
+			db.prepare('DELETE FROM segments WHERE id = ?').run(payload.id)
 
 			db.exec('COMMIT')
 

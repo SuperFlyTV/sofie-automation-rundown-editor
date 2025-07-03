@@ -153,10 +153,10 @@ export const mutations = {
 		try {
 			db.exec('BEGIN TRANSACTION')
 
-			db.prepare('DELETE FROM rundowns WHERE id = ?').run(payload.id)
-			db.prepare('DELETE FROM segments WHERE rundownId = ?').run(payload.id)
-			db.prepare('DELETE FROM parts WHERE rundownId = ?').run(payload.id)
 			db.prepare('DELETE FROM pieces WHERE rundownId = ?').run(payload.id)
+			db.prepare('DELETE FROM parts WHERE rundownId = ?').run(payload.id)
+			db.prepare('DELETE FROM segments WHERE rundownId = ?').run(payload.id)
+			db.prepare('DELETE FROM rundowns WHERE id = ?').run(payload.id)
 
 			db.exec('COMMIT')
 

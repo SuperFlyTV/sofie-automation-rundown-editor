@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain } from 'electron'
+import { ipcMain } from 'electron'
 import {
 	DBPart,
 	IpcOperation,
@@ -17,6 +17,7 @@ import { getMutatedPiecesFromPart } from './pieces'
 import { mutations as rundownMutations } from './rundowns'
 import { mutations as segmentsMutations } from './segments'
 import { stringifyError } from '../util'
+import { mutations as settingsMutations } from './settings'
 
 async function mutatePart(part: Part): Promise<MutatedPart> {
 	return {
@@ -67,9 +68,16 @@ async function sendPartDiffToCore(oldPart: Part, newPart: Part) {
 
 export const mutations = {
 	async create(payload: MutationPartCreate): Promise<{ result?: Part; error?: Error }> {
+		const partTypes: string[] | undefined = (await settingsMutations.read()).result?.partTypes
+
 		const id = payload.id || uuid()
 		const document: Partial<MutationPartCreate> = {
-			...payload
+			...payload,
+			payload: {
+				// fallback Type to avoid errors in core
+				type: partTypes?.[0],
+				...payload.payload
+			}
 		}
 		delete document.playlistId
 		delete document.rundownId
@@ -204,8 +212,8 @@ export const mutations = {
 		try {
 			db.exec('BEGIN TRANSACTION')
 
-			db.prepare('DELETE FROM parts WHERE id = ?').run(payload.id)
 			db.prepare('DELETE FROM pieces WHERE partId = ?').run(payload.id)
+			db.prepare('DELETE FROM parts WHERE id = ?').run(payload.id)
 
 			db.exec('COMMIT')
 
