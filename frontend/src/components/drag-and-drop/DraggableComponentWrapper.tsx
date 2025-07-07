@@ -1,65 +1,64 @@
-import type { Identifier, XYCoord } from 'dnd-core'
+import type { Identifier } from 'dnd-core'
 import type { FC } from 'react'
 import { useRef } from 'react'
-import { useDrag, useDrop } from 'react-dnd'
+import { useDrag, useDrop, type DropTargetMonitor } from 'react-dnd'
 import type { DragTypes } from './DragTypes'
 
-interface DragItem {
+export interface DraggableItem {
 	index: number
-	id: string | number
+	id: string
 	type: string
 }
 
 export interface DraggableComponentWrapperProps<T> {
-	id: string | number
+	id: string
 	index: number
 	data: T
 	itemType: DragTypes
-	moveCard: (dragIndex: number, hoverIndex: number) => void
-	Component: FC<{
-		id: string | number
-		index: number
-		data: T
-		moveCard: (dragIndex: number, hoverIndex: number) => void
-	}>
+	move: (dragIndex: number, hoverIndex: number) => void
+	hover: (
+		ref: React.RefObject<HTMLDivElement | null>,
+		monitor: DropTargetMonitor<DraggableItem, void>,
+		hoveredItem: DraggableItem,
+		currentIndex: number,
+		moveToTarget: (dragIndex: number, hoverIndex: number) => void
+	) => void
+	Component: DraggableWrappedComponent<T>
 }
+
+export type DraggableWrappedComponent<T> = FC<{
+	id: string
+	index: number
+	data: T
+	move: (dragIndex: number, hoverIndex: number) => void
+	hover: (
+		ref: React.RefObject<HTMLDivElement | null>,
+		monitor: DropTargetMonitor<DraggableItem, void>,
+		hoveredItem: DraggableItem,
+		currentIndex: number,
+		moveToTarget: (dragIndex: number, hoverIndex: number) => void
+	) => void
+}>
 
 export const DraggableComponentWrapper = <T,>({
 	id,
 	index,
 	data,
 	itemType,
-	moveCard,
+	move,
+	hover,
 	Component
 }: DraggableComponentWrapperProps<T>) => {
 	const ref = useRef<HTMLDivElement>(null)
 
-	const [{ handlerId }, drop] = useDrop<DragItem, void, { handlerId: Identifier | null }>({
+	const [collectedProps, drop] = useDrop<DraggableItem, void, { handlerId: Identifier | null }>({
 		accept: itemType,
 		collect: (monitor) => ({
+			id,
 			handlerId: monitor.getHandlerId()
 		}),
-		hover(item: DragItem, monitor) {
-			if (!ref.current) return
-
-			const dragIndex = item.index
-			const hoverIndex = index
-			if (dragIndex === hoverIndex) return
-
-			const hoverRect = ref.current.getBoundingClientRect()
-			const hoverMiddleY = (hoverRect.bottom - hoverRect.top) / 2
-			const clientOffset = monitor.getClientOffset()
-			const hoverClientY = (clientOffset as XYCoord).y - hoverRect.top
-
-			if (
-				(dragIndex < hoverIndex && hoverClientY < hoverMiddleY) ||
-				(dragIndex > hoverIndex && hoverClientY > hoverMiddleY)
-			) {
-				return
-			}
-
-			moveCard(dragIndex, hoverIndex)
-			item.index = hoverIndex
+		hover(item: DraggableItem, monitor) {
+			hover(ref, monitor, item, index, move)
 		}
 	})
 
@@ -74,8 +73,12 @@ export const DraggableComponentWrapper = <T,>({
 	drag(drop(ref))
 
 	return (
-		<div ref={ref} style={{ opacity: isDragging ? 0.3 : 1 }} data-handler-id={handlerId}>
-			<Component id={id} index={index} data={data} moveCard={moveCard} />
+		<div
+			ref={ref}
+			style={{ opacity: isDragging ? 0.3 : 1 }}
+			data-handler-id={collectedProps.handlerId}
+		>
+			<Component id={id} index={index} data={data} move={move} hover={hover} />
 		</div>
 	)
 }

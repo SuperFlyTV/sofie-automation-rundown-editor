@@ -7,7 +7,7 @@ import './sidebar.scss'
 import classNames from 'classnames'
 import { useToasts } from '../toasts/toasts'
 import { DragTypes } from '~/components/drag-and-drop/DragTypes'
-import { DraggableComponentContainer } from '../drag-and-drop/DraggableComponentContainer'
+import { DraggableContainer } from '../drag-and-drop/DraggableContainer'
 
 export function RundownSidebar({
 	rundownId,
@@ -40,7 +40,7 @@ export function RundownSidebar({
 
 	return (
 		<div className="rundown-sidebar">
-			<DraggableComponentContainer
+			<DraggableContainer
 				items={sortedSegments}
 				itemType={DragTypes.SEGMENT}
 				Component={({ data: segment }) => <SidebarSegment key={segment.id} segment={segment} />}
@@ -105,7 +105,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			</Link>
 
 			<div className="ps-3">
-				<DraggableComponentContainer
+				<DraggableContainer
 					items={sortedParts}
 					itemType={DragTypes.PART}
 					Component={({ data: part }) => (
