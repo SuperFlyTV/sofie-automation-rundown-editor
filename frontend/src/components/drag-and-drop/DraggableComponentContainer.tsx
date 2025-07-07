@@ -1,6 +1,6 @@
 import update from 'immutability-helper'
 import type { FC, ReactElement } from 'react'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { DraggableComponentWrapper } from './DraggableComponentWrapper'
 import type { DragTypes } from './DragTypes'
 
@@ -24,7 +24,7 @@ export const DraggableComponentContainer = <T extends DraggableItem>({
 	itemType,
 	Component
 }: DraggableComponentContainerProps<T>): ReactElement => {
-	const [cards, setCards] = useState<T[]>(items)
+	const [cards, setCards] = useState<T[]>([])
 
 	const moveCard = useCallback((dragIndex: number, hoverIndex: number) => {
 		setCards((prevCards: T[]) =>
@@ -36,6 +36,12 @@ export const DraggableComponentContainer = <T extends DraggableItem>({
 			})
 		)
 	}, [])
+
+	useEffect(() => {
+		if (items.length > 0) {
+			setCards(items)
+		}
+	}, [items])
 
 	const renderCard = useCallback(
 		(item: T, index: number) => (
@@ -51,6 +57,8 @@ export const DraggableComponentContainer = <T extends DraggableItem>({
 		),
 		[moveCard, Component, itemType]
 	)
+
+	console.log(cards)
 
 	return <div>{cards.map(renderCard)}</div>
 }
