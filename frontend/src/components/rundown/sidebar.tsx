@@ -39,7 +39,7 @@ export function RundownSidebar({
 	}
 
 	return (
-		<div className="rundown-sidebar">
+		<div className="rundown-sidebar" style={{ marginTop: '2px' }}>
 			<DraggableContainer
 				items={sortedSegments}
 				itemType={DragTypes.SEGMENT}
@@ -89,15 +89,16 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 	const segmentDuration = sortedParts.reduce((acc, part) => acc + (part.payload?.duration ?? 0), 0)
 
 	return (
-		<div className="mb-1">
+		<div>
 			<Link
 				to="/rundown/$rundownId/segment/$segmentId"
 				params={{ rundownId: segment.rundownId, segmentId: segment.id }}
 			>
 				<button
-					className={classNames('segment-button mb-1', {
+					className={classNames('segment-button', {
 						floated: segment.float
 					})}
+					style={{ marginBottom: '2px' }}
 				>
 					{segment.name}
 					<span className="item-duration">{displayTime(segmentDuration)}</span>
@@ -119,7 +120,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 							}}
 						>
 							<button
-								className={classNames('part-button mb-1', {
+								className={classNames('part-button', {
 									floated: segment.float || part.float
 								})}
 							>
@@ -129,7 +130,11 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 						</Link>
 					)}
 				/>
-				<button className="part-button add-button mb-2" onClick={handleAddPart}>
+				<button
+					className="part-button add-button"
+					style={{ marginTop: '2px' }}
+					onClick={handleAddPart}
+				>
 					+ Add Part
 				</button>
 			</div>
