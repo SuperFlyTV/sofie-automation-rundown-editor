@@ -15,6 +15,7 @@ export interface DraggableItemData {
 }
 
 export interface DraggableContainerProps<T extends DraggableItemData> {
+	id: string
 	items: T[]
 	itemType: DragTypes
 	Component: DraggableWrappedComponent<T>
@@ -29,6 +30,7 @@ export type HoverState<T> = {
 }
 
 export const DraggableContainer = <T extends DraggableItemData>({
+	id,
 	items,
 	itemType,
 	Component
@@ -49,7 +51,7 @@ export const DraggableContainer = <T extends DraggableItemData>({
 		if (!hoveredRef.current) return
 
 		// reset hover state when hovering on the dragged item
-		if (draggedItem.id === hoveredItem.id)
+		if (draggedItem.id === hoveredItem.id || draggedItem.parentId !== hoveredItem.parentId)
 			setHoverState({
 				hoveredItem: null,
 				newPosition: null,
@@ -145,6 +147,7 @@ export const DraggableContainer = <T extends DraggableItemData>({
 				Component={Component}
 				hoverState={hoverState}
 				endDrag={endDrag}
+				parentId={id}
 			/>
 		),
 		[itemType, Component, hoverState]

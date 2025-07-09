@@ -44,6 +44,7 @@ export function RundownSidebar({
 				items={sortedSegments}
 				itemType={DragTypes.SEGMENT}
 				Component={({ data: segment }) => <SidebarSegment key={segment.id} segment={segment} />}
+				id={rundownId}
 			/>
 			<button className="segment-button add-button" onClick={handleAddSegment}>
 				+ Add Segment
@@ -129,6 +130,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 							</button>
 						</Link>
 					)}
+					id={segment.id}
 				/>
 				<button
 					className="part-button add-button"

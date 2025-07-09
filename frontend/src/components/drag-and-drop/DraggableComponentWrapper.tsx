@@ -9,6 +9,7 @@ export interface DraggableItem<T> extends DraggableItemData {
 	index: number
 	type: string
 	data: T
+	parentId: string
 }
 
 export interface DraggableWrappedComponentProps<T> {
@@ -33,12 +34,14 @@ export type DraggableWrappedComponent<T> = FC<DraggableWrappedComponentProps<T>>
 
 export interface DraggableComponentWrapperProps<T> extends DraggableWrappedComponentProps<T> {
 	Component: DraggableWrappedComponent<T>
+	parentId: string
 	itemType: DragTypes
 	hoverState: HoverState<T>
 }
 
 export const DraggableComponentWrapper = <T,>({
 	id,
+	parentId,
 	index,
 	data,
 	itemType,
@@ -60,10 +63,10 @@ export const DraggableComponentWrapper = <T,>({
 			handlerId: monitor.getHandlerId()
 		}),
 		hover(item: DraggableItem<T>, monitor) {
-			hover(ref, monitor, item, { id, index, type: itemType, data })
+			hover(ref, monitor, item, { id, index, type: itemType, data, parentId })
 		},
 		drop: () => {
-			return { id, index, type: itemType, data }
+			return { id, index, type: itemType, data, parentId }
 		},
 		canDrop: (item: DraggableItem<T>) => {
 			return (
@@ -77,7 +80,7 @@ export const DraggableComponentWrapper = <T,>({
 	const [{ isDragging }, drag] = useDrag({
 		type: itemType,
 		item: () => {
-			return { id, index, type: itemType, data }
+			return { id, index, type: itemType, data, parentId }
 		},
 		end: (item, monitor) => {
 			if (!item || !monitor) return
