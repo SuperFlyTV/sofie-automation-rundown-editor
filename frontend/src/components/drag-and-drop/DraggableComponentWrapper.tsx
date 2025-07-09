@@ -3,28 +3,29 @@ import type { FC } from 'react'
 import { useRef } from 'react'
 import { useDrag, useDrop, type DropTargetMonitor } from 'react-dnd'
 import type { DragTypes } from './DragTypes'
-import type { ListItemToBeDragged } from './DraggableContainer'
+import type { DraggableItemData, HoverState } from './DraggableContainer'
 
-export interface DraggableItem extends ListItemToBeDragged {
+export interface DraggableItem<T> extends DraggableItemData {
 	index: number
 	type: string
+	data: T
 }
 
 export interface DraggableWrappedComponentProps<T> {
 	id: string
 	index: number
 	data: T
-	move: (dragIndex: number, hoverIndex: number) => void
 	hover: (
-		ref: React.RefObject<HTMLDivElement | null>,
-		monitor: DropTargetMonitor<DraggableItem, void>,
-		hoveredItem: DraggableItem,
-		currentIndex: number
+		hoveredRef: React.RefObject<HTMLDivElement | null>,
+		monitor: DropTargetMonitor<DraggableItem<T>, void>,
+		draggedItem: DraggableItem<T>,
+		hoveredItem: DraggableItem<T>
 	) => void
 	endDrag: (
 		hoverIndex: number,
-		move: (dragIndex: number, hoverIndex: number) => void,
-		didDrop: boolean
+		didDrop: boolean,
+		item: DraggableItem<T>,
+		target: DraggableItem<T> | null
 	) => void
 }
 
@@ -33,8 +34,7 @@ export type DraggableWrappedComponent<T> = FC<DraggableWrappedComponentProps<T>>
 export interface DraggableComponentWrapperProps<T> extends DraggableWrappedComponentProps<T> {
 	Component: DraggableWrappedComponent<T>
 	itemType: DragTypes
-	hoveredIndex: number | null
-	hoverPosition: 'above' | 'below' | null
+	hoverState: HoverState<T>
 }
 
 export const DraggableComponentWrapper = <T,>({
@@ -42,30 +42,34 @@ export const DraggableComponentWrapper = <T,>({
 	index,
 	data,
 	itemType,
-	move,
 	hover,
 	endDrag,
 	Component,
-	hoveredIndex,
-	hoverPosition
+	hoverState
 }: DraggableComponentWrapperProps<T>) => {
 	const ref = useRef<HTMLDivElement>(null)
 
-	const [collectedProps, drop] = useDrop<DraggableItem, void, { handlerId: Identifier | null }>({
+	const [dropCollectedProps, drop] = useDrop<
+		DraggableItem<T>,
+		DraggableItem<T>,
+		{ handlerId: Identifier | null }
+	>({
 		accept: itemType,
 		collect: (monitor) => ({
 			id,
 			handlerId: monitor.getHandlerId()
 		}),
-		hover(item: DraggableItem, monitor) {
-			hover(ref, monitor, item, index)
+		hover(item: DraggableItem<T>, monitor) {
+			hover(ref, monitor, item, { id, index, type: itemType, data })
 		},
-		canDrop: (item: DraggableItem) => {
-			console.log(item.index, index - 1, hoverPosition)
+		drop: () => {
+			return { id, index, type: itemType, data }
+		},
+		canDrop: (item: DraggableItem<T>) => {
 			return (
 				item.id !== id &&
-				((item.index !== index - 1 && hoverPosition === 'above') ||
-					(item.index !== index + 1 && hoverPosition === 'below'))
+				((item.index !== index - 1 && hoverState.newPosition === 'above') ||
+					(item.index !== index + 1 && hoverState.newPosition === 'below'))
 			)
 		}
 	})
@@ -73,12 +77,12 @@ export const DraggableComponentWrapper = <T,>({
 	const [{ isDragging }, drag] = useDrag({
 		type: itemType,
 		item: () => {
-			return { id, index, type: itemType }
+			return { id, index, type: itemType, data }
 		},
 		end: (item, monitor) => {
 			if (!item || !monitor) return
 
-			endDrag(item.index, move, monitor.didDrop())
+			endDrag(item.index, monitor.didDrop(), item, monitor.getDropResult())
 		},
 		collect: (monitor) => ({
 			isDragging: monitor.isDragging()
@@ -94,23 +98,27 @@ export const DraggableComponentWrapper = <T,>({
 				position: 'relative',
 				opacity: isDragging ? 0.3 : 1
 			}}
-			data-handler-id={collectedProps.handlerId}
+			data-handler-id={dropCollectedProps.handlerId}
 		>
 			<div
 				style={{
 					position: 'relative',
 					borderTop:
-						hoveredIndex === index && hoverPosition === 'above' ? '2px solid green' : 'none',
+						hoverState.hoveredItem?.id === id && hoverState.newPosition === 'above'
+							? '2px solid green'
+							: 'none',
 					height: '2px',
 					top: '-1px'
 				}}
 			></div>
-			<Component id={id} index={index} data={data} move={move} hover={hover} endDrag={endDrag} />
+			<Component id={id} index={index} data={data} hover={hover} endDrag={endDrag} />
 			<div
 				style={{
 					position: 'relative',
 					borderBottom:
-						hoveredIndex === index && hoverPosition === 'below' ? '2px solid green' : 'none',
+						hoverState.hoveredItem?.id === id && hoverState.newPosition === 'below'
+							? '2px solid green'
+							: 'none',
 					height: '2px',
 					top: '1px'
 				}}

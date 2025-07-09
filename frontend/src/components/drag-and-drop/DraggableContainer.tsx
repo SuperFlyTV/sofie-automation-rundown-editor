@@ -8,87 +8,116 @@ import {
 } from './DraggableComponentWrapper'
 import { DragTypes } from './DragTypes'
 import type { DropTargetMonitor, XYCoord } from 'react-dnd'
+import { getNewPosition, isResultCurrentPosition } from './util'
 
-export interface ListItemToBeDragged {
+export interface DraggableItemData {
 	id: string
 }
 
-export interface DraggableContainerProps<T extends ListItemToBeDragged> {
+export interface DraggableContainerProps<T extends DraggableItemData> {
 	items: T[]
 	itemType: DragTypes
 	Component: DraggableWrappedComponent<T>
 }
 
-export const DraggableContainer = <T extends ListItemToBeDragged>({
+export type HoverPosition = 'above' | 'below' | null
+
+export type HoverState<T> = {
+	hoveredItem: DraggableItem<T> | null
+	newPosition: HoverPosition | null
+	draggedItem: DraggableItem<T> | null
+}
+
+export const DraggableContainer = <T extends DraggableItemData>({
 	items,
 	itemType,
 	Component
 }: DraggableContainerProps<T>): ReactElement => {
-	const [containedItems, setContainedItems] = useState<T[]>([])
-	const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-	const [hoverPosition, setHoverPosition] = useState<'above' | 'below' | null>(null)
+	const [draggableItems, setDraggableItems] = useState<T[]>([])
+	const [hoverState, setHoverState] = useState<HoverState<T>>({
+		hoveredItem: null,
+		newPosition: null,
+		draggedItem: null
+	})
 
 	const hover = (
 		hoveredRef: React.RefObject<HTMLDivElement | null>,
-		monitor: DropTargetMonitor<DraggableItem, void>,
-		draggedItem: DraggableItem,
-		hoveredIndex: number
+		monitor: DropTargetMonitor<DraggableItem<T>, void>,
+		draggedItem: DraggableItem<T>,
+		hoveredItem: DraggableItem<T>
 	) => {
 		if (!hoveredRef.current) return
 
-		const dragIndex = draggedItem.index
-		if (dragIndex === hoveredIndex) setHoveredIndex(null)
+		// reset hover state when hovering on the dragged item
+		if (draggedItem.id === hoveredItem.id)
+			setHoverState({
+				hoveredItem: null,
+				newPosition: null,
+				draggedItem: null
+			})
 		else {
-			const hoverRect = hoveredRef.current.getBoundingClientRect()
-			const hoverMiddleY = (hoverRect.bottom - hoverRect.top) / 2
-			const clientOffset = monitor.getClientOffset()
-			const hoverClientY = (clientOffset as XYCoord).y - hoverRect.top
+			const hoveredRect = hoveredRef.current.getBoundingClientRect()
+			// vertical position of the cursor inside the currently hovered element
+			const hoverClientY = (monitor.getClientOffset() as XYCoord).y - hoveredRect.top
 
-			if (hoverClientY > hoverMiddleY && hoverClientY < hoverMiddleY + 4) {
-				return
-			}
+			const newPosition = getNewPosition(hoverClientY, hoveredRect)
 
-			const newPosition = hoverClientY > hoverMiddleY ? 'below' : 'above'
-
-			if (
-				(hoveredIndex === dragIndex - 1 && newPosition === 'below') ||
-				(hoveredIndex === dragIndex + 1 && newPosition === 'above')
-			) {
-				setHoveredIndex(null)
-				setHoverPosition(null)
-			} else {
-				setHoverPosition((prev) => (prev !== newPosition ? newPosition : prev))
-				setHoveredIndex((prev) => (prev !== hoveredIndex ? hoveredIndex : prev))
+			if (newPosition !== undefined) {
+				if (isResultCurrentPosition(draggedItem.index, newPosition, hoveredItem.index)) {
+					// reset hover state when the result of the drop would be the current position of the hovered item
+					setHoverState({
+						hoveredItem: null,
+						newPosition: null,
+						draggedItem: null
+					})
+				} else {
+					setHoverState({ hoveredItem, newPosition, draggedItem })
+				}
 			}
 		}
 	}
 
+	// Pass Dragged item to this, or even just pass the hover state if possible.
 	const endDrag = (
 		dragIndex: number,
-		moveToHovered: (dragIndex: number, hoverIndex: number) => void,
-		didDrop: boolean
+		didDrop: boolean,
+		item: DraggableItem<T>,
+		target: DraggableItem<T> | null
 	) => {
-		if (didDrop && hoveredIndex !== null && hoverPosition !== null) {
-			let targetIndex = hoveredIndex
+		console.log(item)
+		console.log(target)
+		if (didDrop && hoverState.hoveredItem && hoverState.newPosition !== null) {
+			let targetIndex = hoverState.hoveredItem.index
 
-			if (hoverPosition === 'below') {
-				targetIndex = dragIndex < hoveredIndex ? hoveredIndex : hoveredIndex + 1
-			} else {
-				targetIndex = dragIndex < hoveredIndex ? hoveredIndex - 1 : hoveredIndex
+			if (hoverState.newPosition !== null) {
+				if (hoverState.newPosition === 'below') {
+					targetIndex =
+						dragIndex < hoverState.hoveredItem.index
+							? hoverState.hoveredItem.index
+							: hoverState.hoveredItem.index + 1
+				} else {
+					targetIndex =
+						dragIndex < hoverState.hoveredItem.index
+							? hoverState.hoveredItem.index - 1
+							: hoverState.hoveredItem.index
+				}
 			}
 
-			targetIndex = Math.max(0, Math.min(containedItems.length - 1, targetIndex))
+			targetIndex = Math.max(0, Math.min(draggableItems.length - 1, targetIndex))
 
 			if (targetIndex !== dragIndex) {
-				moveToHovered(dragIndex, targetIndex)
+				move(dragIndex, targetIndex)
 			}
 		}
-		setHoveredIndex(null)
-		setHoverPosition(null)
+		setHoverState({
+			hoveredItem: null,
+			newPosition: null,
+			draggedItem: null
+		})
 	}
 
 	const move = useCallback((dragIndex: number, hoverIndex: number) => {
-		setContainedItems((prevDaggableItems: T[]) =>
+		setDraggableItems((prevDaggableItems: T[]) =>
 			update(prevDaggableItems, {
 				$splice: [
 					[dragIndex, 1],
@@ -100,7 +129,7 @@ export const DraggableContainer = <T extends ListItemToBeDragged>({
 
 	useEffect(() => {
 		if (items.length > 0) {
-			setContainedItems(items)
+			setDraggableItems(items)
 		}
 	}, [items])
 
@@ -111,17 +140,15 @@ export const DraggableContainer = <T extends ListItemToBeDragged>({
 				id={item.id}
 				index={index}
 				data={item}
-				move={move}
 				hover={hover}
 				itemType={itemType}
 				Component={Component}
-				hoverPosition={hoverPosition}
-				hoveredIndex={hoveredIndex}
+				hoverState={hoverState}
 				endDrag={endDrag}
 			/>
 		),
-		[move, itemType, Component, hoverPosition, hoveredIndex]
+		[itemType, Component, hoverState]
 	)
 
-	return <div>{containedItems.map(renderContainedItem)}</div>
+	return <div>{draggableItems.map(renderContainedItem)}</div>
 }
