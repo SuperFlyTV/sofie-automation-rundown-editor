@@ -1,7 +1,7 @@
 import type { Identifier } from 'dnd-core'
 import type { FC } from 'react'
 import { useRef } from 'react'
-import { useDrag, useDrop, type DropTargetMonitor } from 'react-dnd'
+import { useDrag, useDrop, type DragSourceMonitor, type DropTargetMonitor } from 'react-dnd'
 import type { DragTypes } from './DragTypes'
 import type { DraggableItemData, HoverState } from './DraggableContainer'
 
@@ -10,6 +10,7 @@ export interface DraggableItem<T> extends DraggableItemData {
 	type: string
 	data: T
 	parentId: string
+	hoverState: HoverState<T>
 }
 
 export interface DraggableWrappedComponentProps<T> {
@@ -18,15 +19,14 @@ export interface DraggableWrappedComponentProps<T> {
 	data: T
 	hover: (
 		hoveredRef: React.RefObject<HTMLDivElement | null>,
-		monitor: DropTargetMonitor<DraggableItem<T>, void>,
+		monitor: DropTargetMonitor<DraggableItem<T>, DraggableItem<T>>,
 		draggedItem: DraggableItem<T>,
 		hoveredItem: DraggableItem<T>
 	) => void
 	endDrag: (
-		hoverIndex: number,
-		didDrop: boolean,
-		item: DraggableItem<T>,
-		target: DraggableItem<T> | null
+		dragIndex: number,
+		monitor: DragSourceMonitor<DraggableItem<T>, DraggableItem<T>>,
+		item: DraggableItem<T>
 	) => void
 }
 
@@ -62,13 +62,20 @@ export const DraggableComponentWrapper = <T,>({
 			id,
 			handlerId: monitor.getHandlerId()
 		}),
-		hover(item: DraggableItem<T>, monitor) {
-			hover(ref, monitor, item, { id, index, type: itemType, data, parentId })
+		hover(item, monitor) {
+			hover(ref, monitor, item, {
+				id,
+				index,
+				type: itemType,
+				data,
+				parentId,
+				hoverState
+			})
 		},
 		drop: () => {
-			return { id, index, type: itemType, data, parentId }
+			return { id, index, type: itemType, data, parentId, hoverState }
 		},
-		canDrop: (item: DraggableItem<T>) => {
+		canDrop: (item) => {
 			return (
 				item.id !== id &&
 				((item.index !== index - 1 && hoverState.newPosition === 'above') ||
@@ -77,15 +84,19 @@ export const DraggableComponentWrapper = <T,>({
 		}
 	})
 
-	const [{ isDragging }, drag] = useDrag({
+	const [{ isDragging }, drag] = useDrag<
+		DraggableItem<T>,
+		DraggableItem<T>,
+		{ isDragging: boolean }
+	>({
 		type: itemType,
 		item: () => {
-			return { id, index, type: itemType, data, parentId }
+			return { id, index, type: itemType, data, parentId, hoverState }
 		},
 		end: (item, monitor) => {
 			if (!item || !monitor) return
 
-			endDrag(item.index, monitor.didDrop(), item, monitor.getDropResult())
+			endDrag(item.index, monitor, item)
 		},
 		collect: (monitor) => ({
 			isDragging: monitor.isDragging()
