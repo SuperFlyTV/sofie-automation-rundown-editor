@@ -43,79 +43,85 @@ export const DraggableContainer = <T extends DraggableItemData>({
 		draggedItem: null
 	})
 
-	const hover = (
-		hoveredRef: React.RefObject<HTMLDivElement | null>,
-		monitor: DropTargetMonitor<DraggableItem<T>, void>,
-		draggedItem: DraggableItem<T>,
-		hoveredItem: DraggableItem<T>
-	) => {
-		if (!hoveredRef.current) return
+	const hover = useCallback(
+		(
+			hoveredRef: React.RefObject<HTMLDivElement | null>,
+			monitor: DropTargetMonitor<DraggableItem<T>, void>,
+			draggedItem: DraggableItem<T>,
+			hoveredItem: DraggableItem<T>
+		) => {
+			if (!hoveredRef.current) return
 
-		// reset hover state when hovering on the dragged item
-		if (draggedItem.id === hoveredItem.id || draggedItem.parentId !== hoveredItem.parentId)
+			// reset hover state when hovering on the dragged item
+			if (draggedItem.id === hoveredItem.id || draggedItem.parentId !== hoveredItem.parentId)
+				setHoverState({
+					hoveredItem: null,
+					newPosition: null,
+					draggedItem: null
+				})
+			else {
+				const hoveredRect = hoveredRef.current.getBoundingClientRect()
+				// vertical position of the cursor inside the currently hovered element
+				const hoverClientY = (monitor.getClientOffset() as XYCoord).y - hoveredRect.top
+
+				const newPosition = getNewPosition(hoverClientY, hoveredRect)
+
+				if (newPosition !== undefined) {
+					if (isResultCurrentPosition(draggedItem.index, newPosition, hoveredItem.index)) {
+						// reset hover state when the result of the drop would be the current position of the hovered item
+						setHoverState({
+							hoveredItem: null,
+							newPosition: null,
+							draggedItem: null
+						})
+					} else {
+						setHoverState({ hoveredItem, newPosition, draggedItem })
+					}
+				}
+			}
+		},
+		[setHoverState]
+	)
+
+	// Pass Dragged item to this, or even just pass the hover state if possible.
+	const endDrag = useCallback(
+		(
+			dragIndex: number,
+			didDrop: boolean,
+			item: DraggableItem<T>,
+			target: DraggableItem<T> | null
+		) => {
+			if (didDrop && target && hoverState.hoveredItem && hoverState.newPosition !== null) {
+				let targetIndex = hoverState.hoveredItem.index
+
+				if (hoverState.newPosition !== null) {
+					if (hoverState.newPosition === 'below') {
+						targetIndex =
+							dragIndex < hoverState.hoveredItem.index
+								? hoverState.hoveredItem.index
+								: hoverState.hoveredItem.index + 1
+					} else {
+						targetIndex =
+							dragIndex < hoverState.hoveredItem.index
+								? hoverState.hoveredItem.index - 1
+								: hoverState.hoveredItem.index
+					}
+				}
+
+				targetIndex = Math.max(0, Math.min(draggableItems.length - 1, targetIndex))
+
+				if (targetIndex !== dragIndex) {
+					reorder(item.data, targetIndex)
+				}
+			}
 			setHoverState({
 				hoveredItem: null,
 				newPosition: null,
 				draggedItem: null
 			})
-		else {
-			const hoveredRect = hoveredRef.current.getBoundingClientRect()
-			// vertical position of the cursor inside the currently hovered element
-			const hoverClientY = (monitor.getClientOffset() as XYCoord).y - hoveredRect.top
-
-			const newPosition = getNewPosition(hoverClientY, hoveredRect)
-
-			if (newPosition !== undefined) {
-				if (isResultCurrentPosition(draggedItem.index, newPosition, hoveredItem.index)) {
-					// reset hover state when the result of the drop would be the current position of the hovered item
-					setHoverState({
-						hoveredItem: null,
-						newPosition: null,
-						draggedItem: null
-					})
-				} else {
-					setHoverState({ hoveredItem, newPosition, draggedItem })
-				}
-			}
-		}
-	}
-
-	// Pass Dragged item to this, or even just pass the hover state if possible.
-	const endDrag = (
-		dragIndex: number,
-		didDrop: boolean,
-		item: DraggableItem<T>,
-		target: DraggableItem<T> | null
-	) => {
-		if (didDrop && target && hoverState.hoveredItem && hoverState.newPosition !== null) {
-			let targetIndex = hoverState.hoveredItem.index
-
-			if (hoverState.newPosition !== null) {
-				if (hoverState.newPosition === 'below') {
-					targetIndex =
-						dragIndex < hoverState.hoveredItem.index
-							? hoverState.hoveredItem.index
-							: hoverState.hoveredItem.index + 1
-				} else {
-					targetIndex =
-						dragIndex < hoverState.hoveredItem.index
-							? hoverState.hoveredItem.index - 1
-							: hoverState.hoveredItem.index
-				}
-			}
-
-			targetIndex = Math.max(0, Math.min(draggableItems.length - 1, targetIndex))
-
-			if (targetIndex !== dragIndex) {
-				reorder(item.data, targetIndex)
-			}
-		}
-		setHoverState({
-			hoveredItem: null,
-			newPosition: null,
-			draggedItem: null
-		})
-	}
+		},
+		[draggableItems.length, hoverState.hoveredItem, hoverState.newPosition, reorder]
+	)
 
 	useEffect(() => {
 		if (items.length > 0) {
@@ -138,7 +144,7 @@ export const DraggableContainer = <T extends DraggableItemData>({
 				parentId={id}
 			/>
 		),
-		[itemType, Component, hoverState]
+		[hover, itemType, Component, hoverState, endDrag, id]
 	)
 
 	return <div>{draggableItems.map(renderContainedItem)}</div>
