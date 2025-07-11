@@ -52,7 +52,7 @@ export function SegmentPropertiesForm({ segment }: { segment: Segment }) {
 								<Form.Control
 									name={field.name}
 									type="text"
-									value={field.state.value}
+									value={field.state.value ?? ''}
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>

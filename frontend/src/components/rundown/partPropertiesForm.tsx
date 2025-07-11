@@ -52,7 +52,7 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 								<Form.Control
 									name={field.name}
 									type="text"
-									value={field.state.value}
+									value={field.state.value ?? ''}
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
@@ -108,7 +108,7 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 								<Form.Control
 									name={field.name}
 									type="number"
-									value={Number(field.state.value)}
+									value={Number(field.state.value ?? 0)}
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(Number(e.target.value))}
 								/>
@@ -127,7 +127,7 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 									name={field.name}
 									as="textarea"
 									rows={3}
-									value={field.state.value}
+									value={field.state.value ?? ''}
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
