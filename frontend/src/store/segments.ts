@@ -35,6 +35,12 @@ export const updateSegment = createAppAsyncThunk(
 		return electronApi.updateSegment(payload.segment)
 	}
 )
+export const reorderSegments = createAppAsyncThunk(
+	'parts/reorderSegments',
+	async ({ segment, targetIndex }: { segment: Segment; targetIndex: number }) => {
+		return electronApi.reorderSegments(segment, targetIndex)
+	}
+)
 export const removeSegment = createAppAsyncThunk(
 	'segments/removeSegment',
 	async (payload: RemoveSegmentPayload) => {
@@ -103,6 +109,12 @@ const segmentsSlice = createSlice({
 				if (index !== -1) {
 					state.segments[index] = action.payload
 				}
+			})
+			.addCase(reorderSegments.fulfilled, (state, action) => {
+				state.status = 'succeeded'
+				state.rundownId = action.meta.arg.segment.rundownId
+				state.segments = action.payload
+				state.error = null
 			})
 			.addCase(removeSegment.fulfilled, (state, action) => {
 				const index = state.segments.findIndex((segment) => segment.id === action.payload.id)

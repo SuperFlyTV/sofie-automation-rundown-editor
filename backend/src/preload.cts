@@ -149,6 +149,12 @@ const electronApi: BackendApi = {
 			payload: segment
 		})
 	},
+	reorderSegments: (segment: MutationSegmentUpdate, targetIndex: number) => {
+		return ipcRenderer.invoke('segments', {
+			type: 'reorder',
+			payload: { segment, targetIndex }
+		})
+	},
 	deleteSegment: (segmentId: string) => {
 		return ipcRenderer.invoke('segments', {
 			type: 'delete',

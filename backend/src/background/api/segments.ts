@@ -14,8 +14,8 @@ import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { getMutatedPartsFromSegment } from './parts'
-import { mutations as rundownMutations } from './rundowns'
-import { stringifyError } from '../util'
+import { mutations as rundownMutations, sendRundownDiffToCore } from './rundowns'
+import { spliceReorder, stringifyError } from '../util'
 
 async function mutateSegment(segment: Segment): Promise<MutatedSegment> {
 	return {
@@ -188,6 +188,64 @@ export const mutations = {
 			return { error: e as Error }
 		}
 	},
+	async reorder({
+		segment,
+		targetIndex
+	}: {
+		segment: MutationSegmentUpdate
+		targetIndex: number
+	}): Promise<{ result?: Segment | Segment[]; error?: Error }> {
+		try {
+			const { result, error } = await this.read({
+				rundownId: segment.rundownId
+			})
+
+			if (error) throw error
+			if (result && (!('length' in result) || result?.length < 2))
+				throw new Error('An error occurred when getting segments from the database during reorder.')
+
+			const segmentsInRankOrder = (result as Segment[]).sort(
+				(partA, partB) => partA.rank - partB.rank
+			)
+			const reorderedParts = spliceReorder(segmentsInRankOrder, segment.rank, targetIndex)
+
+			db.exec('BEGIN;')
+			try {
+				const updateStmt = db.prepare(`
+					UPDATE segments
+					SET playlistId = ?, document = (SELECT json_patch(segments.document, json(?)) FROM segments WHERE id = ?)
+					WHERE id = ?;
+				`)
+
+				reorderedParts.forEach((segment, index) => {
+					updateStmt.run(
+						segment.playlistId || null,
+						// update rank based on array order
+						JSON.stringify({ ...segment, rank: index }),
+						segment.id,
+						segment.id
+					)
+				})
+
+				db.exec('COMMIT;')
+			} catch (transactionError) {
+				console.error(transactionError)
+				db.exec('ROLLBACK;')
+				throw transactionError
+			}
+
+			const { result: updatedSegments, error: updatedSegmentsserror } = await this.read({
+				rundownId: segment.rundownId
+			})
+
+			if (updatedSegmentsserror) throw updatedSegmentsserror
+
+			return { result: updatedSegments }
+		} catch (e) {
+			console.error(e)
+			return { error: e as Error }
+		}
+	},
 	async delete(payload: MutationSegmentDelete): Promise<{ error?: Error }> {
 		try {
 			db.exec('BEGIN TRANSACTION')
@@ -247,6 +305,31 @@ export async function init(): Promise<void> {
 			}
 
 			return result || error
+		} else if (operation.type === IpcOperationType.Reorder) {
+			const { result: sourceDocument } = await mutations.read({ id: operation.payload.segment.id })
+			const { result: reorderedSegments, error } = await mutations.reorder(operation.payload)
+
+			if (
+				!error &&
+				sourceDocument &&
+				!Array.isArray(sourceDocument) &&
+				Array.isArray(reorderedSegments)
+			) {
+				const { result: rundown, error: rundownError } = await rundownMutations.read({
+					id: sourceDocument.rundownId
+				})
+				if (rundown && !Array.isArray(rundown) && rundown.sync) {
+					try {
+						if (rundown && !rundownError) {
+							await sendRundownDiffToCore(rundown, rundown)
+							return reorderedSegments
+						}
+					} catch (error) {
+						console.error(error)
+						event.sender.send('error', stringifyError(error, true))
+					}
+				}
+			}
 		} else if (operation.type === IpcOperationType.Delete) {
 			const { result: document } = await mutations.read({ id: operation.payload.id })
 			const { error } = await mutations.delete(operation.payload)

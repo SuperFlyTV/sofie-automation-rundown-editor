@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import { addNewPart, reorderParts } from '~/store/parts'
-import { addNewSegment } from '~/store/segments'
+import { addNewSegment, reorderSegments } from '~/store/segments'
 import type { Part, Segment } from '~backend/background/interfaces'
 import './sidebar.scss'
 import classNames from 'classnames'
@@ -38,6 +38,23 @@ export function RundownSidebar({
 			})
 	}
 
+	const handleReorderSegment = (sourceSegment: Segment, targetIndex: number) => {
+		return dispatch(reorderSegments({ segment: sourceSegment, targetIndex }))
+			.unwrap()
+			.then(async () => {
+				await navigate({
+					to: `/rundown/${sourceSegment.rundownId}/segment/${sourceSegment.id}`
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Reordering Segment',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			})
+	}
+
 	return (
 		<div className="rundown-sidebar" style={{ marginTop: '2px' }}>
 			<DraggableContainer
@@ -45,7 +62,7 @@ export function RundownSidebar({
 				itemType={DragTypes.SEGMENT}
 				Component={({ data: segment }) => <SidebarSegment key={segment.id} segment={segment} />}
 				id={rundownId}
-				reorder={() => {}}
+				reorder={handleReorderSegment}
 			/>
 			<button className="segment-button add-button" onClick={handleAddSegment}>
 				+ Add Segment
