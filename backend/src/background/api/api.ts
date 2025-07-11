@@ -54,6 +54,7 @@ export interface BackendApi {
 	getParts: (rundownId: string) => Promise<Part[]>
 	addNewPart: (part: MutationPartCreate) => Promise<Part>
 	updatePart: (part: MutationPartUpdate) => Promise<Part>
+	reorderParts: (part: MutationPartUpdate, targetIndex: number) => Promise<Part[]>
 	deletePart: (partId: string) => Promise<void>
 
 	getPieces: (rundownId: string) => Promise<Piece[]>

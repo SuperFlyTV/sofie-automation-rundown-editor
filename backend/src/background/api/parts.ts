@@ -15,9 +15,10 @@ import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { getMutatedPiecesFromPart } from './pieces'
 import { mutations as rundownMutations } from './rundowns'
-import { mutations as segmentsMutations } from './segments'
-import { stringifyError } from '../util'
+import { mutations as segmentsMutations, sendSegmentDiffToCore } from './segments'
+import { spliceReorder, stringifyError } from '../util'
 import { mutations as settingsMutations } from './settings'
+import { error } from 'console'
 
 async function mutatePart(part: Part): Promise<MutatedPart> {
 	return {
@@ -141,21 +142,31 @@ export const mutations = {
 		}
 
 		let query = `
-			SELECT *
-			FROM parts
-		`
-		const args: string[] = []
+    SELECT *
+    FROM parts
+  `
+		const args: (string | number)[] = []
+		const conditions: string[] = []
+
 		if (payload.id) {
-			query += `\nWHERE id = ?`
+			conditions.push(`id = ?`)
 			args.push(payload.id)
 		}
 		if (payload.rundownId) {
-			query += `\nWHERE rundownId = ?`
+			conditions.push(`rundownId = ?`)
 			args.push(payload.rundownId)
 		}
 		if (payload.segmentId) {
-			query += `\nWHERE segmentId = ?`
+			conditions.push(`segmentId = ?`)
 			args.push(payload.segmentId)
+		}
+		if (payload.rank !== null && payload.rank !== undefined) {
+			conditions.push(`JSON_EXTRACT(document, '$.rank') = ?`)
+			args.push(payload.rank)
+		}
+
+		if (conditions.length > 0) {
+			query += `\nWHERE ${conditions.join(' AND ')}` // Join conditions with AND
 		}
 
 		try {
@@ -205,6 +216,65 @@ export const mutations = {
 
 			return this.readOne(payload.id)
 		} catch (e) {
+			return { error: e as Error }
+		}
+	},
+	async reorder({
+		part,
+		targetIndex
+	}: {
+		part: MutationPartUpdate
+		targetIndex: number
+	}): Promise<{ result?: Part | Part[]; error?: Error }> {
+		try {
+			const { result, error } = await this.read({
+				segmentId: part.segmentId,
+				rundownId: part.rundownId
+			})
+
+			if (error) throw error
+			if (result && (!('length' in result) || result?.length < 2))
+				throw new Error('An error occurred when getting parts from the database during reorder.')
+
+			const partsInRankOrder = (result as Part[]).sort((partA, partB) => partA.rank - partB.rank)
+			const reorderedParts = spliceReorder(partsInRankOrder, part.rank, targetIndex)
+
+			db.exec('BEGIN;')
+			try {
+				const updateStmt = db.prepare(`
+				UPDATE parts
+				SET playlistId = ?, segmentId = ?, document = (SELECT json_patch(parts.document, json(?)) FROM parts WHERE id = ?)
+				WHERE id = ?;
+			`)
+
+				reorderedParts.forEach((part, index) => {
+					updateStmt.run(
+						part.playlistId || null,
+						part.segmentId || null,
+						// update rank based on array order
+						JSON.stringify({ ...part, rank: index }),
+						part.id,
+						part.id
+					)
+				})
+
+				db.exec('COMMIT;')
+			} catch (transactionError) {
+				console.error(transactionError)
+				db.exec('ROLLBACK;')
+				throw transactionError
+			}
+
+			const { result: updatedParts, error: updatedPartserror } = await this.read({
+				segmentId: part.segmentId,
+				rundownId: part.rundownId
+			})
+
+			if (updatedPartserror) throw updatedPartserror
+
+			return { result: updatedParts }
+		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	},
@@ -264,6 +334,33 @@ export async function init(): Promise<void> {
 			}
 
 			return error || result
+		} else if (operation.type === IpcOperationType.Reorder) {
+			const { result: sourceDocument } = await mutations.read({ id: operation.payload.part.id })
+			const { result: reorderedParts, error } = await mutations.reorder(operation.payload)
+
+			if (
+				!error &&
+				sourceDocument &&
+				!Array.isArray(sourceDocument) &&
+				Array.isArray(reorderedParts)
+			) {
+				const { result: rundown } = await rundownMutations.read({ id: sourceDocument.rundownId })
+				if (rundown && !Array.isArray(rundown) && rundown.sync) {
+					try {
+						const { result: segment, error: segmentError } = await segmentsMutations.readOne(
+							sourceDocument.segmentId
+						)
+						// We need to update the entire segment, because otherwise core also reorders the parts in some cases.
+						if (segment && !segmentError) {
+							await sendSegmentDiffToCore(segment, segment)
+							return reorderedParts
+						}
+					} catch (error) {
+						console.error(error)
+						event.sender.send('error', stringifyError(error, true))
+					}
+				}
+			}
 		} else if (operation.type === IpcOperationType.Delete) {
 			const { result: document } = await mutations.read({ id: operation.payload.id })
 			const { error } = await mutations.delete(operation.payload)

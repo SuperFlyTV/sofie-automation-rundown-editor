@@ -30,7 +30,7 @@ async function mutateSegment(segment: Segment): Promise<MutatedSegment> {
 	}
 }
 
-async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
+export async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
 	const rd = await rundownMutations.read({ id: newSegment.rundownId })
 	if (rd.result && !Array.isArray(rd.result) && rd.result.sync === false) {
 		return

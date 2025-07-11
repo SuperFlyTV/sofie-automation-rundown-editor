@@ -1,4 +1,3 @@
-import update from 'immutability-helper'
 import type { ReactElement } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import {
@@ -19,6 +18,7 @@ export interface DraggableContainerProps<T extends DraggableItemData> {
 	items: T[]
 	itemType: DragTypes
 	Component: DraggableWrappedComponent<T>
+	reorder: (source: T, targetIndex: number) => unknown
 }
 
 export type HoverPosition = 'above' | 'below' | null
@@ -33,7 +33,8 @@ export const DraggableContainer = <T extends DraggableItemData>({
 	id,
 	items,
 	itemType,
-	Component
+	Component,
+	reorder
 }: DraggableContainerProps<T>): ReactElement => {
 	const [draggableItems, setDraggableItems] = useState<T[]>([])
 	const [hoverState, setHoverState] = useState<HoverState<T>>({
@@ -86,9 +87,7 @@ export const DraggableContainer = <T extends DraggableItemData>({
 		item: DraggableItem<T>,
 		target: DraggableItem<T> | null
 	) => {
-		console.log(item)
-		console.log(target)
-		if (didDrop && hoverState.hoveredItem && hoverState.newPosition !== null) {
+		if (didDrop && target && hoverState.hoveredItem && hoverState.newPosition !== null) {
 			let targetIndex = hoverState.hoveredItem.index
 
 			if (hoverState.newPosition !== null) {
@@ -108,7 +107,7 @@ export const DraggableContainer = <T extends DraggableItemData>({
 			targetIndex = Math.max(0, Math.min(draggableItems.length - 1, targetIndex))
 
 			if (targetIndex !== dragIndex) {
-				move(dragIndex, targetIndex)
+				reorder(item.data, targetIndex)
 			}
 		}
 		setHoverState({
@@ -117,17 +116,6 @@ export const DraggableContainer = <T extends DraggableItemData>({
 			draggedItem: null
 		})
 	}
-
-	const move = useCallback((dragIndex: number, hoverIndex: number) => {
-		setDraggableItems((prevDaggableItems: T[]) =>
-			update(prevDaggableItems, {
-				$splice: [
-					[dragIndex, 1],
-					[hoverIndex, 0, prevDaggableItems[dragIndex]]
-				]
-			})
-		)
-	}, [])
 
 	useEffect(() => {
 		if (items.length > 0) {

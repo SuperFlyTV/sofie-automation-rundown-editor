@@ -38,6 +38,12 @@ export const updatePart = createAppAsyncThunk(
 		return electronApi.updatePart(payload.part)
 	}
 )
+export const reorderParts = createAppAsyncThunk(
+	'parts/reorderParts',
+	async ({ part, targetIndex }: { part: Part; targetIndex: number }) => {
+		return electronApi.reorderParts(part, targetIndex)
+	}
+)
 export const removePart = createAppAsyncThunk(
 	'parts/removePart',
 	async (payload: RemovePartPayload) => {
@@ -106,6 +112,12 @@ const partsSlice = createSlice({
 				if (index !== -1) {
 					state.parts[index] = action.payload
 				}
+			})
+			.addCase(reorderParts.fulfilled, (state, action) => {
+				state.status = 'succeeded'
+				state.rundownId = action.meta.arg.part.rundownId
+				state.parts = action.payload
+				state.error = null
 			})
 			.addCase(removePart.fulfilled, (state, action) => {
 				const index = state.parts.findIndex((part) => part.id === action.payload.id)

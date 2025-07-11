@@ -178,6 +178,12 @@ const electronApi: BackendApi = {
 			payload: part
 		})
 	},
+	reorderParts: (part: MutationPartUpdate, targetIndex: number) => {
+		return ipcRenderer.invoke('parts', {
+			type: 'reorder',
+			payload: { part, targetIndex }
+		})
+	},
 	deletePart: (partId: string) => {
 		return ipcRenderer.invoke('parts', {
 			type: 'delete',

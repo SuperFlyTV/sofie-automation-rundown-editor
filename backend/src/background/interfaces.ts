@@ -164,6 +164,7 @@ export enum IpcOperationType {
 	Create = 'create',
 	Read = 'read',
 	Update = 'update',
+	Reorder = 'reorder',
 	Delete = 'delete'
 }
 
@@ -236,7 +237,7 @@ export interface MutatedPiece {
 
 export type MutationPartCreate = SetOptional<Part, 'id'>
 
-export type MutationPartRead = Pick<Part, 'id' | 'rundownId' | 'segmentId'>
+export type MutationPartRead = Pick<Part, 'id' | 'rundownId' | 'segmentId' | 'rank'>
 
 export type MutationPartUpdate = Part
 

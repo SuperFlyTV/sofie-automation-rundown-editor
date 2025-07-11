@@ -1,8 +1,8 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '~/store/app'
-import { addNewPart } from '~/store/parts'
+import { addNewPart, reorderParts } from '~/store/parts'
 import { addNewSegment } from '~/store/segments'
-import type { Segment } from '~backend/background/interfaces'
+import type { Part, Segment } from '~backend/background/interfaces'
 import './sidebar.scss'
 import classNames from 'classnames'
 import { useToasts } from '../toasts/toasts'
@@ -45,6 +45,7 @@ export function RundownSidebar({
 				itemType={DragTypes.SEGMENT}
 				Component={({ data: segment }) => <SidebarSegment key={segment.id} segment={segment} />}
 				id={rundownId}
+				reorder={() => {}}
 			/>
 			<button className="segment-button add-button" onClick={handleAddSegment}>
 				+ Add Segment
@@ -82,6 +83,23 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 				console.error(e)
 				toasts.show({
 					headerContent: 'Adding part',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			})
+	}
+
+	const handleReorderPart = (sourcePart: Part, targetIndex: number) => {
+		return dispatch(reorderParts({ part: sourcePart, targetIndex }))
+			.unwrap()
+			.then(async () => {
+				await navigate({
+					to: `/rundown/${segment.rundownId}/segment/${segment.id}/part/${sourcePart.id}`
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Reordering part',
 					bodyContent: 'Encountered an unexpected error'
 				})
 			})
@@ -131,6 +149,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 						</Link>
 					)}
 					id={segment.id}
+					reorder={handleReorderPart}
 				/>
 				<button
 					className="part-button add-button"
