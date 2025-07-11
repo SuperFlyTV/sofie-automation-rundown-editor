@@ -113,7 +113,9 @@ const segmentsSlice = createSlice({
 			.addCase(reorderSegments.fulfilled, (state, action) => {
 				state.status = 'succeeded'
 				state.rundownId = action.meta.arg.segment.rundownId
-				state.segments = action.payload
+				state.segments = state.segments.map(
+					(segment) => action.payload.find((segment) => segment.id === segment.id) ?? segment
+				)
 				state.error = null
 			})
 			.addCase(removeSegment.fulfilled, (state, action) => {

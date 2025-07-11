@@ -116,7 +116,9 @@ const partsSlice = createSlice({
 			.addCase(reorderParts.fulfilled, (state, action) => {
 				state.status = 'succeeded'
 				state.rundownId = action.meta.arg.part.rundownId
-				state.parts = action.payload
+				state.parts = state.parts.map(
+					(part) => action.payload.find((newPart) => newPart.id === part.id) ?? part
+				)
 				state.error = null
 			})
 			.addCase(removePart.fulfilled, (state, action) => {
