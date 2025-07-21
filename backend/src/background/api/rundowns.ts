@@ -31,7 +31,7 @@ export async function mutateRundown(rundown: Rundown): Promise<MutatedRundown> {
 	}
 }
 
-async function sendRundownDiffToCore(oldDocument: Rundown, newDocument: Rundown) {
+export async function sendRundownDiffToCore(oldDocument: Rundown, newDocument: Rundown) {
 	if (oldDocument.sync && !newDocument.sync) {
 		console.log('delete rundown', oldDocument, newDocument)
 		return coreHandler.core.coreMethods.dataRundownDelete(oldDocument.id)

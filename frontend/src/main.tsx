@@ -6,6 +6,8 @@ import { store } from '~/store/store.js'
 
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
 
 // Create a new router instance
 const hashHistory = createHashHistory() // Use hash history, to make it work properly in packaged Electron
@@ -20,8 +22,10 @@ declare module '@tanstack/react-router' {
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
-		<Provider store={store}>
-			<RouterProvider router={router} />
-		</Provider>
+		<DndProvider backend={HTML5Backend}>
+			<Provider store={store}>
+				<RouterProvider router={router} />
+			</Provider>
+		</DndProvider>
 	</StrictMode>
 )

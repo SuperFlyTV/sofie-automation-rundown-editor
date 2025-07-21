@@ -1,11 +1,21 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { useAppDispatch, useAppSelector } from '~/store/app'
-import { addNewPart } from '~/store/parts'
-import { addNewSegment } from '~/store/segments'
-import type { Segment } from '~backend/background/interfaces'
+import { useAppDispatch, useAppSelector, type RootState } from '~/store/app'
+import { addNewPart, movePart, reorderParts } from '~/store/parts'
+import { addNewSegment, reorderSegments } from '~/store/segments'
+import type { Part, Segment } from '~backend/background/interfaces'
 import './sidebar.scss'
 import classNames from 'classnames'
 import { useToasts } from '../toasts/toasts'
+import { DragTypes } from '~/components/drag-and-drop/DragTypes'
+import { DraggableContainer } from '../drag-and-drop/DraggableContainer'
+import { createSelector } from '@reduxjs/toolkit'
+
+const selectAllParts = (state: RootState) => state.parts.parts
+
+const selectPartsBySegmentId = createSelector(
+	[selectAllParts, (_state, segmentId) => segmentId],
+	(allParts, segmentId) => allParts.filter((part) => part.segmentId === segmentId)
+)
 
 export function RundownSidebar({
 	rundownId,
@@ -30,17 +40,42 @@ export function RundownSidebar({
 			.catch((e) => {
 				console.error(e)
 				toasts.show({
-					headerContent: 'Deleting segment',
+					headerContent: 'Adding segment',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			})
+	}
+
+	const handleReorderSegment = (
+		_targetSegment: Segment,
+		sourceSegment: Segment,
+		targetIndex: number
+	) => {
+		return dispatch(reorderSegments({ segment: sourceSegment, targetIndex }))
+			.unwrap()
+			.then(async () => {
+				await navigate({
+					to: `/rundown/${sourceSegment.rundownId}/segment/${sourceSegment.id}`
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Reordering Segment',
 					bodyContent: 'Encountered an unexpected error'
 				})
 			})
 	}
 
 	return (
-		<div className="rundown-sidebar">
-			{sortedSegments.map((segment) => (
-				<SidebarSegment key={segment.id} segment={segment} />
-			))}
+		<div className="rundown-sidebar" style={{ marginTop: '2px' }}>
+			<DraggableContainer
+				items={sortedSegments}
+				itemType={DragTypes.SEGMENT}
+				Component={({ data: segment }) => <SidebarSegment key={segment.id} segment={segment} />}
+				id={rundownId}
+				reorder={handleReorderSegment}
+			/>
 			<button className="segment-button add-button" onClick={handleAddSegment}>
 				+ Add Segment
 			</button>
@@ -53,9 +88,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 	const navigate = useNavigate()
 	const toasts = useToasts()
 
-	const parts = useAppSelector((state) =>
-		state.parts.parts.filter((part) => part.segmentId === segment.id)
-	)
+	const parts = useAppSelector((state) => selectPartsBySegmentId(state, segment.id))
 	const sortedParts = [...parts].sort((a, b) => a.rank - b.rank)
 
 	const handleAddPart = () => {
@@ -63,8 +96,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			addNewPart({
 				rundownId: segment.rundownId,
 				playlistId: segment.playlistId,
-				segmentId: segment.id,
-				rank: sortedParts.length
+				segmentId: segment.id
 			})
 		)
 			.unwrap()
@@ -82,18 +114,55 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			})
 	}
 
+	const handleReorderPart = (targetPart: Part, sourcePart: Part, targetIndex: number) => {
+		if (targetPart.segmentId !== sourcePart.segmentId) {
+			return dispatch(movePart({ targetPart, sourcePart, targetIndex }))
+				.unwrap()
+				.then(async (newPart) => {
+					await navigate({
+						to: `/rundown/${segment.rundownId}/segment/${newPart.segmentId}/part/${newPart.id}`
+					})
+				})
+				.catch((e) => {
+					console.error(e)
+					toasts.show({
+						headerContent: 'Reordering part',
+						bodyContent: 'Encountered an unexpected error'
+					})
+				})
+
+			// remove part from old segment
+		} else {
+			return dispatch(reorderParts({ part: sourcePart, targetIndex }))
+				.unwrap()
+				.then(async () => {
+					await navigate({
+						to: `/rundown/${segment.rundownId}/segment/${segment.id}/part/${sourcePart.id}`
+					})
+				})
+				.catch((e) => {
+					console.error(e)
+					toasts.show({
+						headerContent: 'Reordering part',
+						bodyContent: 'Encountered an unexpected error'
+					})
+				})
+		}
+	}
+
 	const segmentDuration = sortedParts.reduce((acc, part) => acc + (part.payload?.duration ?? 0), 0)
 
 	return (
-		<div className="mb-1">
+		<div>
 			<Link
 				to="/rundown/$rundownId/segment/$segmentId"
 				params={{ rundownId: segment.rundownId, segmentId: segment.id }}
 			>
 				<button
-					className={classNames('segment-button mb-1', {
+					className={classNames('segment-button', {
 						floated: segment.float
 					})}
+					style={{ marginBottom: '2px' }}
 				>
 					{segment.name}
 					<span className="item-duration">{displayTime(segmentDuration)}</span>
@@ -101,23 +170,37 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			</Link>
 
 			<div className="ps-3">
-				{sortedParts.map((part) => (
-					<Link
-						key={part.id}
-						to="/rundown/$rundownId/segment/$segmentId/part/$partId"
-						params={{ rundownId: segment.rundownId, segmentId: segment.id, partId: part.id }}
-					>
-						<button
-							className={classNames('part-button mb-1', {
-								floated: segment.float || part.float
-							})}
+				<DraggableContainer
+					items={sortedParts}
+					itemType={DragTypes.PART}
+					Component={({ data: part }) => (
+						<Link
+							key={part.id}
+							to="/rundown/$rundownId/segment/$segmentId/part/$partId"
+							params={{
+								rundownId: segment.rundownId,
+								segmentId: segment.id,
+								partId: part.id
+							}}
 						>
-							{part.name}
-							<span className="item-duration">{displayTime(part.payload?.duration)}</span>
-						</button>
-					</Link>
-				))}
-				<button className="part-button add-button mb-2" onClick={handleAddPart}>
+							<button
+								className={classNames('part-button', {
+									floated: segment.float || part.float
+								})}
+							>
+								{part.name}
+								<span className="item-duration">{displayTime(part.payload?.duration)}</span>
+							</button>
+						</Link>
+					)}
+					id={segment.id}
+					reorder={handleReorderPart}
+				/>
+				<button
+					className="part-button add-button"
+					style={{ marginTop: '2px' }}
+					onClick={handleAddPart}
+				>
 					+ Add Part
 				</button>
 			</div>

@@ -19,9 +19,12 @@
 		"@tanstack/react-router-devtools": "^1.120.10",
 		"bootstrap": "^5.3.6",
 		"classnames": "^2.5.1",
+		"immutability-helper": "^3.1.1",
 		"react": "^19.1.0",
 		"react-bootstrap": "^2.10.10",
 		"react-datepicker": "^8.4.0",
+		"react-dnd": "^16.0.1",
+		"react-dnd-html5-backend": "^16.0.1",
 		"react-dom": "^19.1.0",
 		"react-error-boundary": "^6.0.0",
 		"react-redux": "^9.2.0"

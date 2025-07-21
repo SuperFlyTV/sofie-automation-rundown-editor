@@ -19,6 +19,7 @@ import type { BackendApi } from './background/api/api.js'
 import type {
 	CoreConnectionInfo,
 	MutationPartCreate,
+	MutationPartMove,
 	MutationPartUpdate,
 	MutationPieceCreate,
 	MutationPieceUpdate,
@@ -27,6 +28,7 @@ import type {
 	MutationSegmentCreate,
 	MutationSegmentUpdate,
 	OpenFromFileArgs,
+	Part,
 	PieceTypeManifest,
 	SaveToFileArgs
 } from './background/interfaces.js'
@@ -149,6 +151,12 @@ const electronApi: BackendApi = {
 			payload: segment
 		})
 	},
+	reorderSegments: (segment: MutationSegmentUpdate, targetIndex: number) => {
+		return ipcRenderer.invoke('segments', {
+			type: 'reorder',
+			payload: { segment, targetIndex }
+		})
+	},
 	deleteSegment: (segmentId: string) => {
 		return ipcRenderer.invoke('segments', {
 			type: 'delete',
@@ -172,10 +180,22 @@ const electronApi: BackendApi = {
 			payload: part
 		})
 	},
+	movePart: function (payload: MutationPartMove): Promise<Part> {
+		return ipcRenderer.invoke('parts', {
+			type: 'move',
+			payload
+		})
+	},
 	updatePart: (part: MutationPartUpdate) => {
 		return ipcRenderer.invoke('parts', {
 			type: 'update',
 			payload: part
+		})
+	},
+	reorderParts: (part: MutationPartUpdate, targetIndex: number) => {
+		return ipcRenderer.invoke('parts', {
+			type: 'reorder',
+			payload: { part, targetIndex }
 		})
 	},
 	deletePart: (partId: string) => {
@@ -195,10 +215,10 @@ const electronApi: BackendApi = {
 			}
 		})
 	},
-	addNewPiece: (segment: MutationPieceCreate) => {
+	addNewPiece: (piece: MutationPieceCreate) => {
 		return ipcRenderer.invoke('pieces', {
 			type: 'create',
-			payload: segment
+			payload: piece
 		})
 	},
 	updatePiece: (piece: MutationPieceUpdate) => {
@@ -212,6 +232,15 @@ const electronApi: BackendApi = {
 			type: 'delete',
 			payload: {
 				id: pieceId
+			}
+		})
+	},
+	clonePiecesFromPartToPart: (fromPartId: string, toPartId: string) => {
+		return ipcRenderer.invoke('pieces', {
+			type: 'cloneSet',
+			payload: {
+				fromPartId,
+				toPartId
 			}
 		})
 	}

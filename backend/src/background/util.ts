@@ -57,3 +57,8 @@ export function stringifyErrorInner(error: unknown): {
 		stack
 	}
 }
+export function spliceReorder<T>(arr: T[], sourceIndex: number, targetIndex: number): T[] {
+	let newArr = [...arr.slice(0, sourceIndex), ...arr.slice(sourceIndex + 1)]
+	newArr = [...newArr.slice(0, targetIndex), arr[sourceIndex], ...newArr.slice(targetIndex)]
+	return newArr
+}

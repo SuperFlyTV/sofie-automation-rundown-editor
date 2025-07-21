@@ -14,8 +14,8 @@ import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { getMutatedPartsFromSegment } from './parts'
-import { mutations as rundownMutations } from './rundowns'
-import { stringifyError } from '../util'
+import { mutations as rundownMutations, sendRundownDiffToCore } from './rundowns'
+import { spliceReorder, stringifyError } from '../util'
 
 async function mutateSegment(segment: Segment): Promise<MutatedSegment> {
 	return {
@@ -30,7 +30,7 @@ async function mutateSegment(segment: Segment): Promise<MutatedSegment> {
 	}
 }
 
-async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
+export async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
 	const rd = await rundownMutations.read({ id: newSegment.rundownId })
 	if (rd.result && !Array.isArray(rd.result) && rd.result.sync === false) {
 		return
@@ -54,8 +54,19 @@ async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Segment) {
 export const mutations = {
 	async create(payload: MutationSegmentCreate): Promise<{ result?: Segment; error?: Error }> {
 		const id = payload.id || uuid()
+		const rundownSegments: Segment | Segment[] | undefined = (
+			await mutations.read({ rundownId: payload.rundownId })
+		).result
+
+		const segmentsLength: number = Array.isArray(rundownSegments)
+			? rundownSegments.length
+			: rundownSegments
+				? 1
+				: 0
+
 		const document: Partial<MutationSegmentCreate> = {
-			...payload
+			...payload,
+			rank: payload.rank ?? segmentsLength
 		}
 		delete document.playlistId
 		delete document.rundownId
@@ -188,6 +199,69 @@ export const mutations = {
 			return { error: e as Error }
 		}
 	},
+	async reorder({
+		segment,
+		targetIndex
+	}: {
+		segment: MutationSegmentUpdate
+		targetIndex: number
+	}): Promise<{ result?: Segment | Segment[]; error?: Error }> {
+		try {
+			const { result, error } = await this.read({
+				rundownId: segment.rundownId
+			})
+
+			if (error) throw error
+			if (result && (!('length' in result) || result?.length < 2))
+				throw new Error('An error occurred when getting segments from the database during reorder.')
+
+			const safeTargetIndex: number = Math.max(
+				0,
+				Math.min((result as Segment[]).length - 1, targetIndex)
+			)
+
+			const segmentsInRankOrder = (result as Segment[]).sort(
+				(partA, partB) => partA.rank - partB.rank
+			)
+			const reorderedSegments = spliceReorder(segmentsInRankOrder, segment.rank, safeTargetIndex)
+
+			db.exec('BEGIN;')
+			try {
+				const updateStmt = db.prepare(`
+					UPDATE segments
+					SET playlistId = ?, document = (SELECT json_patch(segments.document, json(?)) FROM segments WHERE id = ?)
+					WHERE id = ?;
+				`)
+
+				reorderedSegments.forEach((segment, index) => {
+					updateStmt.run(
+						segment.playlistId || null,
+						// update rank based on array order
+						JSON.stringify({ ...segment, rank: index }),
+						segment.id,
+						segment.id
+					)
+				})
+
+				db.exec('COMMIT;')
+			} catch (transactionError) {
+				console.error(transactionError)
+				db.exec('ROLLBACK;')
+				throw transactionError
+			}
+
+			const { result: updatedSegments, error: updatedSegmentsError } = await this.read({
+				rundownId: segment.rundownId
+			})
+
+			if (updatedSegmentsError) throw updatedSegmentsError
+
+			return { result: updatedSegments }
+		} catch (e) {
+			console.error(e)
+			return { error: e as Error }
+		}
+	},
 	async delete(payload: MutationSegmentDelete): Promise<{ error?: Error }> {
 		try {
 			db.exec('BEGIN TRANSACTION')
@@ -247,6 +321,31 @@ export async function init(): Promise<void> {
 			}
 
 			return result || error
+		} else if (operation.type === IpcOperationType.Reorder) {
+			const { result: sourceDocument } = await mutations.read({ id: operation.payload.segment.id })
+			const { result: reorderedSegments, error } = await mutations.reorder(operation.payload)
+
+			if (
+				!error &&
+				sourceDocument &&
+				!Array.isArray(sourceDocument) &&
+				Array.isArray(reorderedSegments)
+			) {
+				const { result: rundown, error: rundownError } = await rundownMutations.read({
+					id: sourceDocument.rundownId
+				})
+				if (rundown && !Array.isArray(rundown) && rundown.sync) {
+					try {
+						if (rundown && !rundownError) {
+							await sendRundownDiffToCore(rundown, rundown)
+							return reorderedSegments
+						}
+					} catch (error) {
+						console.error(error)
+						event.sender.send('error', stringifyError(error, true))
+					}
+				}
+			}
 		} else if (operation.type === IpcOperationType.Delete) {
 			const { result: document } = await mutations.read({ id: operation.payload.id })
 			const { error } = await mutations.delete(operation.payload)

@@ -1,6 +1,7 @@
 import type { Part } from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
+import { loadPieces } from './pieces'
 
 export interface LoadPartsPayload {
 	rundownId: string
@@ -9,7 +10,18 @@ export interface NewPartPayload {
 	playlistId: string | null // TODO - this should be handled by the server..
 	rundownId: string
 	segmentId: string
-	rank: number
+	name?: string
+	rank?: number
+	payload?: {
+		script?: string
+		type?: string
+		duration?: number
+	}
+}
+export interface MovePartPayload {
+	sourcePart: Part
+	targetPart: Part
+	targetIndex: number
 }
 export interface UpdatePartPayload {
 	part: Part
@@ -21,21 +33,40 @@ export interface RemovePartPayload {
 export const addNewPart = createAppAsyncThunk(
 	'parts/addNewPart',
 	async (payload: NewPartPayload) => {
+		const rank: number = payload.rank ?? 0
 		return electronApi.addNewPart({
-			name: `Part ${payload.rank + 1}`,
+			name: payload.name ?? `Part ${rank + 1}`,
 			playlistId: payload.playlistId,
 			rundownId: payload.rundownId,
 			segmentId: payload.segmentId,
 			rank: payload.rank,
 			float: false,
-			payload: {}
+			payload: payload.payload ?? {}
 		})
+	}
+)
+export const movePart = createAppAsyncThunk(
+	'parts/movePart',
+	async (payload: MovePartPayload, { dispatch }) => {
+		const partResult = electronApi.movePart(payload)
+
+		//update parts and pieces
+		await dispatch(loadParts({ rundownId: payload.sourcePart.rundownId }))
+		await dispatch(loadPieces({ rundownId: payload.sourcePart.rundownId }))
+
+		return partResult
 	}
 )
 export const updatePart = createAppAsyncThunk(
 	'parts/updatePart',
 	async (payload: UpdatePartPayload) => {
 		return electronApi.updatePart(payload.part)
+	}
+)
+export const reorderParts = createAppAsyncThunk(
+	'parts/reorderParts',
+	async ({ part, targetIndex }: { part: Part; targetIndex: number }) => {
+		return electronApi.reorderParts(part, targetIndex)
 	}
 )
 export const removePart = createAppAsyncThunk(
@@ -106,6 +137,14 @@ const partsSlice = createSlice({
 				if (index !== -1) {
 					state.parts[index] = action.payload
 				}
+			})
+			.addCase(reorderParts.fulfilled, (state, action) => {
+				state.status = 'succeeded'
+				state.rundownId = action.meta.arg.part.rundownId
+				state.parts = state.parts.map(
+					(part) => action.payload.find((newPart) => newPart.id === part.id) ?? part
+				)
+				state.error = null
 			})
 			.addCase(removePart.fulfilled, (state, action) => {
 				const index = state.parts.findIndex((part) => part.id === action.payload.id)
