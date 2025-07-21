@@ -48,6 +48,12 @@ export const removePiece = createAppAsyncThunk(
 		return payload
 	}
 )
+export const clonePiecesFromPartToPart = createAppAsyncThunk(
+	'pieces/clonePiecesFromPartToPart',
+	async ({ fromPartId, toPartId }: { fromPartId: string; toPartId: string }) => {
+		return electronApi.clonePiecesFromPartToPart(fromPartId, toPartId)
+	}
+)
 
 interface PiecesState {
 	rundownId: string | null
@@ -115,6 +121,11 @@ const piecesSlice = createSlice({
 				if (index !== -1) {
 					state.pieces.splice(index, 1)
 				}
+			})
+			.addCase(clonePiecesFromPartToPart.fulfilled, (state, action) => {
+				action.payload.map((piece) => {
+					state.pieces.push(piece)
+				})
 			})
 	}
 })

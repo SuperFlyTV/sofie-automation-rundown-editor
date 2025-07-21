@@ -77,9 +77,10 @@ export const DraggableComponentWrapper = <T,>({
 		},
 		canDrop: (item) => {
 			return (
-				item.id !== id &&
-				((item.index !== index - 1 && hoverState.newPosition === 'above') ||
-					(item.index !== index + 1 && hoverState.newPosition === 'below'))
+				item.parentId !== parentId ||
+				(item.id !== id &&
+					((item.index !== index - 1 && hoverState.newPosition === 'above') ||
+						(item.index !== index + 1 && hoverState.newPosition === 'below')))
 			)
 		}
 	})

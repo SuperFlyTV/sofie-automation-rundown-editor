@@ -14,6 +14,7 @@ import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { sendPartUpdateToCore } from './parts'
 import { stringifyError } from '../util'
+import { mutations as partsMutations } from './parts'
 
 export const mutations = {
 	async create(payload: MutationPieceCreate): Promise<{ result?: Piece; error?: Error }> {
@@ -47,6 +48,7 @@ export const mutations = {
 
 			return this.readOne(id)
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	},
@@ -170,6 +172,53 @@ export const mutations = {
 		} catch (e) {
 			return { error: e as Error }
 		}
+	},
+	async cloneFromPartToPart({
+		fromPartId,
+		toPartId
+	}: {
+		fromPartId: string
+		toPartId: string
+	}): Promise<{ result?: Piece[]; error?: Error }> {
+		try {
+			const { result: fromPart } = await partsMutations.readOne(fromPartId)
+			const { result: toPart } = await partsMutations.readOne(toPartId)
+
+			if (!fromPart || !toPart) {
+				throw new Error('Either the source or target Part was not found')
+			}
+
+			const { result: sourcePieces } = await mutations.read({ partId: fromPartId })
+			if (sourcePieces && Array.isArray(sourcePieces)) {
+				await Promise.all(
+					sourcePieces.map(async (piece) => {
+						return await mutations.create({
+							playlistId: toPart.playlistId,
+							rundownId: toPart.rundownId,
+							segmentId: toPart.segmentId,
+							partId: toPart.id,
+							name: piece.name,
+							start: piece.start,
+							duration: piece.duration,
+							pieceType: piece.pieceType,
+							payload: piece.payload
+						})
+					})
+				)
+
+				const { result: resultPieces } = await mutations.read({ partId: toPartId })
+				if (resultPieces) {
+					return { result: Array.isArray(resultPieces) ? resultPieces : [resultPieces] }
+				} else {
+					throw new Error("Couldn't retrieve cloned pieces after creation.")
+				}
+			} else {
+				throw new Error('Pre-conditions for cloning were not met.')
+			}
+		} catch (e) {
+			console.error(e)
+			return { error: e as Error }
+		}
 	}
 }
 
@@ -219,6 +268,19 @@ export async function init(): Promise<void> {
 			}
 
 			return error || true
+		} else if (operation.type === IpcOperationType.CloneSet) {
+			const { result, error } = await mutations.cloneFromPartToPart(operation.payload)
+
+			if (result) {
+				try {
+					await sendPartUpdateToCore(operation.payload.toPartId)
+				} catch (error) {
+					console.error(error)
+					event.sender.send('error', stringifyError(error, true))
+				}
+			}
+
+			return error || result
 		}
 	})
 }

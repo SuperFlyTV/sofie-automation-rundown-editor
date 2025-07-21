@@ -18,7 +18,7 @@ export interface DraggableContainerProps<T extends DraggableItemData> {
 	items: T[]
 	itemType: DragTypes
 	Component: DraggableWrappedComponent<T>
-	reorder: (source: T, targetIndex: number) => unknown
+	reorder: (target: T, source: T, targetIndex: number) => unknown
 }
 
 export type HoverPosition = 'above' | 'below' | null
@@ -82,7 +82,6 @@ export const DraggableContainer = <T extends DraggableItemData>({
 		[setHoverState]
 	)
 
-	// Pass Dragged item to this, or even just pass the hover state if possible.
 	const endDrag = useCallback(
 		(
 			dragIndex: number,
@@ -93,23 +92,27 @@ export const DraggableContainer = <T extends DraggableItemData>({
 			if (
 				monitor.didDrop() &&
 				target &&
-				hoverState.hoveredItem &&
-				hoverState.newPosition !== null
+				target.hoverState.hoveredItem &&
+				target.hoverState.newPosition !== null
 			) {
 				let targetIndex = target.index
 
 				if (target.hoverState.newPosition !== null) {
 					if (target.hoverState.newPosition === 'below') {
-						targetIndex = dragIndex < target.index ? target.index : target.index + 1
+						targetIndex =
+							item.parentId === target.parentId && dragIndex < target.index
+								? target.index
+								: target.index + 1
 					} else {
-						targetIndex = dragIndex < target.index ? target.index - 1 : target.index
+						targetIndex =
+							item.parentId === target.parentId && dragIndex < target.index
+								? target.index - 1
+								: target.index
 					}
 				}
 
-				targetIndex = Math.max(0, Math.min(items.length - 1, targetIndex))
-
-				if (targetIndex !== dragIndex) {
-					reorder(item.data, targetIndex)
+				if (item.parentId !== target.parentId || targetIndex !== dragIndex) {
+					reorder(target.data, item.data, targetIndex)
 				}
 			}
 			setHoverState({
@@ -118,7 +121,7 @@ export const DraggableContainer = <T extends DraggableItemData>({
 				draggedItem: null
 			})
 		},
-		[items.length, hoverState.hoveredItem, hoverState.newPosition, reorder]
+		[reorder]
 	)
 
 	const renderContainedItem = useCallback(

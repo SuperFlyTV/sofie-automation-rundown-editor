@@ -54,8 +54,19 @@ export async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Seg
 export const mutations = {
 	async create(payload: MutationSegmentCreate): Promise<{ result?: Segment; error?: Error }> {
 		const id = payload.id || uuid()
+		const rundownSegments: Segment | Segment[] | undefined = (
+			await mutations.read({ rundownId: payload.rundownId })
+		).result
+
+		const segmentsLength: number = Array.isArray(rundownSegments)
+			? rundownSegments.length
+			: rundownSegments
+				? 1
+				: 0
+
 		const document: Partial<MutationSegmentCreate> = {
-			...payload
+			...payload,
+			rank: payload.rank ?? segmentsLength
 		}
 		delete document.playlistId
 		delete document.rundownId
@@ -204,10 +215,15 @@ export const mutations = {
 			if (result && (!('length' in result) || result?.length < 2))
 				throw new Error('An error occurred when getting segments from the database during reorder.')
 
+			const safeTargetIndex: number = Math.max(
+				0,
+				Math.min((result as Segment[]).length - 1, targetIndex)
+			)
+
 			const segmentsInRankOrder = (result as Segment[]).sort(
 				(partA, partB) => partA.rank - partB.rank
 			)
-			const reorderedParts = spliceReorder(segmentsInRankOrder, segment.rank, targetIndex)
+			const reorderedSegments = spliceReorder(segmentsInRankOrder, segment.rank, safeTargetIndex)
 
 			db.exec('BEGIN;')
 			try {
@@ -217,7 +233,7 @@ export const mutations = {
 					WHERE id = ?;
 				`)
 
-				reorderedParts.forEach((segment, index) => {
+				reorderedSegments.forEach((segment, index) => {
 					updateStmt.run(
 						segment.playlistId || null,
 						// update rank based on array order
@@ -234,11 +250,11 @@ export const mutations = {
 				throw transactionError
 			}
 
-			const { result: updatedSegments, error: updatedSegmentsserror } = await this.read({
+			const { result: updatedSegments, error: updatedSegmentsError } = await this.read({
 				rundownId: segment.rundownId
 			})
 
-			if (updatedSegmentsserror) throw updatedSegmentsserror
+			if (updatedSegmentsError) throw updatedSegmentsError
 
 			return { result: updatedSegments }
 		} catch (e) {

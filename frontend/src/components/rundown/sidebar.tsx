@@ -1,6 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { useAppDispatch, useAppSelector } from '~/store/app'
-import { addNewPart, reorderParts } from '~/store/parts'
+import { useAppDispatch, useAppSelector, type RootState } from '~/store/app'
+import { addNewPart, movePart, reorderParts } from '~/store/parts'
 import { addNewSegment, reorderSegments } from '~/store/segments'
 import type { Part, Segment } from '~backend/background/interfaces'
 import './sidebar.scss'
@@ -8,6 +8,14 @@ import classNames from 'classnames'
 import { useToasts } from '../toasts/toasts'
 import { DragTypes } from '~/components/drag-and-drop/DragTypes'
 import { DraggableContainer } from '../drag-and-drop/DraggableContainer'
+import { createSelector } from '@reduxjs/toolkit'
+
+const selectAllParts = (state: RootState) => state.parts.parts
+
+const selectPartsBySegmentId = createSelector(
+	[selectAllParts, (_state, segmentId) => segmentId],
+	(allParts, segmentId) => allParts.filter((part) => part.segmentId === segmentId)
+)
 
 export function RundownSidebar({
 	rundownId,
@@ -38,7 +46,11 @@ export function RundownSidebar({
 			})
 	}
 
-	const handleReorderSegment = (sourceSegment: Segment, targetIndex: number) => {
+	const handleReorderSegment = (
+		_targetSegment: Segment,
+		sourceSegment: Segment,
+		targetIndex: number
+	) => {
 		return dispatch(reorderSegments({ segment: sourceSegment, targetIndex }))
 			.unwrap()
 			.then(async () => {
@@ -76,9 +88,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 	const navigate = useNavigate()
 	const toasts = useToasts()
 
-	const parts = useAppSelector((state) =>
-		state.parts.parts.filter((part) => part.segmentId === segment.id)
-	)
+	const parts = useAppSelector((state) => selectPartsBySegmentId(state, segment.id))
 	const sortedParts = [...parts].sort((a, b) => a.rank - b.rank)
 
 	const handleAddPart = () => {
@@ -86,8 +96,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			addNewPart({
 				rundownId: segment.rundownId,
 				playlistId: segment.playlistId,
-				segmentId: segment.id,
-				rank: sortedParts.length
+				segmentId: segment.id
 			})
 		)
 			.unwrap()
@@ -105,21 +114,40 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			})
 	}
 
-	const handleReorderPart = (sourcePart: Part, targetIndex: number) => {
-		return dispatch(reorderParts({ part: sourcePart, targetIndex }))
-			.unwrap()
-			.then(async () => {
-				await navigate({
-					to: `/rundown/${segment.rundownId}/segment/${segment.id}/part/${sourcePart.id}`
+	const handleReorderPart = (targetPart: Part, sourcePart: Part, targetIndex: number) => {
+		if (targetPart.segmentId !== sourcePart.segmentId) {
+			return dispatch(movePart({ targetPart, sourcePart, targetIndex }))
+				.unwrap()
+				.then(async (newPart) => {
+					await navigate({
+						to: `/rundown/${segment.rundownId}/segment/${newPart.segmentId}/part/${newPart.id}`
+					})
 				})
-			})
-			.catch((e) => {
-				console.error(e)
-				toasts.show({
-					headerContent: 'Reordering part',
-					bodyContent: 'Encountered an unexpected error'
+				.catch((e) => {
+					console.error(e)
+					toasts.show({
+						headerContent: 'Reordering part',
+						bodyContent: 'Encountered an unexpected error'
+					})
 				})
-			})
+
+			// remove part from old segment
+		} else {
+			return dispatch(reorderParts({ part: sourcePart, targetIndex }))
+				.unwrap()
+				.then(async () => {
+					await navigate({
+						to: `/rundown/${segment.rundownId}/segment/${segment.id}/part/${sourcePart.id}`
+					})
+				})
+				.catch((e) => {
+					console.error(e)
+					toasts.show({
+						headerContent: 'Reordering part',
+						bodyContent: 'Encountered an unexpected error'
+					})
+				})
+		}
 	}
 
 	const segmentDuration = sortedParts.reduce((acc, part) => acc + (part.payload?.duration ?? 0), 0)

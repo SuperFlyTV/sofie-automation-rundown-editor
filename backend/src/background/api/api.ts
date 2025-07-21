@@ -2,6 +2,7 @@ import type {
 	ApplicationSettings,
 	CoreConnectionInfo,
 	MutationPartCreate,
+	MutationPartMove,
 	MutationPartUpdate,
 	MutationPieceCreate,
 	MutationPieceUpdate,
@@ -54,6 +55,7 @@ export interface BackendApi {
 
 	getParts: (rundownId: string) => Promise<Part[]>
 	addNewPart: (part: MutationPartCreate) => Promise<Part>
+	movePart: (payload: MutationPartMove) => Promise<Part>
 	updatePart: (part: MutationPartUpdate) => Promise<Part>
 	reorderParts: (part: MutationPartUpdate, targetIndex: number) => Promise<Part[]>
 	deletePart: (partId: string) => Promise<void>
@@ -62,4 +64,5 @@ export interface BackendApi {
 	addNewPiece: (piece: MutationPieceCreate) => Promise<Piece>
 	updatePiece: (piece: MutationPieceUpdate) => Promise<Piece>
 	deletePiece: (pieceId: string) => Promise<void>
+	clonePiecesFromPartToPart: (fromPartId: string, toPartId: string) => Promise<Piece[]>
 }

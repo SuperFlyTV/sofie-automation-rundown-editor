@@ -165,7 +165,9 @@ export enum IpcOperationType {
 	Read = 'read',
 	Update = 'update',
 	Reorder = 'reorder',
-	Delete = 'delete'
+	Delete = 'delete',
+	CloneSet = 'cloneSet',
+	Move = 'move'
 }
 
 export interface IpcOperation {
@@ -235,7 +237,13 @@ export interface MutatedPiece {
 	position: number | undefined
 }
 
-export type MutationPartCreate = SetOptional<Part, 'id'>
+export type MutationPartCreate = SetOptional<Part, 'id' | 'rank'>
+
+export type MutationPartMove = {
+	sourcePart: Part
+	targetPart: Part
+	targetIndex: number
+}
 
 export type MutationPartRead = Pick<Part, 'id' | 'rundownId' | 'segmentId' | 'rank'>
 
@@ -261,7 +269,7 @@ export type MutationRundownUpdate = Rundown
 
 export type MutationRundownDelete = Pick<Rundown, 'id'>
 
-export type MutationSegmentCreate = SetOptional<Segment, 'id'>
+export type MutationSegmentCreate = SetOptional<Segment, 'id' | 'rank'>
 
 export type MutationSegmentRead = Pick<Segment, 'id' | 'rundownId'>
 

@@ -18,7 +18,7 @@ import { mutations as rundownMutations } from './rundowns'
 import { mutations as segmentsMutations, sendSegmentDiffToCore } from './segments'
 import { spliceReorder, stringifyError } from '../util'
 import { mutations as settingsMutations } from './settings'
-import { error } from 'console'
+import { mutations as piecesMutations } from './pieces'
 
 async function mutatePart(part: Part): Promise<MutatedPart> {
 	return {
@@ -70,6 +70,15 @@ async function sendPartDiffToCore(oldPart: Part, newPart: Part) {
 export const mutations = {
 	async create(payload: MutationPartCreate): Promise<{ result?: Part; error?: Error }> {
 		const partTypes: string[] | undefined = (await settingsMutations.read()).result?.partTypes
+		const segmentParts: Part | Part[] | undefined = (
+			await mutations.read({ segmentId: payload.segmentId })
+		).result
+
+		const partsLength: number = Array.isArray(segmentParts)
+			? segmentParts.length
+			: segmentParts
+				? 1
+				: 0
 
 		const id = payload.id || uuid()
 		const document: Partial<MutationPartCreate> = {
@@ -78,7 +87,8 @@ export const mutations = {
 				// fallback Type to avoid errors in core
 				type: partTypes?.[0],
 				...payload.payload
-			}
+			},
+			rank: payload.rank ?? partsLength
 		}
 		delete document.playlistId
 		delete document.rundownId
@@ -104,6 +114,46 @@ export const mutations = {
 
 			return this.readOne(id)
 		} catch (e) {
+			return { error: e as Error }
+		}
+	},
+	async move(
+		sourcePart: Part,
+		targetPart: Part,
+		targetIndex: number
+	): Promise<{ result?: Part; error?: Error }> {
+		try {
+			const addNewPart = await mutations.create({
+				...sourcePart,
+				rundownId: targetPart.rundownId,
+				playlistId: targetPart.playlistId,
+				segmentId: targetPart.segmentId,
+				rank: undefined,
+				id: uuid(),
+				payload: {
+					script: sourcePart.payload.script,
+					type: sourcePart.payload.type,
+					duration: sourcePart.payload.duration
+				}
+			})
+			if (!addNewPart.result) {
+				console.error(addNewPart.error)
+				throw new Error('Could not create new part while cloning.')
+			}
+			const clonePieces = await piecesMutations.cloneFromPartToPart({
+				fromPartId: sourcePart.id,
+				toPartId: addNewPart.result.id
+			})
+			const reorderParts = await mutations.reorder({ part: addNewPart.result, targetIndex })
+			const removePart = await mutations.delete({ id: sourcePart.id })
+
+			if (clonePieces.error && reorderParts.error && removePart.error) {
+				throw new Error('Cloning the part failed')
+			}
+
+			return mutations.readOne(addNewPart.result.id)
+		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	},
@@ -236,8 +286,13 @@ export const mutations = {
 			if (result && (!('length' in result) || result?.length < 2))
 				throw new Error('An error occurred when getting parts from the database during reorder.')
 
+			const safeTargetIndex: number = Math.max(
+				0,
+				Math.min((result as Part[]).length - 1, targetIndex)
+			)
+
 			const partsInRankOrder = (result as Part[]).sort((partA, partB) => partA.rank - partB.rank)
-			const reorderedParts = spliceReorder(partsInRankOrder, part.rank, targetIndex)
+			const reorderedParts = spliceReorder(partsInRankOrder, part.rank, safeTargetIndex)
 
 			db.exec('BEGIN;')
 			try {
@@ -316,6 +371,37 @@ export async function init(): Promise<void> {
 			}
 
 			return error || result
+		} else if (operation.type === IpcOperationType.Move) {
+			// TODO: Maybe this should be handled inside Sofie?
+			try {
+				const { sourcePart, targetPart, targetIndex } = operation.payload
+				const { result: document, error: sourceError } = await mutations.readOne(sourcePart.id)
+				if (sourceError) throw sourceError
+				const { result: target, error: targetError } = await mutations.readOne(targetPart.id)
+				if (targetError) throw targetError
+
+				if (document && target) {
+					const { result, error } = await mutations.move(sourcePart, targetPart, targetIndex)
+					if (error) throw error
+
+					const { result: sourceSegment } = await segmentsMutations.readOne(document.segmentId)
+					const { result: targetSegment } = await segmentsMutations.readOne(target.segmentId)
+
+					if (result && sourceSegment && targetSegment) {
+						try {
+							await sendSegmentDiffToCore(sourceSegment, sourceSegment)
+							await sendSegmentDiffToCore(targetSegment, targetSegment)
+						} catch (error) {
+							console.error(error)
+							event.sender.send('error', stringifyError(error, true))
+						}
+					} else throw new Error('Cannot find segments while cloning')
+					return result
+				}
+			} catch (e) {
+				console.error(e)
+				return e as Error
+			}
 		} else if (operation.type === IpcOperationType.Read) {
 			const { result, error } = await mutations.read(operation.payload)
 
