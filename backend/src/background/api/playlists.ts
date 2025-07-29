@@ -1,38 +1,21 @@
-import { ipcMain } from 'electron'
-import { DBPlaylist, IpcOperation, IpcOperationType, Playlist } from '../interfaces'
+import {
+	DBPlaylist,
+	IpcOperationType,
+	MutationPlaylistCreate,
+	MutationPlaylistDelete,
+	MutationPlaylistRead,
+	MutationPlaylistUpdate,
+	Playlist
+} from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
+import { Server, Socket } from 'socket.io'
 
-async function readOne(id: string): Promise<{ result?: Playlist; error?: Error }> {
-	try {
-		const stmt = db.prepare(`
-			SELECT *
-			FROM playlists
-			WHERE id = ?
-			LIMIT 1;
-		`)
-
-		const document = stmt.get(id) as DBPlaylist | undefined
-		if (!document) {
-			return { error: new Error(`Playlist with id ${id} not found`) }
-		}
-
-		return {
-			result: {
-				...JSON.parse(document.document),
-				id: document.id
-			}
-		}
-	} catch (e) {
-		return { error: e as Error }
-	}
-}
-
-ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
-	if (operation.type === IpcOperationType.Create) {
+export const mutations = {
+	async create(playlist: MutationPlaylistCreate) {
 		const id = uuid()
 		const document = {
-			...operation.payload
+			...playlist
 		}
 		delete document.id
 
@@ -45,13 +28,40 @@ ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 			const result = stmt.run(id, JSON.stringify(document))
 			if (result.changes === 0) throw new Error('No rows were inserted')
 
-			return readOne(id)
+			return mutations.readOne(id)
 		} catch (e) {
 			return { error: e as Error }
 		}
-	} else if (operation.type === IpcOperationType.Read) {
-		if (operation.payload && operation.payload.id) {
-			return readOne(operation.payload.id)
+	},
+	async readOne(id: string): Promise<{ result?: Playlist; error?: Error }> {
+		try {
+			const stmt = db.prepare(`
+			SELECT *
+			FROM playlists
+			WHERE id = ?
+			LIMIT 1;
+		`)
+
+			const document = stmt.get(id) as DBPlaylist | undefined
+			if (!document) {
+				return { error: new Error(`Playlist with id ${id} not found`) }
+			}
+
+			return {
+				result: {
+					...JSON.parse(document.document),
+					id: document.id
+				}
+			}
+		} catch (e) {
+			return { error: e as Error }
+		}
+	},
+	async read(
+		payload: MutationPlaylistRead
+	): Promise<{ result?: Playlist | Playlist[]; error?: Error }> {
+		if (payload && payload.id) {
+			return mutations.readOne(payload.id)
 		} else {
 			try {
 				const stmt = db.prepare(`
@@ -71,9 +81,10 @@ ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 				return { error: e as Error }
 			}
 		}
-	} else if (operation.type === IpcOperationType.Update) {
+	},
+	async update(payload: MutationPlaylistUpdate): Promise<{ result?: Playlist; error?: Error }> {
 		const update = {
-			...operation.payload,
+			...payload,
 			id: null
 		}
 
@@ -84,26 +95,62 @@ ipcMain.handle('playlists', async (_, operation: IpcOperation) => {
 				WHERE id = ?;
 			`)
 
-			const result = stmt.run(JSON.stringify(update), operation.payload.id, operation.payload.id)
+			const result = stmt.run(JSON.stringify(update), payload.id, payload.id)
 			if (result.changes === 0) {
 				throw new Error('No rows were updated')
 			}
 
-			return readOne(operation.payload.id)
+			return mutations.readOne(payload.id)
 		} catch (e) {
 			return { error: e as Error }
 		}
-	} else if (operation.type === IpcOperationType.Delete) {
+	},
+	async delete(payload: MutationPlaylistDelete): Promise<{ result?: true; error?: Error }> {
 		try {
 			const stmt = db.prepare(`
 				DELETE FROM playlists
 				WHERE id = ?;
 			`)
 
-			stmt.run(operation.payload.id)
-			return {}
+			stmt.run(payload.id)
+			return { result: true }
 		} catch (e) {
 			return { error: e as Error }
 		}
 	}
-})
+}
+
+export function registerPlaylistsHandlers(socket: Socket, _io: Server) {
+	socket.on('playlists', async (action, payload, callback) => {
+		console.log(action)
+		switch (action) {
+			case IpcOperationType.Create:
+				{
+					const { result, error } = await mutations.create(payload)
+					callback(result || error)
+				}
+				break
+			case IpcOperationType.Read:
+				{
+					const { result, error } = await mutations.read(payload)
+					console.log(result)
+					callback(result || error)
+				}
+				break
+			case IpcOperationType.Update:
+				{
+					const { result, error } = await mutations.update(payload)
+					callback(result || error)
+				}
+				break
+			case IpcOperationType.Delete:
+				{
+					const { result, error } = await mutations.delete(payload)
+					callback(result || error)
+				}
+				break
+			default:
+				callback(new Error(`Unknown operation type ${action}`))
+		}
+	})
+}

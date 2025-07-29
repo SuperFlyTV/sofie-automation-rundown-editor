@@ -14,10 +14,10 @@ import { StatusCode } from '@sofie-automation/shared-lib/dist/lib/status'
 import { protectString } from '@sofie-automation/shared-lib/dist/lib/protectedString'
 import { DEVICE_CONFIG_MANIFEST } from './configManifest'
 import { mutations as settingsMutations } from './api/settings'
-import { BrowserWindow, ipcMain, webContents } from 'electron'
 import { CoreConnectionInfo, CoreConnectionStatus } from './interfaces'
 import { mutateRundown, mutations as rundownMutations } from './api/rundowns'
 import { PeripheralDeviceCommandId } from '@sofie-automation/shared-lib/dist/core/model/Ids'
+import { getSocketIO } from './socket'
 
 export interface DeviceConfig {
 	deviceId: string
@@ -56,10 +56,11 @@ export class CoreHandler {
 		const { result: settings } = await settingsMutations.read()
 
 		const sendConnectionInfo = () => {
-			webContents.getAllWebContents().forEach((window) => {
-				if (window.isDestroyed()) return
-				window.send('coreConnectionInfo', this._connectionInfo)
-			})
+			const socketIO = getSocketIO()
+
+			if (socketIO) {
+				socketIO.emit('coreConnectionInfo', this._connectionInfo)
+			}
 		}
 
 		this.core.onConnected(() => {

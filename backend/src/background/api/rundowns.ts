@@ -1,7 +1,5 @@
-import { BrowserWindow, ipcMain } from 'electron'
 import {
 	DBRundown,
-	IpcOperation,
 	IpcOperationType,
 	MutationRundownCreate,
 	MutationRundownDelete,
@@ -14,7 +12,7 @@ import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { getMutatedSegmentsFromRundown } from './segments'
-import { stringifyError } from '../util'
+import { Server, Socket } from 'socket.io'
 
 export async function mutateRundown(rundown: Rundown): Promise<MutatedRundown> {
 	return {
@@ -167,53 +165,99 @@ export const mutations = {
 	}
 }
 
-export async function init(): Promise<void> {
-	ipcMain.handle('rundowns', async (event, operation: IpcOperation) => {
-		if (operation.type === IpcOperationType.Create) {
-			const { result, error } = await mutations.create(operation.payload)
-			if (result && result.sync) {
-				console.log('create rundown', result, error)
-				try {
-					await coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(result))
-				} catch (error) {
-					console.error(error)
-					event.sender.send('error', stringifyError(error, true))
+export function registerRundownsHandlers(socket: Socket, _io: Server) {
+	socket.on('rundowns', async (action, payload, callback) => {
+		switch (action) {
+			case IpcOperationType.Create:
+				{
+					const { result, error } = await handleCreateRundown(payload)
+					callback(result || error)
 				}
-			}
-
-			return result || error
-		} else if (operation.type === IpcOperationType.Read) {
-			const { result, error } = await mutations.read(operation.payload)
-
-			return result || error
-		} else if (operation.type === IpcOperationType.Update) {
-			const { result: document } = await mutations.read({ id: operation.payload.id })
-			const { result, error } = await mutations.update(operation.payload)
-
-			if (document && 'id' in document && result) {
-				try {
-					await sendRundownDiffToCore(document, result)
-				} catch (error) {
-					console.error(error)
-					event.sender.send('error', stringifyError(error, true))
+				break
+			case IpcOperationType.Read:
+				{
+					const { result, error } = await mutations.read(payload)
+					callback(result || error)
 				}
-			}
-
-			return result || error
-		} else if (operation.type === IpcOperationType.Delete) {
-			const { result: document } = await mutations.read({ id: operation.payload.id })
-			const { error } = await mutations.delete(operation.payload)
-
-			if (document && 'id' in document && !error && document.sync) {
-				try {
-					await coreHandler.core.coreMethods.dataRundownDelete(document.id)
-				} catch (error) {
-					console.error(error)
-					event.sender.send('error', stringifyError(error, true))
+				break
+			case IpcOperationType.Update:
+				{
+					const { result, error } = await handleUpdateRundown(payload)
+					callback(result || error)
 				}
-			}
-
-			return error || true
+				break
+			case IpcOperationType.Delete:
+				{
+					const { result, error } = await handleDeleteRundown(payload)
+					callback(result || error)
+				}
+				break
+			default:
+				callback(new Error(`Unknown operation type ${action}`))
 		}
 	})
+}
+
+async function handleCreateRundown(payload: MutationRundownCreate) {
+	{
+		let returnedError: unknown | Error | undefined
+
+		const { result, error: createError } = await mutations.create(payload)
+
+		if (createError) returnedError = createError
+
+		if (result && result.sync) {
+			console.log('create rundown', result, createError)
+			try {
+				await coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(result))
+			} catch (error) {
+				console.error(error)
+				returnedError = error
+			}
+		}
+
+		return { result, error: returnedError }
+	}
+}
+async function handleUpdateRundown(payload: MutationRundownUpdate) {
+	{
+		let returnedError: unknown | Error | undefined
+
+		const { result: document } = await mutations.read({ id: payload.id })
+		const { result, error: updateError } = await mutations.update(payload)
+
+		if (updateError) returnedError = updateError
+
+		if (document && 'id' in document && result) {
+			try {
+				await sendRundownDiffToCore(document, result)
+			} catch (error) {
+				console.error(error)
+				returnedError = error
+			}
+		}
+
+		return { result, error: returnedError }
+	}
+}
+async function handleDeleteRundown(payload: MutationRundownDelete) {
+	{
+		let returnedError: unknown | Error | undefined
+
+		const { result: document } = await mutations.read({ id: payload.id })
+		const { error: deleteError } = await mutations.delete(payload)
+
+		if (deleteError) returnedError = deleteError
+
+		if (document && 'id' in document && !deleteError && document.sync) {
+			try {
+				await coreHandler.core.coreMethods.dataRundownDelete(document.id)
+			} catch (error) {
+				console.error(error)
+				returnedError = error
+			}
+		}
+
+		return { result: returnedError === undefined ? true : undefined, error: returnedError }
+	}
 }

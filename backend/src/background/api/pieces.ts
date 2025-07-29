@@ -1,9 +1,8 @@
-import { BrowserWindow, ipcMain } from 'electron'
 import {
 	DBPiece,
-	IpcOperation,
 	IpcOperationType,
 	MutatedPiece,
+	MutationPieceCloneFromParToPart,
 	MutationPieceCreate,
 	MutationPieceDelete,
 	MutationPieceRead,
@@ -13,8 +12,8 @@ import {
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { sendPartUpdateToCore } from './parts'
-import { stringifyError } from '../util'
 import { mutations as partsMutations } from './parts'
+import { Server, Socket } from 'socket.io'
 
 export const mutations = {
 	async create(payload: MutationPieceCreate): Promise<{ result?: Piece; error?: Error }> {
@@ -176,10 +175,7 @@ export const mutations = {
 	async cloneFromPartToPart({
 		fromPartId,
 		toPartId
-	}: {
-		fromPartId: string
-		toPartId: string
-	}): Promise<{ result?: Piece[]; error?: Error }> {
+	}: MutationPieceCloneFromParToPart): Promise<{ result?: Piece[]; error?: Error }> {
 		try {
 			const { result: fromPart } = await partsMutations.readOne(fromPartId)
 			const { result: toPart } = await partsMutations.readOne(toPartId)
@@ -222,67 +218,122 @@ export const mutations = {
 	}
 }
 
-export async function init(): Promise<void> {
-	ipcMain.handle('pieces', async (event, operation: IpcOperation) => {
-		if (operation.type === IpcOperationType.Create) {
-			const { result, error } = await mutations.create(operation.payload)
-
-			if (result) {
-				try {
-					await sendPartUpdateToCore(result.partId)
-				} catch (error) {
-					console.error(error)
-					event.sender.send('error', stringifyError(error, true))
+export function registerPiecesHandlers(socket: Socket, _io: Server) {
+	socket.on('pieces', async (action, payload, callback) => {
+		switch (action) {
+			case IpcOperationType.Create:
+				{
+					const { result, error } = await handleCreatePiece(payload)
+					callback(result || error)
 				}
-			}
-
-			return error || result
-		} else if (operation.type === IpcOperationType.Read) {
-			const { result, error } = await mutations.read(operation.payload)
-
-			return error || result
-		} else if (operation.type === IpcOperationType.Update) {
-			const { result, error } = await mutations.update(operation.payload)
-
-			if (result) {
-				try {
-					await sendPartUpdateToCore(result.partId)
-				} catch (error) {
-					console.error(error)
-					event.sender.send('error', stringifyError(error, true))
+				break
+			case IpcOperationType.Read:
+				{
+					const { result, error } = await mutations.read(payload)
+					callback(result || error)
 				}
-			}
-
-			return error || result
-		} else if (operation.type === IpcOperationType.Delete) {
-			const { result: document } = await mutations.read({ id: operation.payload.id })
-			const { error } = await mutations.delete(operation.payload)
-
-			if (!error && document && !Array.isArray(document)) {
-				try {
-					await sendPartUpdateToCore(document.partId)
-				} catch (error) {
-					console.error(error)
-					event.sender.send('error', stringifyError(error, true))
+				break
+			case IpcOperationType.Update:
+				{
+					const { result, error } = await handleUpdatePiece(payload)
+					callback(result || error)
 				}
-			}
-
-			return error || true
-		} else if (operation.type === IpcOperationType.CloneSet) {
-			const { result, error } = await mutations.cloneFromPartToPart(operation.payload)
-
-			if (result) {
-				try {
-					await sendPartUpdateToCore(operation.payload.toPartId)
-				} catch (error) {
-					console.error(error)
-					event.sender.send('error', stringifyError(error, true))
+				break
+			case IpcOperationType.Delete:
+				{
+					const { result, error } = await handleDeletePiece(payload)
+					callback(result || error)
 				}
-			}
-
-			return error || result
+				break
+			default:
+				callback(new Error(`Unknown operation type ${action}`))
 		}
 	})
+}
+
+async function handleCreatePiece(payload: MutationPieceCreate) {
+	{
+		let returnedError: unknown | Error | undefined
+
+		const { result, error: createError } = await mutations.create(payload)
+
+		if (createError) returnedError = createError
+
+		if (result) {
+			try {
+				await sendPartUpdateToCore(result.partId)
+			} catch (error) {
+				console.error(error)
+				returnedError = error
+			}
+		}
+
+		return { result, error: returnedError }
+	}
+}
+
+async function handleUpdatePiece(payload: MutationPieceUpdate) {
+	{
+		let returnedError: unknown | Error | undefined
+
+		const { result, error: updateError } = await mutations.update(payload)
+
+		if (updateError) returnedError = updateError
+
+		if (result) {
+			try {
+				await sendPartUpdateToCore(result.partId)
+			} catch (error) {
+				console.error(error)
+				returnedError = error
+			}
+		}
+
+		return { result, error: returnedError }
+	}
+}
+
+async function handleDeletePiece(payload: MutationPieceDelete) {
+	{
+		let returnedError: unknown | Error | undefined
+
+		const { result: document } = await mutations.read({ id: payload.id })
+		const { error: deleteError } = await mutations.delete(payload)
+
+		if (deleteError) returnedError = deleteError
+
+		if (!deleteError && document && !Array.isArray(document)) {
+			try {
+				await sendPartUpdateToCore(document.partId)
+			} catch (error) {
+				console.error(error)
+				returnedError = error
+			}
+		}
+
+		return { result: returnedError === undefined ? true : undefined, error: returnedError }
+	}
+}
+
+async function handleCloneSetPiece(payload: MutationPieceCloneFromParToPart) {
+	{
+		let returnedError: unknown | Error | undefined
+
+		const { result, error: cloneError } = await mutations.cloneFromPartToPart(payload)
+
+		if (cloneError) returnedError = cloneError
+
+		if (result) {
+			try {
+				await sendPartUpdateToCore(payload.toPartId)
+			} catch (error) {
+				console.error(error)
+				returnedError = error
+			}
+		}
+
+		return { result, error: returnedError }
+	}
 }
 
 export async function getMutatedPiecesFromPart(partId: string): Promise<MutatedPiece[]> {

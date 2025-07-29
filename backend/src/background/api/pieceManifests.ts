@@ -1,4 +1,3 @@
-import { ipcMain } from 'electron'
 import {
 	DBPieceTypeManifest,
 	IpcOperation,
@@ -11,6 +10,7 @@ import {
 } from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
+import { Server, Socket } from 'socket.io'
 
 export const mutations = {
 	async create(
@@ -125,22 +125,35 @@ export const mutations = {
 	}
 }
 
-ipcMain.handle('pieceTypeManifests', async (_, operation: IpcOperation) => {
-	if (operation.type === IpcOperationType.Create) {
-		const { result, error } = await mutations.create(operation.payload)
-
-		return result || error
-	} else if (operation.type === IpcOperationType.Read) {
-		const { result, error } = await mutations.read(operation.payload)
-
-		return result || error
-	} else if (operation.type === IpcOperationType.Update) {
-		const { result, error } = await mutations.update(operation.payload)
-
-		return result || error
-	} else if (operation.type === IpcOperationType.Delete) {
-		const { error } = await mutations.delete(operation.payload)
-
-		return error || true
-	}
-})
+export function registerPieceManifestsHandlers(socket: Socket, _io: Server) {
+	socket.on('pieceTypeManifests', async (action, payload, callback) => {
+		switch (action) {
+			case IpcOperationType.Create:
+				{
+					const { result, error } = await mutations.create(payload)
+					callback(result || error)
+				}
+				break
+			case IpcOperationType.Read:
+				{
+					const { result, error } = await mutations.read(payload)
+					callback(result || error)
+				}
+				break
+			case IpcOperationType.Update:
+				{
+					const { result, error } = await mutations.update(payload)
+					callback(result || error)
+				}
+				break
+			case IpcOperationType.Delete:
+				{
+					const { error } = await mutations.delete(payload)
+					callback(error || true)
+				}
+				break
+			default:
+				callback(new Error(`Unknown operation type ${action}`))
+		}
+	})
+}

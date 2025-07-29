@@ -1,7 +1,5 @@
-import { ipcMain } from 'electron'
 import {
 	DBSettings,
-	IpcOperation,
 	IpcOperationType,
 	ApplicationSettings,
 	MutationApplicationSettingsCreate,
@@ -10,6 +8,7 @@ import {
 import { db } from '../db'
 import { PARTS_MANIFEST, PIECES_MANIFEST } from '../manifest'
 import { mutations as pieceTypeManifestMutations } from './pieceManifests'
+import { Server, Socket } from 'socket.io'
 
 export const mutations = {
 	async create(
@@ -89,26 +88,38 @@ export const mutations = {
 	}
 }
 
-ipcMain.handle('settings', async (_, operation: IpcOperation) => {
-	console.log('Settings operation:', operation)
-	if (operation.type === IpcOperationType.Create) {
-		const { result, error } = await mutations.create(operation.payload)
-
-		return result || error
-	} else if (operation.type === IpcOperationType.Read) {
-		const { result, error } = await mutations.read()
-
-		return result || error
-	} else if (operation.type === IpcOperationType.Update) {
-		const { result, error } = await mutations.update(operation.payload)
-
-		return result || error
-	} else if ((operation.type as string) === 'reset') {
-		await mutations.reset()
-	} else {
-		throw new Error('Unknown operation type')
-	}
-})
+export function registerSettingsHandlers(socket: Socket, _io: Server) {
+	socket.on('settings', async (action, payload, callback) => {
+		switch (action) {
+			case IpcOperationType.Create:
+				{
+					const { result, error } = await mutations.create(payload)
+					callback(result || error)
+				}
+				break
+			case IpcOperationType.Read:
+				{
+					const { result, error } = await mutations.read()
+					callback(result || error)
+				}
+				break
+			case IpcOperationType.Update:
+				{
+					const { result, error } = await mutations.update(payload)
+					callback(result || error)
+				}
+				break
+			case 'reset':
+				{
+					const { result, error } = await mutations.reset()
+					callback(result || error)
+				}
+				break
+			default:
+				callback(new Error(`Unknown operation type ${action}`))
+		}
+	})
+}
 
 const DEFAULT_SETTINGS: ApplicationSettings = {
 	partTypes: PARTS_MANIFEST,

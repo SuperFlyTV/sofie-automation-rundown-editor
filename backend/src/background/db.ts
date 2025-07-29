@@ -1,11 +1,10 @@
 import path from 'path'
-import { app, dialog } from 'electron'
 import isDev from 'electron-is-dev'
 import sqlite from 'node:sqlite'
 
 // In dev, store the database in the current working directory
 // In production, store the database in the user data directory
-const dbFile = isDev ? path.join(process.cwd(), 'data.db') : app.getPath('userData') + '/data.db'
+const dbFile = path.join(process.cwd(), 'data.db')
 console.log('Database location:', dbFile)
 
 let db: sqlite.DatabaseSync
@@ -92,7 +91,7 @@ try {
         );
     `)
 } catch (error) {
-	dialog.showErrorBox(
+	console.error(
 		'Unable to open database',
 		`An error occurred while trying to open the database file at ${dbFile}.\n\nError: ${
 			error instanceof Error ? error.message : String(error)

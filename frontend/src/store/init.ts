@@ -1,3 +1,4 @@
+import { ipcAPI } from '~/lib/IPC'
 import type { AppDispatch } from './app'
 import { updateConnectionStatus } from './connectionStatus'
 import { loadPiecesManifest } from './piecesManifest'
@@ -6,18 +7,17 @@ import { initRundowns } from './rundowns'
 import { loadSettings } from './settings'
 
 export function initStore(dispatch: AppDispatch): void {
-	if (!electronApi) throw new Error('electronApi is not available')
-
-	electronApi
+	ipcAPI
 		.getPlaylists()
 		.then((playlists) => {
+			console.log(playlists)
 			dispatch(initPlaylists(playlists))
 		})
 		.catch((error) => {
 			console.error('Error fetching playlists:', error)
 		})
 
-	electronApi
+	ipcAPI
 		.getRundowns()
 		.then((rundowns) => {
 			dispatch(initRundowns(rundowns))
@@ -34,7 +34,7 @@ export function initStore(dispatch: AppDispatch): void {
 		console.error('Error fetching settings:', error)
 	})
 
-	electronApi
+	ipcAPI
 		.getCoreConnectionInfo()
 		.then((info) => {
 			dispatch(updateConnectionStatus(info))
@@ -43,7 +43,7 @@ export function initStore(dispatch: AppDispatch): void {
 			console.error('Error fetching coreConnectionInfo:', error)
 		})
 
-	electronApi.onCoreConnectionInfo((newInfo) => {
+	ipcAPI.onCoreConnectionInfo((newInfo) => {
 		dispatch(updateConnectionStatus(newInfo))
 	})
 }
