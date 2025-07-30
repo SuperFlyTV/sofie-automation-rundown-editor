@@ -15,6 +15,7 @@
 	"scripts": {
 		"prepare": "husky",
 		"dev:backend": "yarn workspace @sofie-rundown-editor/backend dev",
+		"start": "yarn workspace @sofie-rundown-editor/backend start",
 		"dev:ui": "yarn workspace @sofie-rundown-editor/frontend dev",
 		"dev": "yarn dev:backend & yarn dev:ui",
 		"lint": "yarn workspaces foreach --topological-dev --all --verbose run lint",
