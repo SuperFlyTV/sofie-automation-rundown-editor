@@ -73,7 +73,7 @@ export const ipcAPI: BackendApi = {
 		return getSocket().emitWithAck('rundowns', 'update', rundown)
 	},
 	deleteRundown: (rundownId: string) => {
-		return getSocket().emitWithAck('rundowns', 'delete', rundownId)
+		return getSocket().emitWithAck('rundowns', 'delete', { id: rundownId })
 	},
 
 	getSegments: (rundownId: string) => {
