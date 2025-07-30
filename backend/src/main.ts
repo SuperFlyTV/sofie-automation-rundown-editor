@@ -4,10 +4,14 @@ import { initializeDefaults as initializeSettingsDefaults } from './background/a
 import { ControlAPI } from './background'
 
 async function startRundownEditorServer() {
+	const portNumber: number | undefined = process.env.PORT
+		? parseInt(process.env.PORT, 10)
+		: undefined
+
 	await initializeSettingsDefaults()
 
 	const api = new ControlAPI()
-	await api.init().catch((error) => {
+	await api.init(portNumber).catch((error) => {
 		console.error(error)
 		process.exit(1)
 	})

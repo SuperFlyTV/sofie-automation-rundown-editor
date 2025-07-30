@@ -1,10 +1,9 @@
 import path from 'path'
-import isDev from 'electron-is-dev'
 import sqlite from 'node:sqlite'
 
 // In dev, store the database in the current working directory
 // In production, store the database in the user data directory
-const dbFile = path.join(process.cwd(), 'data.db')
+const dbFile = path.join(process.cwd(), '../data/data.db')
 console.log('Database location:', dbFile)
 
 let db: sqlite.DatabaseSync

@@ -48,6 +48,9 @@ export async function initSocketServer(port: number = 3010) {
 		app.get('/', (_, res) => {
 			res.sendFile(path.join(frontendPath, 'index.html'))
 		})
+		app.get('/favicon.png', (_, res) => {
+			res.sendFile(path.join(frontendPath, '../../build/icon.png'))
+		})
 
 		server.listen(port, () => console.log(`Server running on http://localhost:${port}`))
 	} else {
