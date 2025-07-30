@@ -509,7 +509,7 @@ async function handlePartReorder(payload: MutationReorder<MutationPartUpdate>) {
 		}
 	}
 
-	return { result: reorderError ? reorderedParts : undefined, error: reorderError }
+	return { result: returnedError === undefined ? reorderedParts : undefined, error: returnedError }
 }
 async function handlePartDelete(payload: MutationRundownDelete) {
 	let returnedError: unknown | Error | undefined
