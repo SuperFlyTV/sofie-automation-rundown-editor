@@ -33,6 +33,7 @@ export const mutations = {
 
 			return this.readOne(id)
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	},
@@ -57,6 +58,7 @@ export const mutations = {
 				}
 			}
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	},
@@ -81,6 +83,7 @@ export const mutations = {
 					}))
 				}
 			} catch (e) {
+				console.error(e)
 				return { error: e as Error }
 			}
 		}
@@ -107,6 +110,7 @@ export const mutations = {
 
 			return this.readOne(payload.update.id)
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	},
@@ -120,6 +124,7 @@ export const mutations = {
 			stmt.run(payload.id)
 			return {}
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	}
