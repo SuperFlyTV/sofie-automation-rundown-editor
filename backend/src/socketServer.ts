@@ -10,6 +10,9 @@ import { registerPiecesHandlers } from './background/api/pieces'
 import { registerPartsHandlers } from './background/api/parts'
 import { initSocket } from './background/socket'
 import { registerCoreConnectionInfoHandlers } from './background/api/coreConnectionInfo'
+import path from 'path'
+
+const frontendPath = path.resolve(__dirname, '../../frontend/dist')
 
 export async function initSocketServer(port: number = 3010) {
 	const app = express()
@@ -38,6 +41,12 @@ export async function initSocketServer(port: number = 3010) {
 
 			// Register all feature handlers
 			handlers.map((handler: SocketIOHandler) => handler(socket, io))
+		})
+
+		app.use(express.static(frontendPath))
+
+		app.get('/', (_, res) => {
+			res.sendFile(path.join(frontendPath, 'index.html'))
 		})
 
 		server.listen(port, () => console.log(`Server running on http://localhost:${port}`))
