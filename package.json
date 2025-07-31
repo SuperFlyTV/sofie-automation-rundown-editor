@@ -1,6 +1,6 @@
 {
 	"name": "sofie-rundown-editor",
-	"version": "2.1.0",
+	"version": "2.2.0",
 	"private": true,
 	"description": "A standalone tool for creating and editing Sofie rundowns.",
 	"repository": {
@@ -18,7 +18,6 @@
 		"start": "yarn workspace @sofie-rundown-editor/backend start",
 		"dev:ui": "yarn workspace @sofie-rundown-editor/frontend dev",
 		"dev": "yarn dev:backend & yarn dev:ui",
-		"start": "yarn workspace @sofie-rundown-editor/backend start",
 		"lint": "yarn workspaces foreach --topological-dev --all --verbose run lint",
 		"build": "yarn workspaces foreach --topological-dev --all --verbose run build",
 		"license-validate": "license-checker -r --filter MIT --filter 0BSD --filter BSD --filter ISC --filter Apache --filter Unlicense --plain --border ascii",
