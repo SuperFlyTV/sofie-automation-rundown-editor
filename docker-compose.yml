@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   app:
-    image: sofie-automation-rundown-editor:latest
+    image: ghcr.io/sofie-automation-rundown-editor:latest
     build:
       context: .
       dockerfile: Dockerfile

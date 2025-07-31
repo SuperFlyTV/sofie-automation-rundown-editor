@@ -10,7 +10,9 @@ Sofie Rundown Editor requires that you have a working instance of [Sofie Core](h
 
 ## Installation
 
-Head to the [releases](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/releases) page and download the installer for the latest release. You'll find installers for Windows, Linux, and macOS on listed under the Assets dropdown for each release.
+Deploy the docker container using the `docker-compose.yml`, modify the port, volume mapping as needed. When migrating from a local install, the `data.db` file should be copied to the directory which the data volume points to otherwise the container will initialize a new database on the first run.
+
+Once up and running in Rundown Editor go to `Settings -> Core Connection` and set the address and port of your Sofie instance. This is stored in your database file.
 
 ## Usage (Quick Start / Demo)
 
@@ -45,19 +47,15 @@ yarn install
 In one terminal
 
 ```
-yarn dev:ui
+yarn dev
 ```
 
-In another terminal
-
-```
-yarn dev:electron
-```
+The frontend with hot-reloads will be available at `http://localhost:5173/`
 
 ### Compiles and minifies for production
 
 ```
-yarn electron:build
+yarn build
 ```
 
 ### Lints and fixes files
@@ -68,11 +66,11 @@ yarn lint
 
 ### Making a new release
 
-1. Merge everything for the releas in main
+1. Merge everything for the release in main
 2. Wait for release-please to open a PR for the changes
 3. Make sure the changelog and new version number it proposes are sensible.
    If not, release-please has some commands to adjust that.
 4. Merge the PR
 5. Wait for the release-please workflow to create the new tag
-6. Wait for the workflows to  [`Create GitHub Release`](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/actions/workflows/create-release.yaml) action to finish
+6. Wait for the workflows to [`Create GitHub Release`](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/actions/workflows/create-release.yaml) action to finish
 7. Go to the [releases](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/releases) page and publish the draft release
