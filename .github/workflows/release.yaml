@@ -3,7 +3,7 @@ name: Release with Docker image to GHCR
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v**'
 
 jobs:
   release:
