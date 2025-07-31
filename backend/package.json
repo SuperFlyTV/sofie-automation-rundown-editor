@@ -13,27 +13,28 @@
 		"url": "https://superfly.tv"
 	},
 	"scripts": {
-		"dev": "nodemon",
+		"dev": "cross-env NODE_ENV=development dotenv -e .env -- nodemon",
 		"build": "run -T rimraf dist && run build:main",
 		"build:main": "run -T tsc -p tsconfig.json",
 		"watch-types": "run build:main --watch --noEmit",
+		"start": "node ./dist/main.js",
 		"lint": "run -T eslint ."
 	},
 	"main": "dist/main.js",
 	"dependencies": {
-		"@electron/remote": "^2.1.2",
 		"@sofie-automation/server-core-integration": "1.53.0-nightly-release53-20250423-081454-dc957dd.0",
 		"@types/uuid": "^10.0.0",
 		"electron-is-dev": "^2.0.0",
+		"express": "^5.1.0",
+		"socket.io": "^4.8.1",
 		"type-fest": "^4.41.0",
 		"uuid": "^11.1.0"
 	},
 	"devDependencies": {
-		"@types/electron-devtools-installer": "^4.0.0",
+		"@types/express": "^5",
 		"@types/node": "^22.15.21",
-		"electron": "36.3.1",
-		"electron-builder": "25.1.8",
-		"electron-devtools-installer": "^4.0.0",
+		"cross-env": "^10.0.0",
+		"dotenv-cli": "^10.0.0",
 		"nodemon": "^3.1.10",
 		"typescript": "~5.8.3"
 	},

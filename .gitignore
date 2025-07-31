@@ -3,6 +3,7 @@ node_modules
 /dist
 data.db
 data.db-journal
+/data
 
 .pnp.*
 .yarn/*
@@ -37,3 +38,5 @@ pnpm-debug.log*
 
 # TSC output
 /backend/dist
+
+.env

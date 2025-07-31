@@ -1,6 +1,11 @@
-import type { Segment } from '~backend/background/interfaces.js'
+import type {
+	MutationReorder,
+	MutationSegmentUpdate,
+	Segment
+} from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
+import { ipcAPI } from '~/lib/IPC'
 
 export interface LoadSegmentsPayload {
 	rundownId: string
@@ -20,7 +25,7 @@ export interface RemoveSegmentPayload {
 export const addNewSegment = createAppAsyncThunk(
 	'segments/addNewSegment',
 	async (payload: NewSegmentPayload) => {
-		return electronApi.addNewSegment({
+		return ipcAPI.addNewSegment({
 			name: `Segment ${payload.rank + 1}`,
 			playlistId: payload.playlistId,
 			rundownId: payload.rundownId,
@@ -32,19 +37,19 @@ export const addNewSegment = createAppAsyncThunk(
 export const updateSegment = createAppAsyncThunk(
 	'segments/updateSegment',
 	async (payload: UpdateSegmentPayload) => {
-		return electronApi.updateSegment(payload.segment)
+		return ipcAPI.updateSegment(payload.segment)
 	}
 )
 export const reorderSegments = createAppAsyncThunk(
 	'parts/reorderSegments',
-	async ({ segment, targetIndex }: { segment: Segment; targetIndex: number }) => {
-		return electronApi.reorderSegments(segment, targetIndex)
+	async ({ element, targetIndex }: MutationReorder<MutationSegmentUpdate>) => {
+		return ipcAPI.reorderSegments({ element, targetIndex })
 	}
 )
 export const removeSegment = createAppAsyncThunk(
 	'segments/removeSegment',
 	async (payload: RemoveSegmentPayload) => {
-		await electronApi.deleteSegment(payload.id)
+		await ipcAPI.deleteSegment(payload.id)
 		return payload
 	}
 )
@@ -59,7 +64,7 @@ interface SegmentsState {
 export const loadSegments = createAppAsyncThunk(
 	'segments/loadSegments',
 	async (payload: LoadSegmentsPayload) => {
-		const segments = await electronApi.getSegments(payload.rundownId)
+		const segments = await ipcAPI.getSegments(payload.rundownId)
 		return {
 			rundownId: payload.rundownId,
 			segments
@@ -112,7 +117,7 @@ const segmentsSlice = createSlice({
 			})
 			.addCase(reorderSegments.fulfilled, (state, action) => {
 				state.status = 'succeeded'
-				state.rundownId = action.meta.arg.segment.rundownId
+				state.rundownId = action.meta.arg.element.rundownId
 				state.segments = state.segments.map((segment) => {
 					const updated = action.payload.find((updatedSegment) => updatedSegment.id === segment.id)
 					return updated ?? segment

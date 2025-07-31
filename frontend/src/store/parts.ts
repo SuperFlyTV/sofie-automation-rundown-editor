@@ -1,7 +1,8 @@
-import type { Part } from '~backend/background/interfaces.js'
+import type { MutationPartUpdate, MutationReorder, Part } from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 import { loadPieces } from './pieces'
+import { ipcAPI } from '~/lib/IPC'
 
 export interface LoadPartsPayload {
 	rundownId: string
@@ -34,7 +35,7 @@ export const addNewPart = createAppAsyncThunk(
 	'parts/addNewPart',
 	async (payload: NewPartPayload) => {
 		const rank: number = payload.rank ?? 0
-		return electronApi.addNewPart({
+		return ipcAPI.addNewPart({
 			name: payload.name ?? `Part ${rank + 1}`,
 			playlistId: payload.playlistId,
 			rundownId: payload.rundownId,
@@ -48,7 +49,7 @@ export const addNewPart = createAppAsyncThunk(
 export const movePart = createAppAsyncThunk(
 	'parts/movePart',
 	async (payload: MovePartPayload, { dispatch }) => {
-		const partResult = electronApi.movePart(payload)
+		const partResult = ipcAPI.movePart(payload)
 
 		//update parts and pieces
 		await dispatch(loadParts({ rundownId: payload.sourcePart.rundownId }))
@@ -60,19 +61,19 @@ export const movePart = createAppAsyncThunk(
 export const updatePart = createAppAsyncThunk(
 	'parts/updatePart',
 	async (payload: UpdatePartPayload) => {
-		return electronApi.updatePart(payload.part)
+		return ipcAPI.updatePart(payload.part)
 	}
 )
 export const reorderParts = createAppAsyncThunk(
 	'parts/reorderParts',
-	async ({ part, targetIndex }: { part: Part; targetIndex: number }) => {
-		return electronApi.reorderParts(part, targetIndex)
+	async (payload: MutationReorder<MutationPartUpdate>) => {
+		return ipcAPI.reorderParts(payload)
 	}
 )
 export const removePart = createAppAsyncThunk(
 	'parts/removePart',
 	async (payload: RemovePartPayload) => {
-		await electronApi.deletePart(payload.id)
+		await ipcAPI.deletePart(payload.id)
 		return payload
 	}
 )
@@ -87,7 +88,7 @@ interface PartsState {
 export const loadParts = createAppAsyncThunk(
 	'parts/loadParts',
 	async (payload: LoadPartsPayload) => {
-		const parts = await electronApi.getParts(payload.rundownId)
+		const parts = await ipcAPI.getParts(payload.rundownId)
 		return {
 			rundownId: payload.rundownId,
 			parts
@@ -140,7 +141,7 @@ const partsSlice = createSlice({
 			})
 			.addCase(reorderParts.fulfilled, (state, action) => {
 				state.status = 'succeeded'
-				state.rundownId = action.meta.arg.part.rundownId
+				state.rundownId = action.meta.arg.element.rundownId
 				state.parts = state.parts.map(
 					(part) => action.payload.find((newPart) => newPart.id === part.id) ?? part
 				)

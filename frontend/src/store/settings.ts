@@ -1,6 +1,7 @@
 import type { ApplicationSettings } from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
+import { ipcAPI } from '~/lib/IPC'
 
 // export interface LoadSettingsPayload {
 // 	rundownId: string
@@ -35,7 +36,7 @@ export interface UpdateSettingsPayload {
 export const updateSettings = createAppAsyncThunk(
 	'settings/updateSettings',
 	async (payload: UpdateSettingsPayload) => {
-		return electronApi.updateSettings(payload.settings)
+		return ipcAPI.updateSettings(payload.settings)
 	}
 )
 // export const removeSetting = createAppAsyncThunk(
@@ -53,7 +54,7 @@ interface SettingsState {
 }
 
 export const loadSettings = createAppAsyncThunk('settings/loadSettings', async () => {
-	return electronApi.getSettings()
+	return ipcAPI.getSettings()
 })
 
 const settingsSlice = createSlice({

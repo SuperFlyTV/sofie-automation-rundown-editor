@@ -18,6 +18,7 @@ import {
 	updatePiecesManifest
 } from '~/store/piecesManifest'
 import { useToasts } from '../toasts/toasts'
+import { ipcAPI } from '~/lib/IPC'
 
 export function PieceTypesForm({ piecesManifest }: { piecesManifest: PiecesManifest }) {
 	const dispatch = useAppDispatch()
@@ -34,7 +35,7 @@ export function PieceTypesForm({ piecesManifest }: { piecesManifest: PiecesManif
 	}
 
 	const exportPieceTypes = () => {
-		electronApi
+		ipcAPI
 			.saveToFile({
 				title: 'Export piece types',
 				document: piecesManifest
@@ -44,7 +45,7 @@ export function PieceTypesForm({ piecesManifest }: { piecesManifest: PiecesManif
 			})
 	}
 	const importPieceTypes = () => {
-		electronApi
+		ipcAPI
 			.openFromFile({ title: 'Import piece types' })
 			.then(async (serializedPieceTypes) => {
 				console.log('importing piece types', serializedPieceTypes)

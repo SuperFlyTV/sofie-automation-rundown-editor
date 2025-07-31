@@ -63,7 +63,7 @@ export function CoreConnectionSettingsForm({ settings }: { settings: Application
 					children={(field) => (
 						<>
 							<Form.Group className="mb-3">
-								<Form.Label htmlFor={field.name}>Float:</Form.Label>
+								<Form.Label htmlFor={field.name}>Port:</Form.Label>
 								<Form.Control
 									name={field.name}
 									type="number"

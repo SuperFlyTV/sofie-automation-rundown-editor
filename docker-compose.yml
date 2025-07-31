@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  app:
+    image: ghcr.io/sofie-automation-rundown-editor:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3010
+    ports:
+      - '3010:3010'
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

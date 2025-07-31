@@ -1,5 +1,6 @@
 import { Button, Modal } from 'react-bootstrap'
 import { useState } from 'react'
+import { ipcAPI } from '~/lib/IPC'
 
 export function ResetToDefaults() {
 	const [showDelete, setShowDelete] = useState(false)
@@ -12,7 +13,7 @@ export function ResetToDefaults() {
 		setShowDelete(true)
 	}
 	const performDeletePart = () => {
-		electronApi
+		ipcAPI
 			.resetSettings()
 			.then(() => {
 				console.log('reset settings')
