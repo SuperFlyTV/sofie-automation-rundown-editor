@@ -38,77 +38,20 @@ jobs:
         env:
           CI: true
 
-  macos-build:
-    name: Build on macOS
-    runs-on: macos-latest
-    needs: lint
+  build:
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.node-version'
-      - name: restore node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-      - name: Prepare Environment
-        run: |
-          corepack enable
+          node-version: '22'
 
-          # try and avoid timeout errors
-          yarn config set httpTimeout 100000
+      - name: Install dependencies with Yarn
+        run: yarn install --frozen-lockfile
 
-          yarn --immutable
-      - name: Build binaries
-        run: |
-          yarn electron:build -- --publish=never
-        env:
-          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLEID }}
-          APPLE_TEAM_ID: ${{ secrets.APPLEIDTEAM }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLEIDPASS }}
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-dist
-          path: dist_electron
-          retention-days: 1
-
-  windows-build:
-    name: Build on Windows
-    runs-on: windows-latest
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.node-version'
-      - name: restore node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-      - name: Prepare Environment
-        shell: bash
-        run: |
-          corepack enable
-
-          # try and avoid timeout errors
-          yarn config set httpTimeout 100000
-
-          yarn --immutable
-      - name: Build binaries
-        run: |
-          yarn electron:build -- --publish=never
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: win-dist
-          path: dist_electron
-          retention-days: 1
+      - name: Run build
+        run: yarn build
