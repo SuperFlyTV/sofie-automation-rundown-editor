@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.1](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.2.0...v2.2.1) (2025-08-04)
+
+
+### Bug Fixes
+
+* drag and drop editor reorder fails when ranks are not in order ([#65](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/issues/65)) ([47768d7](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/47768d7d48a139dbda558d0f7cd4b12bec217ab1))
+* use correct image path in docker-compose.yml ([ba222f1](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/ba222f12bb89afcbbab0f30709e9ff573bf39cc6))
+
 ## [2.2.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.1.0...v2.2.0) (2025-07-31)
 
 
