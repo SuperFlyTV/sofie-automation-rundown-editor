@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 import { loadPieces } from './pieces'
 import { ipcAPI } from '~/lib/IPC'
+import { removeRundown } from './rundowns'
 
 export interface LoadPartsPayload {
 	rundownId: string
@@ -151,6 +152,16 @@ const partsSlice = createSlice({
 				const index = state.parts.findIndex((part) => part.id === action.payload.id)
 				if (index !== -1) {
 					state.parts.splice(index, 1)
+				}
+			})
+			.addCase(removeRundown.fulfilled, (state, action) => {
+				// Check if the rundown being removed is the one currently loaded in the parts slice
+				if (state.rundownId === action.payload.id) {
+					// Reset the state to initial values
+					state.rundownId = null
+					state.parts = []
+					state.status = 'idle'
+					state.error = null
 				}
 			})
 	}
