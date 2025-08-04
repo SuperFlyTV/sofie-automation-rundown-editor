@@ -57,8 +57,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${env.REPO}:${{ github.ref_name }}
-            ghcr.io/${env.REPO}:latest
+            ghcr.io/${{ env.REPO }}:${{ github.ref_name }}
+            ghcr.io/${{ env.REPO }}:latest
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -69,5 +69,5 @@ jobs:
             Docker image pushed to GHCR:
 
             ```bash
-            docker pull ghcr.io/${env.REPO}:${{ github.ref_name }}
+            docker pull ghcr.io/${{ env.REPO }}:${{ github.ref_name }}
             ```
