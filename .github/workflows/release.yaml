@@ -53,8 +53,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
+            ghcr.io/${{ github.repository_owner || '' | toLower }}/${{ github.event.repository.name || '' | toLower }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository_owner || '' | toLower }}/${{ github.event.repository.name || '' | toLower }}:latest
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -65,5 +65,5 @@ jobs:
             Docker image pushed to GHCR:
 
             ```bash
-            docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }}
+            docker pull ghcr.io/${{ github.repository_owner || '' | toLower }}/${{ github.event.repository.name || '' | toLower }}:${{ github.ref_name }}
             ```
