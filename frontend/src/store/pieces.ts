@@ -2,6 +2,7 @@ import type { MutationPieceCloneFromParToPart, Piece } from '~backend/background
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 import { ipcAPI } from '~/lib/IPC'
+import { removeRundown } from './rundowns'
 
 export interface LoadPiecesPayload {
 	rundownId: string
@@ -127,6 +128,16 @@ const piecesSlice = createSlice({
 				action.payload.map((piece) => {
 					state.pieces.push(piece)
 				})
+			})
+			.addCase(removeRundown.fulfilled, (state, action) => {
+				// Check if the rundown being removed is the one currently loaded in the pieces slice
+				if (state.rundownId === action.payload.id) {
+					// Reset the state to initial values
+					state.rundownId = null
+					state.pieces = []
+					state.status = 'idle'
+					state.error = null
+				}
 			})
 	}
 })
