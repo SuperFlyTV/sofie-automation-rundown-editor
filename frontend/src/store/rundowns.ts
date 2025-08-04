@@ -40,7 +40,7 @@ export const removeRundown = createAppAsyncThunk(
 export const importRundown = createAppAsyncThunk(
 	'rundowns/importRundown',
 	async (rundown: SerializedRundown) => {
-		const createdRundown = await ipcAPI.addNewRundown(rundown.rundown)
+		const createdRundown = await ipcAPI.addNewRundown({ ...rundown.rundown, sync: false })
 
 		// Note: we don't need to update the stores, that will happen when opening the rundown
 		await Promise.all(rundown.segments.map((segment) => ipcAPI.addNewSegment(segment)))
