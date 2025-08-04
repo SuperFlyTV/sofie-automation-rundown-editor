@@ -1,6 +1,7 @@
-import type { Piece } from '~backend/background/interfaces.js'
+import type { MutationPieceCloneFromParToPart, Piece } from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
+import { ipcAPI } from '~/lib/IPC'
 
 export interface LoadPiecesPayload {
 	rundownId: string
@@ -24,7 +25,7 @@ export interface RemovePiecePayload {
 export const addNewPiece = createAppAsyncThunk(
 	'pieces/addNewPiece',
 	async (payload: NewPiecePayload) => {
-		return electronApi.addNewPiece({
+		return ipcAPI.addNewPiece({
 			name: payload.name,
 			playlistId: payload.playlistId,
 			rundownId: payload.rundownId,
@@ -38,20 +39,20 @@ export const addNewPiece = createAppAsyncThunk(
 export const updatePiece = createAppAsyncThunk(
 	'pieces/updatePiece',
 	async (payload: UpdatePiecePayload) => {
-		return electronApi.updatePiece(payload.piece)
+		return ipcAPI.updatePiece(payload.piece)
 	}
 )
 export const removePiece = createAppAsyncThunk(
 	'pieces/removePiece',
 	async (payload: RemovePiecePayload) => {
-		await electronApi.deletePiece(payload.id)
+		await ipcAPI.deletePiece(payload.id)
 		return payload
 	}
 )
 export const clonePiecesFromPartToPart = createAppAsyncThunk(
 	'pieces/clonePiecesFromPartToPart',
-	async ({ fromPartId, toPartId }: { fromPartId: string; toPartId: string }) => {
-		return electronApi.clonePiecesFromPartToPart(fromPartId, toPartId)
+	async (payload: MutationPieceCloneFromParToPart) => {
+		return ipcAPI.clonePiecesFromPartToPart(payload)
 	}
 )
 
@@ -65,7 +66,7 @@ interface PiecesState {
 export const loadPieces = createAppAsyncThunk(
 	'pieces/loadPieces',
 	async (payload: LoadPiecesPayload) => {
-		const pieces = await electronApi.getPieces(payload.rundownId)
+		const pieces = await ipcAPI.getPieces(payload.rundownId)
 		return {
 			rundownId: payload.rundownId,
 			pieces

@@ -4,8 +4,10 @@ import type {
 	MutationPartCreate,
 	MutationPartMove,
 	MutationPartUpdate,
+	MutationPieceCloneFromParToPart,
 	MutationPieceCreate,
 	MutationPieceUpdate,
+	MutationReorder,
 	MutationRundownCreate,
 	MutationRundownUpdate,
 	MutationSegmentCreate,
@@ -50,19 +52,19 @@ export interface BackendApi {
 	getSegments: (rundownId: string) => Promise<Segment[]>
 	addNewSegment: (segment: MutationSegmentCreate) => Promise<Segment>
 	updateSegment: (segment: MutationSegmentUpdate) => Promise<Segment>
-	reorderSegments: (part: MutationSegmentUpdate, targetIndex: number) => Promise<Segment[]>
+	reorderSegments: (payload: MutationReorder<MutationSegmentUpdate>) => Promise<Segment[]>
 	deleteSegment: (segmentId: string) => Promise<void>
 
 	getParts: (rundownId: string) => Promise<Part[]>
 	addNewPart: (part: MutationPartCreate) => Promise<Part>
 	movePart: (payload: MutationPartMove) => Promise<Part>
 	updatePart: (part: MutationPartUpdate) => Promise<Part>
-	reorderParts: (part: MutationPartUpdate, targetIndex: number) => Promise<Part[]>
+	reorderParts: (payload: MutationReorder<MutationPartUpdate>) => Promise<Part[]>
 	deletePart: (partId: string) => Promise<void>
 
 	getPieces: (rundownId: string) => Promise<Piece[]>
 	addNewPiece: (piece: MutationPieceCreate) => Promise<Piece>
 	updatePiece: (piece: MutationPieceUpdate) => Promise<Piece>
 	deletePiece: (pieceId: string) => Promise<void>
-	clonePiecesFromPartToPart: (fromPartId: string, toPartId: string) => Promise<Piece[]>
+	clonePiecesFromPartToPart: (payload: MutationPieceCloneFromParToPart) => Promise<Piece[]>
 }

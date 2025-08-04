@@ -1,0 +1,73 @@
+name: Release with Docker image to GHCR
+
+on:
+  push:
+    tags:
+      - 'v**'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Verify tag points to a commit on main branch
+        id: verify_branch
+        run: |
+          TAG_COMMIT=$(git rev-list -n 1 $GITHUB_REF)
+          echo "Tag commit: $TAG_COMMIT"
+
+          # Fetch main branch commit
+          git fetch origin main
+          MAIN_COMMIT=$(git rev-parse origin/main)
+          echo "Main commit: $MAIN_COMMIT"
+
+          # Check if TAG_COMMIT is ancestor of main commit
+          if git merge-base --is-ancestor $TAG_COMMIT $MAIN_COMMIT; then
+            echo "continue=true" >> $GITHUB_OUTPUT
+          else
+            echo "continue=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Stop if tag is not on main branch
+        if: steps.verify_branch.outputs.continue != 'true'
+        run: |
+          echo "Tag commit is not on main branch, skipping release."
+          exit 0
+
+      - name: lowercase repo
+        run: |
+          echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image to GHCR
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ env.REPO }}:${{ github.ref_name }}
+            ghcr.io/${{ env.REPO }}:latest
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            Docker image pushed to GHCR:
+
+            ```bash
+            docker pull ghcr.io/${{ env.REPO }}:${{ github.ref_name }}
+            ```

@@ -51,7 +51,7 @@ export function RundownSidebar({
 		sourceSegment: Segment,
 		targetIndex: number
 	) => {
-		return dispatch(reorderSegments({ segment: sourceSegment, targetIndex }))
+		return dispatch(reorderSegments({ element: sourceSegment, targetIndex }))
 			.unwrap()
 			.then(async () => {
 				await navigate({
@@ -133,7 +133,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 
 			// remove part from old segment
 		} else {
-			return dispatch(reorderParts({ part: sourcePart, targetIndex }))
+			return dispatch(reorderParts({ element: sourcePart, targetIndex }))
 				.unwrap()
 				.then(async () => {
 					await navigate({

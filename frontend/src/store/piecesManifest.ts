@@ -1,6 +1,7 @@
 import type { PiecesManifest, PieceTypeManifest } from '~backend/background/interfaces.js'
 import { createSlice, nanoid } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
+import { ipcAPI } from '~/lib/IPC'
 
 export interface ImportPiecesManifestPayload {
 	piecesManifest: PieceTypeManifest
@@ -16,7 +17,7 @@ export interface RemovePiecesManifestPayload {
 export const addNewPiecesManifest = createAppAsyncThunk(
 	'piecesManifest/addNewPiecesManifest',
 	async () => {
-		return electronApi.addNewPieceManifest({
+		return ipcAPI.addNewPieceManifest({
 			id: nanoid(),
 			name: 'New Piece Type',
 			shortName: 'NPT',
@@ -28,16 +29,13 @@ export const addNewPiecesManifest = createAppAsyncThunk(
 export const importPiecesManifest = createAppAsyncThunk(
 	'piecesManifest/importPiecesManifest',
 	async (payload: ImportPiecesManifestPayload) => {
-		return electronApi.addNewPieceManifest(payload.piecesManifest)
+		return ipcAPI.addNewPieceManifest(payload.piecesManifest)
 	}
 )
 export const updatePiecesManifest = createAppAsyncThunk(
 	'piecesManifest/updatePiecesManifest',
 	async (payload: UpdatePiecesManifestPayload) => {
-		const newDoc = await electronApi.updatePiecesManifest(
-			payload.originalId,
-			payload.piecesManifest
-		)
+		const newDoc = await ipcAPI.updatePiecesManifest(payload.originalId, payload.piecesManifest)
 		return {
 			newDoc,
 			oldId: payload.originalId
@@ -47,7 +45,7 @@ export const updatePiecesManifest = createAppAsyncThunk(
 export const removePiecesManifest = createAppAsyncThunk(
 	'piecesManifest/removePiecesManifest',
 	async (payload: RemovePiecesManifestPayload) => {
-		await electronApi.removePiecesManifest(payload.id)
+		await ipcAPI.removePiecesManifest(payload.id)
 		return payload
 	}
 )
@@ -61,7 +59,7 @@ interface PiecesManifestState {
 export const loadPiecesManifest = createAppAsyncThunk(
 	'piecesManifest/loadPiecesManifest',
 	async () => {
-		return electronApi.getPiecesManifest()
+		return ipcAPI.getPiecesManifest()
 	}
 )
 

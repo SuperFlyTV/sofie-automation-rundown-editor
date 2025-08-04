@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.2.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.1.0...v2.2.0) (2025-07-31)
+
+
+### Features
+
+* convert to web app ([#61](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/issues/61)) ([3203c38](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/3203c38929fd48074d40b8fba9be2a4cac3992bf))
+
+## [2.1.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.0.3...v2.1.0) (2025-07-21)
+
+
+### Features
+
+* drag and drop editor ([88a344d](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/88a344dbdfd18b57aa9e1193bc03cb826e3e0236))
+
 ## [2.0.3](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.0.3...v2.0.3) (2025-07-03)
 
 

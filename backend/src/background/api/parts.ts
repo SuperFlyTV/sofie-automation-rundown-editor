@@ -1,14 +1,15 @@
-import { ipcMain } from 'electron'
 import {
 	DBPart,
-	IpcOperation,
 	IpcOperationType,
 	MutationPartCreate,
 	MutationPartDelete,
 	MutationPartRead,
 	MutationPartUpdate,
 	MutatedPart,
-	Part
+	Part,
+	MutationPartMove,
+	MutationReorder,
+	MutationRundownDelete
 } from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
@@ -16,9 +17,10 @@ import { coreHandler } from '../coreHandler'
 import { getMutatedPiecesFromPart } from './pieces'
 import { mutations as rundownMutations } from './rundowns'
 import { mutations as segmentsMutations, sendSegmentDiffToCore } from './segments'
-import { spliceReorder, stringifyError } from '../util'
+import { spliceReorder } from '../util'
 import { mutations as settingsMutations } from './settings'
 import { mutations as piecesMutations } from './pieces'
+import { Server, Socket } from 'socket.io'
 
 async function mutatePart(part: Part): Promise<MutatedPart> {
 	return {
@@ -114,6 +116,7 @@ export const mutations = {
 
 			return this.readOne(id)
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	},
@@ -144,7 +147,7 @@ export const mutations = {
 				fromPartId: sourcePart.id,
 				toPartId: addNewPart.result.id
 			})
-			const reorderParts = await mutations.reorder({ part: addNewPart.result, targetIndex })
+			const reorderParts = await mutations.reorder({ element: addNewPart.result, targetIndex })
 			const removePart = await mutations.delete({ id: sourcePart.id })
 
 			if (clonePieces.error && reorderParts.error && removePart.error) {
@@ -181,6 +184,7 @@ export const mutations = {
 				}
 			}
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	},
@@ -234,6 +238,7 @@ export const mutations = {
 				}))
 			}
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	},
@@ -266,20 +271,18 @@ export const mutations = {
 
 			return this.readOne(payload.id)
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	},
 	async reorder({
-		part,
+		element,
 		targetIndex
-	}: {
-		part: MutationPartUpdate
-		targetIndex: number
-	}): Promise<{ result?: Part | Part[]; error?: Error }> {
+	}: MutationReorder<MutationPartUpdate>): Promise<{ result?: Part | Part[]; error?: Error }> {
 		try {
 			const { result, error } = await this.read({
-				segmentId: part.segmentId,
-				rundownId: part.rundownId
+				segmentId: element.segmentId,
+				rundownId: element.rundownId
 			})
 
 			if (error) throw error
@@ -292,7 +295,7 @@ export const mutations = {
 			)
 
 			const partsInRankOrder = (result as Part[]).sort((partA, partB) => partA.rank - partB.rank)
-			const reorderedParts = spliceReorder(partsInRankOrder, part.rank, safeTargetIndex)
+			const reorderedParts = spliceReorder(partsInRankOrder, element.rank, safeTargetIndex)
 
 			db.exec('BEGIN;')
 			try {
@@ -321,8 +324,8 @@ export const mutations = {
 			}
 
 			const { result: updatedParts, error: updatedPartserror } = await this.read({
-				segmentId: part.segmentId,
-				rundownId: part.rundownId
+				segmentId: element.segmentId,
+				rundownId: element.rundownId
 			})
 
 			if (updatedPartserror) throw updatedPartserror
@@ -344,132 +347,195 @@ export const mutations = {
 
 			return {}
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	}
 }
 
-export async function init(): Promise<void> {
-	ipcMain.handle('parts', async (event, operation: IpcOperation) => {
-		if (operation.type === IpcOperationType.Create) {
-			const { result, error } = await mutations.create(operation.payload)
-
-			if (result && !result.float) {
-				const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
-				if (rundown && !Array.isArray(rundown) && rundown.sync) {
-					try {
-						await coreHandler.core.coreMethods.dataPartCreate(
-							result.rundownId,
-							result.segmentId,
-							await mutatePart(result)
-						)
-					} catch (error) {
-						console.error(error)
-						event.sender.send('error', stringifyError(error, true))
-					}
+export function registerPartsHandlers(socket: Socket, _io: Server) {
+	socket.on('parts', async (action, payload, callback) => {
+		switch (action) {
+			case IpcOperationType.Create:
+				{
+					const { result, error } = await handlePartCreate(payload)
+					callback(result || error)
 				}
-			}
-
-			return error || result
-		} else if (operation.type === IpcOperationType.Move) {
-			// TODO: Maybe this should be handled inside Sofie?
-			try {
-				const { sourcePart, targetPart, targetIndex } = operation.payload
-				const { result: document, error: sourceError } = await mutations.readOne(sourcePart.id)
-				if (sourceError) throw sourceError
-				const { result: target, error: targetError } = await mutations.readOne(targetPart.id)
-				if (targetError) throw targetError
-
-				if (document && target) {
-					const { result, error } = await mutations.move(sourcePart, targetPart, targetIndex)
-					if (error) throw error
-
-					const { result: sourceSegment } = await segmentsMutations.readOne(document.segmentId)
-					const { result: targetSegment } = await segmentsMutations.readOne(target.segmentId)
-
-					if (result && sourceSegment && targetSegment) {
-						try {
-							await sendSegmentDiffToCore(sourceSegment, sourceSegment)
-							await sendSegmentDiffToCore(targetSegment, targetSegment)
-						} catch (error) {
-							console.error(error)
-							event.sender.send('error', stringifyError(error, true))
-						}
-					} else throw new Error('Cannot find segments while cloning')
-					return result
+				break
+			case IpcOperationType.Move:
+				{
+					const { result, error } = await handlePartMove(payload)
+					callback(result || error)
 				}
-			} catch (e) {
-				console.error(e)
-				return e as Error
-			}
-		} else if (operation.type === IpcOperationType.Read) {
-			const { result, error } = await mutations.read(operation.payload)
-
-			return error || result
-		} else if (operation.type === IpcOperationType.Update) {
-			const { result: document } = await mutations.read({ id: operation.payload.id })
-			const { result, error } = await mutations.update(operation.payload)
-
-			if (document && 'id' in document && result) {
-				try {
-					await sendPartDiffToCore(document, result)
-				} catch (error) {
-					console.error(error)
-					event.sender.send('error', stringifyError(error, true))
+				break
+			case IpcOperationType.Read:
+				{
+					const { result, error } = await mutations.read(payload)
+					callback(result || error)
 				}
-			}
-
-			return error || result
-		} else if (operation.type === IpcOperationType.Reorder) {
-			const { result: sourceDocument } = await mutations.read({ id: operation.payload.part.id })
-			const { result: reorderedParts, error } = await mutations.reorder(operation.payload)
-
-			if (
-				!error &&
-				sourceDocument &&
-				!Array.isArray(sourceDocument) &&
-				Array.isArray(reorderedParts)
-			) {
-				const { result: rundown } = await rundownMutations.read({ id: sourceDocument.rundownId })
-				if (rundown && !Array.isArray(rundown) && rundown.sync) {
-					try {
-						const { result: segment, error: segmentError } = await segmentsMutations.readOne(
-							sourceDocument.segmentId
-						)
-						// We need to update the entire segment, because otherwise core also reorders the parts in some cases.
-						if (segment && !segmentError) {
-							await sendSegmentDiffToCore(segment, segment)
-							return reorderedParts
-						}
-					} catch (error) {
-						console.error(error)
-						event.sender.send('error', stringifyError(error, true))
-					}
+				break
+			case IpcOperationType.Update:
+				{
+					const { result, error } = await handlePartUpdate(payload)
+					callback(result || error)
 				}
-			}
-		} else if (operation.type === IpcOperationType.Delete) {
-			const { result: document } = await mutations.read({ id: operation.payload.id })
-			const { error } = await mutations.delete(operation.payload)
-
-			if (!error && document && !Array.isArray(document) && !document.float) {
-				const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
-				if (rundown && !Array.isArray(rundown) && rundown.sync) {
-					try {
-						await coreHandler.core.coreMethods.dataPartDelete(
-							document.rundownId,
-							document.segmentId,
-							document.id
-						)
-					} catch (error) {
-						console.error(error)
-						event.sender.send('error', stringifyError(error, true))
-					}
+				break
+			case IpcOperationType.Reorder:
+				{
+					const { result, error } = await handlePartReorder(payload)
+					callback(result || error)
 				}
-			}
-
-			return error || true
+				break
+			case IpcOperationType.Delete:
+				{
+					const { result, error } = await handlePartDelete(payload)
+					callback(result || error)
+				}
+				break
+			default:
+				callback(new Error(`Unknown operation type ${action}`))
 		}
 	})
+}
+
+async function handlePartCreate(payload: MutationPartCreate) {
+	{
+		let returnedError: unknown | Error | undefined
+
+		const { result, error: createError } = await mutations.create(payload)
+
+		if (createError) returnedError = createError
+
+		if (result && !result.float) {
+			const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
+			if (rundown && !Array.isArray(rundown) && rundown.sync) {
+				try {
+					await coreHandler.core.coreMethods.dataPartCreate(
+						result.rundownId,
+						result.segmentId,
+						await mutatePart(result)
+					)
+				} catch (error) {
+					console.error(error)
+					returnedError = error
+				}
+			}
+		}
+
+		return { result, error: returnedError }
+	}
+}
+async function handlePartUpdate(payload: MutationPartUpdate) {
+	{
+		let returnedError: unknown | Error | undefined
+
+		const { result: document } = await mutations.read({ id: payload.id })
+		const { result, error: updateError } = await mutations.update(payload)
+
+		if (updateError) returnedError = updateError
+
+		if (document && 'id' in document && result) {
+			try {
+				await sendPartDiffToCore(document, result)
+			} catch (error) {
+				console.error(error)
+				returnedError = error
+			}
+		}
+
+		return { result, error: returnedError }
+	}
+}
+async function handlePartMove(payload: MutationPartMove) {
+	// TODO: Maybe this should be handled inside Sofie?
+	let returnedError: unknown | Error | undefined
+	let returnedResult: Part | undefined
+
+	try {
+		const { sourcePart, targetPart, targetIndex } = payload
+		const { result: document, error: sourceError } = await mutations.readOne(sourcePart.id)
+		if (sourceError) throw sourceError
+		const { result: target, error: targetError } = await mutations.readOne(targetPart.id)
+		if (targetError) throw targetError
+
+		if (document && target) {
+			const { result, error } = await mutations.move(sourcePart, targetPart, targetIndex)
+			if (error) throw error
+
+			const { result: sourceSegment } = await segmentsMutations.readOne(document.segmentId)
+			const { result: targetSegment } = await segmentsMutations.readOne(target.segmentId)
+
+			if (result && sourceSegment && targetSegment) {
+				await sendSegmentDiffToCore(sourceSegment, sourceSegment)
+				await sendSegmentDiffToCore(targetSegment, targetSegment)
+			} else throw new Error('Cannot find segments while cloning')
+			returnedResult = result
+		}
+	} catch (e) {
+		console.error(e)
+		returnedError = e
+	}
+
+	return { result: returnedResult, error: returnedError }
+}
+async function handlePartReorder(payload: MutationReorder<MutationPartUpdate>) {
+	let returnedError: unknown | Error | undefined
+
+	const { result: sourceDocument } = await mutations.read({ id: payload.element.id })
+	const { result: reorderedParts, error: reorderError } = await mutations.reorder(payload)
+
+	if (reorderError) returnedError = reorderError
+
+	if (
+		!reorderError &&
+		sourceDocument &&
+		!Array.isArray(sourceDocument) &&
+		Array.isArray(reorderedParts)
+	) {
+		const { result: rundown } = await rundownMutations.read({ id: sourceDocument.rundownId })
+		if (rundown && !Array.isArray(rundown) && rundown.sync) {
+			try {
+				const { result: segment, error: segmentError } = await segmentsMutations.readOne(
+					sourceDocument.segmentId
+				)
+				// We need to update the entire segment, because otherwise core also reorders the parts in some cases.
+				if (segment && !segmentError) {
+					await sendSegmentDiffToCore(segment, segment)
+				}
+			} catch (error) {
+				console.error(error)
+				returnedError = error
+			}
+		}
+	}
+
+	return { result: returnedError === undefined ? reorderedParts : undefined, error: returnedError }
+}
+async function handlePartDelete(payload: MutationRundownDelete) {
+	let returnedError: unknown | Error | undefined
+
+	const { result: document } = await mutations.read({ id: payload.id })
+	const { error: deleteError } = await mutations.delete(payload)
+
+	if (deleteError) returnedError = deleteError
+
+	if (!deleteError && document && !Array.isArray(document) && !document.float) {
+		const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
+		if (rundown && !Array.isArray(rundown) && rundown.sync) {
+			try {
+				await coreHandler.core.coreMethods.dataPartDelete(
+					document.rundownId,
+					document.segmentId,
+					document.id
+				)
+			} catch (error) {
+				console.error(error)
+				returnedError = error
+			}
+		}
+	}
+
+	return { result: returnedError === undefined, error: returnedError }
 }
 
 export async function sendPartUpdateToCore(partId: string) {

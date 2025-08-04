@@ -7,6 +7,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { removeRundown, updateRundown } from '~/store/rundowns'
 import { useAppDispatch, useAppSelector, useAppStore } from '~/store/app'
 import { useToasts } from '../toasts/toasts'
+import { ipcAPI } from '~/lib/IPC'
 
 export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 	const dispatch = useAppDispatch()
@@ -43,7 +44,7 @@ export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 		// Should never happen, but just in case
 		if (!serializedRundown.rundown) return
 
-		electronApi
+		ipcAPI
 			.saveToFile({
 				title: 'Export rundown',
 				document: serializedRundown

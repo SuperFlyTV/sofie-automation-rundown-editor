@@ -6,6 +6,15 @@ export interface Playlist {
 	/** Name of the playlist */
 	name: string
 }
+
+export type MutationPlaylistCreate = SetOptional<Playlist, 'id'>
+
+export type MutationPlaylistRead = SetOptional<Pick<Playlist, 'id'>, 'id'>
+
+export type MutationPlaylistUpdate = Playlist
+
+export type MutationPlaylistDelete = Pick<Playlist, 'id'>
+
 export interface Rundown {
 	/** Id of the rundown as reported by the ingest gateway. Must be unique for each rundown owned by the gateway */
 	id: string
@@ -184,6 +193,11 @@ export type MutationPieceUpdate = Piece
 
 export type MutationPieceDelete = Pick<Piece, 'id'>
 
+export type MutationPieceCloneFromParToPart = {
+	fromPartId: string
+	toPartId: string
+}
+
 export interface MutatedRundown {
 	externalId: string
 	name: string
@@ -305,4 +319,9 @@ export interface OpenFromFileArgs {
 export interface SaveToFileArgs {
 	title: string
 	document: unknown
+}
+
+export interface MutationReorder<T> {
+	element: T
+	targetIndex: number
 }

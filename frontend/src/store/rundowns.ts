@@ -1,6 +1,7 @@
 import type { Rundown, SerializedRundown } from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
+import { ipcAPI } from '~/lib/IPC'
 
 export interface NewRundownPayload {
 	playlistId: string | null
@@ -15,7 +16,7 @@ export interface RemoveRundownPayload {
 export const addNewRundown = createAppAsyncThunk(
 	'rundowns/addNewRundown',
 	async (initialRundown: NewRundownPayload) => {
-		return electronApi.addNewRundown({
+		return ipcAPI.addNewRundown({
 			name: 'New rundown',
 			sync: false,
 			playlistId: initialRundown.playlistId
@@ -25,13 +26,13 @@ export const addNewRundown = createAppAsyncThunk(
 export const updateRundown = createAppAsyncThunk(
 	'rundowns/updateRundown',
 	async (payload: UpdateRundownPayload) => {
-		return electronApi.updateRundown(payload.rundown)
+		return ipcAPI.updateRundown(payload.rundown)
 	}
 )
 export const removeRundown = createAppAsyncThunk(
 	'rundowns/removeRundown',
 	async (payload: RemoveRundownPayload) => {
-		await electronApi.deleteRundown(payload.id)
+		await ipcAPI.deleteRundown(payload.id)
 		return payload
 	}
 )
@@ -39,12 +40,12 @@ export const removeRundown = createAppAsyncThunk(
 export const importRundown = createAppAsyncThunk(
 	'rundowns/importRundown',
 	async (rundown: SerializedRundown) => {
-		const createdRundown = await electronApi.addNewRundown(rundown.rundown)
+		const createdRundown = await ipcAPI.addNewRundown(rundown.rundown)
 
 		// Note: we don't need to update the stores, that will happen when opening the rundown
-		await Promise.all(rundown.segments.map((segment) => electronApi.addNewSegment(segment)))
-		await Promise.all(rundown.parts.map((part) => electronApi.addNewPart(part)))
-		await Promise.all(rundown.pieces.map((piece) => electronApi.addNewPiece(piece)))
+		await Promise.all(rundown.segments.map((segment) => ipcAPI.addNewSegment(segment)))
+		await Promise.all(rundown.parts.map((part) => ipcAPI.addNewPart(part)))
+		await Promise.all(rundown.pieces.map((piece) => ipcAPI.addNewPiece(piece)))
 
 		return createdRundown
 	}

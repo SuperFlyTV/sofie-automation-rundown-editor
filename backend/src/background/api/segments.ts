@@ -1,21 +1,22 @@
-import { BrowserWindow, ipcMain } from 'electron'
 import {
 	DBSegment,
-	IpcOperation,
 	IpcOperationType,
 	MutationSegmentCreate,
 	MutationSegmentDelete,
 	MutationSegmentRead,
 	MutationSegmentUpdate,
 	MutatedSegment,
-	Segment
+	Segment,
+	Rundown,
+	MutationReorder
 } from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { getMutatedPartsFromSegment } from './parts'
 import { mutations as rundownMutations, sendRundownDiffToCore } from './rundowns'
-import { spliceReorder, stringifyError } from '../util'
+import { spliceReorder } from '../util'
+import { Server, Socket } from 'socket.io'
 
 async function mutateSegment(segment: Segment): Promise<MutatedSegment> {
 	return {
@@ -92,6 +93,7 @@ export const mutations = {
 
 			return this.readOne(id)
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	},
@@ -118,6 +120,7 @@ export const mutations = {
 				}
 			}
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	},
@@ -145,6 +148,7 @@ export const mutations = {
 					}))
 				}
 			} catch (e) {
+				console.error(e)
 				return { error: e as Error }
 			}
 		} else {
@@ -165,6 +169,7 @@ export const mutations = {
 					}))
 				}
 			} catch (e) {
+				console.error(e)
 				return { error: e as Error }
 			}
 		}
@@ -196,19 +201,17 @@ export const mutations = {
 
 			return this.readOne(payload.id)
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	},
-	async reorder({
-		segment,
-		targetIndex
-	}: {
-		segment: MutationSegmentUpdate
-		targetIndex: number
-	}): Promise<{ result?: Segment | Segment[]; error?: Error }> {
+	async reorder({ element, targetIndex }: MutationReorder<MutationSegmentUpdate>): Promise<{
+		result?: Segment | Segment[]
+		error?: Error
+	}> {
 		try {
 			const { result, error } = await this.read({
-				rundownId: segment.rundownId
+				rundownId: element.rundownId
 			})
 
 			if (error) throw error
@@ -223,7 +226,7 @@ export const mutations = {
 			const segmentsInRankOrder = (result as Segment[]).sort(
 				(partA, partB) => partA.rank - partB.rank
 			)
-			const reorderedSegments = spliceReorder(segmentsInRankOrder, segment.rank, safeTargetIndex)
+			const reorderedSegments = spliceReorder(segmentsInRankOrder, element.rank, safeTargetIndex)
 
 			db.exec('BEGIN;')
 			try {
@@ -251,7 +254,7 @@ export const mutations = {
 			}
 
 			const { result: updatedSegments, error: updatedSegmentsError } = await this.read({
-				rundownId: segment.rundownId
+				rundownId: element.rundownId
 			})
 
 			if (updatedSegmentsError) throw updatedSegmentsError
@@ -274,97 +277,155 @@ export const mutations = {
 
 			return {}
 		} catch (e) {
+			console.error(e)
 			return { error: e as Error }
 		}
 	}
 }
 
-export async function init(): Promise<void> {
-	ipcMain.handle('segments', async (event, operation: IpcOperation) => {
-		if (operation.type === IpcOperationType.Create) {
-			const { result, error } = await mutations.create(operation.payload)
-
-			if (result && !result.float) {
-				const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
-				if (rundown && !Array.isArray(rundown) && rundown.sync) {
-					try {
-						await coreHandler.core.coreMethods.dataSegmentCreate(
-							result.rundownId,
-							await mutateSegment(result)
-						)
-					} catch (error) {
-						console.error(error)
-						event.sender.send('error', stringifyError(error, true))
-					}
+export function registerSegmentsHandlers(socket: Socket, _io: Server) {
+	socket.on('segments', async (action, payload, callback) => {
+		switch (action) {
+			case IpcOperationType.Create:
+				{
+					const { result, error } = await handleCreateSegment(payload)
+					callback(result || error)
 				}
-			}
-
-			return result || error
-		} else if (operation.type === IpcOperationType.Read) {
-			const { result, error } = await mutations.read(operation.payload)
-
-			return result || error
-		} else if (operation.type === IpcOperationType.Update) {
-			const { result: document } = await mutations.read({ id: operation.payload.id })
-			const { result, error } = await mutations.update(operation.payload)
-
-			if (document && 'id' in document && result) {
-				const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
-				if (rundown && !Array.isArray(rundown) && rundown.sync) {
-					try {
-						await sendSegmentDiffToCore(document, result)
-					} catch (error) {
-						console.error(error)
-						event.sender.send('error', stringifyError(error, true))
-					}
+				break
+			case IpcOperationType.Read:
+				{
+					const { result, error } = await mutations.read(payload)
+					callback(result || error)
 				}
-			}
-
-			return result || error
-		} else if (operation.type === IpcOperationType.Reorder) {
-			const { result: sourceDocument } = await mutations.read({ id: operation.payload.segment.id })
-			const { result: reorderedSegments, error } = await mutations.reorder(operation.payload)
-
-			if (
-				!error &&
-				sourceDocument &&
-				!Array.isArray(sourceDocument) &&
-				Array.isArray(reorderedSegments)
-			) {
-				const { result: rundown, error: rundownError } = await rundownMutations.read({
-					id: sourceDocument.rundownId
-				})
-				if (rundown && !Array.isArray(rundown) && rundown.sync) {
-					try {
-						if (rundown && !rundownError) {
-							await sendRundownDiffToCore(rundown, rundown)
-							return reorderedSegments
-						}
-					} catch (error) {
-						console.error(error)
-						event.sender.send('error', stringifyError(error, true))
-					}
+				break
+			case IpcOperationType.Update:
+				{
+					const { result, error } = await handleUpdateSegment(payload)
+					callback(result || error)
 				}
-			}
-		} else if (operation.type === IpcOperationType.Delete) {
-			const { result: document } = await mutations.read({ id: operation.payload.id })
-			const { error } = await mutations.delete(operation.payload)
-
-			if (document && 'id' in document) {
-				const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
-				if (rundown && !Array.isArray(rundown) && rundown.sync) {
-					try {
-						await coreHandler.core.coreMethods.dataSegmentDelete(document.rundownId, document.id)
-					} catch (error) {
-						console.error(error)
-						event.sender.send('error', stringifyError(error, true))
-					}
+				break
+			case IpcOperationType.Reorder:
+				{
+					const { result, error } = await handleReorderSegments(payload)
+					callback(result || error)
 				}
-			}
-
-			return error || true
+				break
+			case IpcOperationType.Delete:
+				{
+					const { result, error } = await handleDeleteSegment(payload)
+					callback(result || error)
+				}
+				break
+			default:
+				callback(new Error(`Unknown operation type ${action}`))
 		}
 	})
+}
+
+async function handleCreateSegment(payload: MutationSegmentCreate) {
+	{
+		let returnedError: unknown | Error | undefined
+
+		const { result, error: createError } = await mutations.create(payload)
+
+		if (createError) returnedError = createError
+
+		if (result && !result.float) {
+			const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
+			if (rundown && !Array.isArray(rundown) && rundown.sync) {
+				try {
+					await coreHandler.core.coreMethods.dataSegmentCreate(
+						result.rundownId,
+						await mutateSegment(result)
+					)
+				} catch (error) {
+					console.error(error)
+					returnedError = error
+				}
+			}
+		}
+
+		return { result, error: returnedError }
+	}
+}
+async function handleUpdateSegment(payload: MutationSegmentUpdate) {
+	{
+		let returnedError: unknown | Error | undefined
+
+		const { result: document } = await mutations.read({ id: payload.id })
+		const { result, error: updateError } = await mutations.update(payload)
+
+		if (document && 'id' in document && result && !updateError) {
+			const { result: rundown } = await rundownMutations.read({ id: result.rundownId })
+			if (rundown && !Array.isArray(rundown) && rundown.sync) {
+				try {
+					await sendSegmentDiffToCore(document, result)
+				} catch (error) {
+					console.error(error)
+					returnedError = error
+				}
+			}
+		} else returnedError = updateError
+
+		// TODO: handle core errors better
+		return { result, error: returnedError }
+	}
+}
+
+async function handleReorderSegments(payload: MutationReorder<MutationSegmentUpdate>) {
+	{
+		let returnedError: unknown | Error | undefined
+
+		const { result: sourceDocument } = await mutations.read({ id: payload.element.id })
+		const { result: reorderedSegments, error: reorderError } = await mutations.reorder(payload)
+
+		if (
+			!reorderError &&
+			sourceDocument &&
+			!Array.isArray(sourceDocument) &&
+			Array.isArray(reorderedSegments)
+		) {
+			const { result: rundown, error: rundownError } = await rundownMutations.read({
+				id: sourceDocument.rundownId
+			})
+			if (rundown && !Array.isArray(rundown) && rundown.sync) {
+				try {
+					if (rundown && !rundownError) {
+						await sendRundownDiffToCore(rundown, rundown)
+					}
+				} catch (error) {
+					console.error(error)
+					returnedError = error
+				}
+			}
+		} else returnedError = reorderError
+
+		return { result: reorderedSegments, error: returnedError }
+	}
+}
+async function handleDeleteSegment(payload: MutationSegmentDelete) {
+	{
+		let returnedError: unknown | Error | undefined
+
+		const { result: document } = await mutations.read({ id: payload.id })
+		const { error: deleteError } = await mutations.delete(payload)
+
+		if (deleteError) returnedError = deleteError
+
+		if (document && 'id' in document) {
+			const { result: rundown } = await rundownMutations.read({ id: document.rundownId })
+			if (rundown && !Array.isArray(rundown) && rundown.sync) {
+				try {
+					await coreHandler.core.coreMethods.dataSegmentDelete(document.rundownId, document.id)
+				} catch (error) {
+					console.error(error)
+					returnedError = error
+				}
+			}
+		}
+
+		return { result: returnedError === undefined ? true : undefined, error: returnedError }
+	}
 }
 
 export async function getMutatedSegmentsFromRundown(rundownId: string): Promise<MutatedSegment[]> {

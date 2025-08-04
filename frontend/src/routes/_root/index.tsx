@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useCallback } from 'react'
 import { Button, ListGroup } from 'react-bootstrap'
 import { useToasts } from '~/components/toasts/toasts'
+import { ipcAPI } from '~/lib/IPC'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import { addNewRundown, importRundown } from '~/store/rundowns'
 import { verifyImportIsRundown } from '~/util/verifyImport'
@@ -21,7 +22,7 @@ function Index() {
 	}, [dispatch])
 
 	const selectImportRundown = () => {
-		electronApi
+		ipcAPI
 			.openFromFile({ title: 'Import rundown' })
 			.then(async (serializedRundown) => {
 				console.log('opening rundown', serializedRundown)
