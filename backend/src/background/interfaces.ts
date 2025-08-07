@@ -256,6 +256,7 @@ export type MutationPartCreate = SetOptional<Part, 'id' | 'rank'>
 export type MutationPartMove = {
 	sourcePart: Part
 	targetPart: Part
+	sourceIndex: number
 	targetIndex: number
 }
 
@@ -323,5 +324,6 @@ export interface SaveToFileArgs {
 
 export interface MutationReorder<T> {
 	element: T
+	sourceIndex: number
 	targetIndex: number
 }

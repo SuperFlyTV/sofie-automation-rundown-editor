@@ -18,7 +18,7 @@ export interface DraggableContainerProps<T extends DraggableItemData> {
 	items: T[]
 	itemType: DragTypes
 	Component: DraggableWrappedComponent<T>
-	reorder: (target: T, source: T, targetIndex: number) => unknown
+	reorder: (target: T, source: T, sourceIndex: number, targetIndex: number) => unknown
 }
 
 export type HoverPosition = 'above' | 'below' | null
@@ -112,7 +112,7 @@ export const DraggableContainer = <T extends DraggableItemData>({
 				}
 
 				if (item.parentId !== target.parentId || targetIndex !== dragIndex) {
-					reorder(target.data, item.data, targetIndex)
+					reorder(target.data, item.data, item.index, targetIndex)
 				}
 			}
 			setHoverState({

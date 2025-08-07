@@ -123,6 +123,7 @@ export const mutations = {
 	async move(
 		sourcePart: Part,
 		targetPart: Part,
+		sourceIndex: number,
 		targetIndex: number
 	): Promise<{ result?: Part; error?: Error }> {
 		try {
@@ -147,7 +148,11 @@ export const mutations = {
 				fromPartId: sourcePart.id,
 				toPartId: addNewPart.result.id
 			})
-			const reorderParts = await mutations.reorder({ element: addNewPart.result, targetIndex })
+			const reorderParts = await mutations.reorder({
+				element: addNewPart.result,
+				sourceIndex,
+				targetIndex
+			})
 			const removePart = await mutations.delete({ id: sourcePart.id })
 
 			if (clonePieces.error && reorderParts.error && removePart.error) {
@@ -277,6 +282,7 @@ export const mutations = {
 	},
 	async reorder({
 		element,
+		sourceIndex,
 		targetIndex
 	}: MutationReorder<MutationPartUpdate>): Promise<{ result?: Part | Part[]; error?: Error }> {
 		try {
@@ -295,7 +301,7 @@ export const mutations = {
 			)
 
 			const partsInRankOrder = (result as Part[]).sort((partA, partB) => partA.rank - partB.rank)
-			const reorderedParts = spliceReorder(partsInRankOrder, element.rank, safeTargetIndex)
+			const reorderedParts = spliceReorder(partsInRankOrder, sourceIndex, safeTargetIndex)
 
 			db.exec('BEGIN;')
 			try {
@@ -452,14 +458,19 @@ async function handlePartMove(payload: MutationPartMove) {
 	let returnedResult: Part | undefined
 
 	try {
-		const { sourcePart, targetPart, targetIndex } = payload
+		const { sourcePart, targetPart, sourceIndex, targetIndex } = payload
 		const { result: document, error: sourceError } = await mutations.readOne(sourcePart.id)
 		if (sourceError) throw sourceError
 		const { result: target, error: targetError } = await mutations.readOne(targetPart.id)
 		if (targetError) throw targetError
 
 		if (document && target) {
-			const { result, error } = await mutations.move(sourcePart, targetPart, targetIndex)
+			const { result, error } = await mutations.move(
+				sourcePart,
+				targetPart,
+				sourceIndex,
+				targetIndex
+			)
 			if (error) throw error
 
 			const { result: sourceSegment } = await segmentsMutations.readOne(document.segmentId)

@@ -1,4 +1,9 @@
-import type { MutationPartUpdate, MutationReorder, Part } from '~backend/background/interfaces.js'
+import type {
+	MutationPartMove,
+	MutationPartUpdate,
+	MutationReorder,
+	Part
+} from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 import { loadPieces } from './pieces'
@@ -19,11 +24,6 @@ export interface NewPartPayload {
 		type?: string
 		duration?: number
 	}
-}
-export interface MovePartPayload {
-	sourcePart: Part
-	targetPart: Part
-	targetIndex: number
 }
 export interface UpdatePartPayload {
 	part: Part
@@ -49,7 +49,7 @@ export const addNewPart = createAppAsyncThunk(
 )
 export const movePart = createAppAsyncThunk(
 	'parts/movePart',
-	async (payload: MovePartPayload, { dispatch }) => {
+	async (payload: MutationPartMove, { dispatch }) => {
 		const partResult = ipcAPI.movePart(payload)
 
 		//update parts and pieces

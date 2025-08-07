@@ -43,8 +43,8 @@ export const updateSegment = createAppAsyncThunk(
 )
 export const reorderSegments = createAppAsyncThunk(
 	'parts/reorderSegments',
-	async ({ element, targetIndex }: MutationReorder<MutationSegmentUpdate>) => {
-		return ipcAPI.reorderSegments({ element, targetIndex })
+	async (payload: MutationReorder<MutationSegmentUpdate>) => {
+		return ipcAPI.reorderSegments(payload)
 	}
 )
 export const removeSegment = createAppAsyncThunk(
