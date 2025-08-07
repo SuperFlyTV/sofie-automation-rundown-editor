@@ -205,7 +205,11 @@ export const mutations = {
 			return { error: e as Error }
 		}
 	},
-	async reorder({ element, targetIndex }: MutationReorder<MutationSegmentUpdate>): Promise<{
+	async reorder({
+		element,
+		sourceIndex,
+		targetIndex
+	}: MutationReorder<MutationSegmentUpdate>): Promise<{
 		result?: Segment | Segment[]
 		error?: Error
 	}> {
@@ -226,7 +230,7 @@ export const mutations = {
 			const segmentsInRankOrder = (result as Segment[]).sort(
 				(partA, partB) => partA.rank - partB.rank
 			)
-			const reorderedSegments = spliceReorder(segmentsInRankOrder, element.rank, safeTargetIndex)
+			const reorderedSegments = spliceReorder(segmentsInRankOrder, sourceIndex, safeTargetIndex)
 
 			db.exec('BEGIN;')
 			try {

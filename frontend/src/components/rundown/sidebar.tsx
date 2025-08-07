@@ -49,9 +49,10 @@ export function RundownSidebar({
 	const handleReorderSegment = (
 		_targetSegment: Segment,
 		sourceSegment: Segment,
+		sourceIndex: number,
 		targetIndex: number
 	) => {
-		return dispatch(reorderSegments({ element: sourceSegment, targetIndex }))
+		return dispatch(reorderSegments({ element: sourceSegment, sourceIndex, targetIndex }))
 			.unwrap()
 			.then(async () => {
 				await navigate({
@@ -114,9 +115,14 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			})
 	}
 
-	const handleReorderPart = (targetPart: Part, sourcePart: Part, targetIndex: number) => {
+	const handleReorderPart = (
+		targetPart: Part,
+		sourcePart: Part,
+		sourceIndex: number,
+		targetIndex: number
+	) => {
 		if (targetPart.segmentId !== sourcePart.segmentId) {
-			return dispatch(movePart({ targetPart, sourcePart, targetIndex }))
+			return dispatch(movePart({ targetPart, sourcePart, sourceIndex, targetIndex }))
 				.unwrap()
 				.then(async (newPart) => {
 					await navigate({
@@ -133,7 +139,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 
 			// remove part from old segment
 		} else {
-			return dispatch(reorderParts({ element: sourcePart, targetIndex }))
+			return dispatch(reorderParts({ element: sourcePart, sourceIndex, targetIndex }))
 				.unwrap()
 				.then(async () => {
 					await navigate({
