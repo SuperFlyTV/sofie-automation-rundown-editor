@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.2](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.2.1...v2.2.2) (2025-08-07)
+
+
+### Bug Fixes
+
+* reorder correctly when ranks go out of sync internally ([66005e8](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/66005e8fce9759265c60a7adbf09cf1d69c42879))
+* reorder correctly when ranks go out of sync internally ([8680e70](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/8680e70ba2f08666c85283d50de8f8f350078c79))
+
 ## [2.2.1](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.2.0...v2.2.1) (2025-08-04)
 
 
