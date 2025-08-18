@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.3](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.2.2...v2.2.3) (2025-08-18)
+
+
+### Bug Fixes
+
+* show empty values in the start and duration field on pieces correctly to the user. ([#71](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/issues/71)) ([3836941](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/3836941926338a24f92129593a965a60095cfab8))
+
 ## [2.2.2](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.2.1...v2.2.2) (2025-08-07)
 
 
