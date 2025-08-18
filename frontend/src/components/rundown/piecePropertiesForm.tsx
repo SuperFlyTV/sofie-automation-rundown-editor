@@ -48,7 +48,9 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 				}}
 			>
 				<Form.Group className="mb-3">
-					<Form.Text>Piece type: {piece.pieceType}</Form.Text>
+					<Form.Text>
+						Piece type: {piece.pieceType} {!piece.start && piece.start !== 0 ? '(AdLib)' : ''}
+					</Form.Text>
 				</Form.Group>
 
 				<form.Field
@@ -79,9 +81,12 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 								<Form.Control
 									name={field.name}
 									type="number"
-									value={Number(field.state.value ?? 0)}
+									value={field.state.value ?? ''}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(Number(e.target.value))}
+									onChange={(e) => {
+										const val = e.target.value
+										field.handleChange(val === '' ? undefined : Number(val))
+									}}
 								/>
 							</Form.Group>
 							<FieldInfo field={field} />
@@ -97,9 +102,12 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 								<Form.Control
 									name={field.name}
 									type="number"
-									value={Number(field.state.value ?? 0)}
+									value={field.state.value ?? ''}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(Number(e.target.value))}
+									onChange={(e) => {
+										const val = e.target.value
+										field.handleChange(val === '' ? undefined : Number(val))
+									}}
 								/>
 							</Form.Group>
 							<FieldInfo field={field} />
