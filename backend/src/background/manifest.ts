@@ -162,5 +162,33 @@ export const PIECES_MANIFEST: PiecesManifest = [
 				type: ManifestFieldType.String
 			}
 		]
+	},
+	{
+		id: 'stepped-graphic',
+		name: 'Stepped Graphic',
+		shortName: 'STGFX',
+		colour: '#ff006e',
+		payload: [
+			{
+				id: 'description',
+				label: 'Description',
+				type: ManifestFieldType.String
+			},
+			{
+				id: 'location',
+				label: 'Location',
+				type: ManifestFieldType.String
+			},
+			{
+				id: 'text',
+				label: 'Text',
+				type: ManifestFieldType.String
+			},
+			{
+				id: 'stepCount',
+				label: 'Step Count',
+				type: ManifestFieldType.Number
+			}
+		]
 	}
 ]
