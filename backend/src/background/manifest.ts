@@ -139,5 +139,28 @@ export const PIECES_MANIFEST: PiecesManifest = [
 				type: ManifestFieldType.String
 			}
 		]
+	},
+	{
+		id: 'graphic',
+		name: 'Graphic',
+		shortName: 'GFX',
+		colour: '#ff006e',
+		payload: [
+			{
+				id: 'description',
+				label: 'Description',
+				type: ManifestFieldType.String
+			},
+			{
+				id: 'location',
+				label: 'Location',
+				type: ManifestFieldType.String
+			},
+			{
+				id: 'text',
+				label: 'Text',
+				type: ManifestFieldType.String
+			}
+		]
 	}
 ]
