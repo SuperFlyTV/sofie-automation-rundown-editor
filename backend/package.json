@@ -1,6 +1,6 @@
 {
 	"name": "@sofie-rundown-editor/backend",
-	"version": "2.2.3",
+	"version": "2.2.4",
 	"private": true,
 	"description": "A standalone tool for creating and editing Sofie rundowns.",
 	"repository": {

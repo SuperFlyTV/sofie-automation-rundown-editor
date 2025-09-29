@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.4](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.2.3...v2.2.4) (2025-09-29)
+
+
+### Bug Fixes
+
+* Add missing piece manifests ([#75](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/issues/75)) ([d522132](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/d522132dcafefe946e58bab6e5fa8a068e39f89b))
+
 ## [2.2.3](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.2.2...v2.2.3) (2025-08-18)
 
 
