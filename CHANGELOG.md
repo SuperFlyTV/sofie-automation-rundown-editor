@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.2.4...v2.3.0) (2025-10-29)
+
+
+### Features
+
+* send piece names to core ([#80](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/issues/80)) ([00d1735](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/00d1735b2fc00f633e099193c20439f96eaad262))
+
 ## [2.2.4](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.2.3...v2.2.4) (2025-09-29)
 
 
