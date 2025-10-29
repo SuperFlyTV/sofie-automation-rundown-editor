@@ -346,6 +346,7 @@ export async function getMutatedPiecesFromPart(partId: string): Promise<MutatedP
 	if (pieces && Array.isArray(pieces)) {
 		return pieces.map((piece) => ({
 			id: piece.id,
+			name: piece.name,
 			objectType: piece.pieceType,
 			objectTime: piece.start,
 			duration: piece.duration,

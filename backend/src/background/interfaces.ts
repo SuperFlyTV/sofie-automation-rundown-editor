@@ -239,6 +239,7 @@ export interface MutatedPart {
 
 export interface MutatedPiece {
 	id: string
+	name: string
 	objectType: string
 	objectTime: number | undefined
 	duration: number | undefined
