@@ -5,6 +5,7 @@ import type {
 	MutationPartMove,
 	MutationPartUpdate,
 	MutationPieceCloneFromParToPart,
+	MutationPieceCopy,
 	MutationPieceCreate,
 	MutationPieceUpdate,
 	MutationReorder,
@@ -120,6 +121,9 @@ export const ipcAPI: BackendApi = {
 	},
 	addNewPiece: (piece: MutationPieceCreate) => {
 		return getSocket().emitWithAck('pieces', 'create', piece)
+	},
+	copyPiece: (piece: MutationPieceCopy) => {
+		return getSocket().emitWithAck('pieces', 'copy', piece)
 	},
 	updatePiece: (piece: MutationPieceUpdate) => {
 		return getSocket().emitWithAck('pieces', 'update', piece)

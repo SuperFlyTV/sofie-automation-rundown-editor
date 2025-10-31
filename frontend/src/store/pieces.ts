@@ -1,4 +1,8 @@
-import type { MutationPieceCloneFromParToPart, Piece } from '~backend/background/interfaces.js'
+import type {
+	MutationPieceCloneFromParToPart,
+	MutationPieceCopy,
+	Piece
+} from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 import { ipcAPI } from '~/lib/IPC'
@@ -35,6 +39,12 @@ export const addNewPiece = createAppAsyncThunk(
 			pieceType: payload.pieceType,
 			payload: {}
 		})
+	}
+)
+export const copyPiece = createAppAsyncThunk(
+	'pieces/copyPiece',
+	async (payload: MutationPieceCopy) => {
+		return ipcAPI.copyPiece(payload)
 	}
 )
 export const updatePiece = createAppAsyncThunk(
@@ -110,6 +120,9 @@ const piecesSlice = createSlice({
 				state.error = action.error.message ?? 'Unknown Error'
 			})
 			.addCase(addNewPiece.fulfilled, (state, action) => {
+				state.pieces.push(action.payload)
+			})
+			.addCase(copyPiece.fulfilled, (state, action) => {
 				state.pieces.push(action.payload)
 			})
 			.addCase(updatePiece.fulfilled, (state, action) => {

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import './piecesList.scss'
-import { addNewPiece } from '~/store/pieces'
+import { addNewPiece, copyPiece } from '~/store/pieces'
 import type { Part, Piece } from '~backend/background/interfaces'
 import { toTime } from '~/util/lib'
 import { useToasts } from '../toasts/toasts'
@@ -41,7 +41,9 @@ export function PiecesList({ part }: { part: Part }) {
 }
 
 function PieceRow({ piece }: { piece: Piece }) {
+	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
+	const toasts = useToasts()
 
 	const manifest = useAppSelector((state) =>
 		state.piecesManifest.manifest?.find((p) => p.id === piece.pieceType)
@@ -59,12 +61,42 @@ function PieceRow({ piece }: { piece: Piece }) {
 		})
 	}
 
+	const performCopyPiece = () => {
+		// perform operation
+		dispatch(
+			copyPiece({
+				id: piece.id
+			})
+		)
+			.unwrap()
+			.then((newPiece) => {
+				// Navigate user to the new piece
+				navigate({
+					to: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId',
+					params: {
+						rundownId: newPiece.rundownId,
+						segmentId: newPiece.segmentId,
+						partId: newPiece.partId,
+						pieceId: newPiece.id
+					}
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Adding piece',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			})
+	}
+
 	return (
 		<tr onClick={pieceRowClick}>
 			<td className="piece-type" style={{ backgroundColor: manifest?.colour }}>
 				{manifest?.shortName || piece.pieceType}
 			</td>
 			<td className="piece-name">{piece.name}</td>
+			<Button onClick={performCopyPiece}>Copy</Button>
 			<td className="piece-start">{piece.start !== undefined ? toTime(piece.start) : ''}</td>
 			<td className="piece-duration">
 				{piece.duration !== undefined ? toTime(piece.duration) : ''}

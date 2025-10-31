@@ -5,6 +5,7 @@ import type {
 	MutationPartMove,
 	MutationPartUpdate,
 	MutationPieceCloneFromParToPart,
+	MutationPieceCopy,
 	MutationPieceCreate,
 	MutationPieceUpdate,
 	MutationReorder,
@@ -64,6 +65,7 @@ export interface BackendApi {
 
 	getPieces: (rundownId: string) => Promise<Piece[]>
 	addNewPiece: (piece: MutationPieceCreate) => Promise<Piece>
+	copyPiece: (payload: MutationPieceCopy) => Promise<Piece>
 	updatePiece: (piece: MutationPieceUpdate) => Promise<Piece>
 	deletePiece: (pieceId: string) => Promise<void>
 	clonePiecesFromPartToPart: (payload: MutationPieceCloneFromParToPart) => Promise<Piece[]>

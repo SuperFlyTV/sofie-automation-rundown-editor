@@ -171,6 +171,7 @@ export interface DBSettings {
 
 export enum IpcOperationType {
 	Create = 'create',
+	Copy = 'copy',
 	Read = 'read',
 	Update = 'update',
 	Reorder = 'reorder',
@@ -186,6 +187,8 @@ export interface IpcOperation {
 }
 
 export type MutationPieceCreate = SetOptional<Piece, 'id'>
+
+export type MutationPieceCopy = SetOptional<Pick<Piece, 'id' | 'partId'>, 'partId'>
 
 export type MutationPieceRead = Pick<Piece, 'id' | 'rundownId' | 'segmentId' | 'partId'>
 
