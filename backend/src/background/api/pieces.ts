@@ -53,7 +53,7 @@ export const mutations = {
 		}
 	},
 	/**
-	 * Clone an existing Piece.
+	 * Copy an existing Piece.
 	 *
 	 * This function creates a new `Piece` record by duplicating the data of an existing one.
 	 * If a `partId` is provided, the cloned piece will be created inside that target part.
@@ -100,7 +100,7 @@ export const mutations = {
 					rundownId: targetRundownId,
 					segmentId: targetSegmentId,
 					partId: targetPartId,
-					name: sourcePiece.name,
+					name: sourcePiece.name + ' Copy',
 					start: sourcePiece.start,
 					duration: sourcePiece.duration,
 					pieceType: sourcePiece.pieceType,
