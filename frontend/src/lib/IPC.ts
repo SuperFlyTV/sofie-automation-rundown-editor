@@ -1,5 +1,6 @@
 import type { BackendApi } from '../../../backend/src/background/api/api.js'
 import type {
+	MutationPartCopy,
 	// CoreConnectionInfo,
 	MutationPartCreate,
 	MutationPartMove,
@@ -97,6 +98,9 @@ export const ipcAPI: BackendApi = {
 
 	getParts: (rundownId: string) => {
 		return getSocket().emitWithAck('parts', 'read', { rundownId })
+	},
+	copyPart: (part: MutationPartCopy) => {
+		return getSocket().emitWithAck('parts', 'copy', part)
 	},
 	addNewPart: (part: MutationPartCreate) => {
 		return getSocket().emitWithAck('parts', 'create', part)

@@ -257,6 +257,9 @@ export interface MutatedPiece {
 
 export type MutationPartCreate = SetOptional<Part, 'id' | 'rank'>
 
+export type MutationPartCopy = SetOptional<Pick<Piece, 'id' | 'segmentId'>, 'segmentId'>
+export type MutationPartCopyResult = { part: Part; pieces: Piece[] }
+
 export type MutationPartMove = {
 	sourcePart: Part
 	targetPart: Part

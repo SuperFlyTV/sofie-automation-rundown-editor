@@ -1,6 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector, type RootState } from '~/store/app'
-import { addNewPart, movePart, reorderParts } from '~/store/parts'
+import { addNewPart, copyPart, movePart, reorderParts } from '~/store/parts'
 import { addNewSegment, reorderSegments } from '~/store/segments'
 import type { Part, Segment } from '~backend/background/interfaces'
 import './sidebar.scss'
@@ -9,6 +9,8 @@ import { useToasts } from '../toasts/toasts'
 import { DragTypes } from '~/components/drag-and-drop/DragTypes'
 import { DraggableContainer } from '../drag-and-drop/DraggableContainer'
 import { createSelector } from '@reduxjs/toolkit'
+import { Button } from 'react-bootstrap'
+import { pushPiece } from '~/store/pieces'
 
 const selectAllParts = (state: RootState) => state.parts.parts
 
@@ -115,6 +117,39 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			})
 	}
 
+	const handleCopyPart = (sourcePartId: string) => {
+		// perform operation
+		dispatch(
+			copyPart({
+				id: sourcePartId
+			})
+		)
+			.unwrap()
+			.then((newPartResult) => {
+				// Hacky: Push the new pieces to the store. this should not be done in the UI!
+				if (newPartResult.pieces && newPartResult.pieces.length > 0) {
+					dispatch(pushPiece(newPartResult.pieces)) // TODO: look into if we can do this in the dispatched copyPart
+				}
+
+				// Navigate user to the new part
+				navigate({
+					to: '/rundown/$rundownId/segment/$segmentId/part/$partId',
+					params: {
+						rundownId: newPartResult.part.rundownId,
+						segmentId: newPartResult.part.segmentId,
+						partId: newPartResult.part.id
+					}
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Adding piece',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			})
+	}
+
 	const handleReorderPart = (
 		targetPart: Part,
 		sourcePart: Part,
@@ -180,24 +215,27 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 					items={sortedParts}
 					itemType={DragTypes.PART}
 					Component={({ data: part }) => (
-						<Link
-							key={part.id}
-							to="/rundown/$rundownId/segment/$segmentId/part/$partId"
-							params={{
-								rundownId: segment.rundownId,
-								segmentId: segment.id,
-								partId: part.id
-							}}
-						>
-							<button
-								className={classNames('part-button', {
-									floated: segment.float || part.float
-								})}
+						<>
+							<Link
+								key={part.id}
+								to="/rundown/$rundownId/segment/$segmentId/part/$partId"
+								params={{
+									rundownId: segment.rundownId,
+									segmentId: segment.id,
+									partId: part.id
+								}}
 							>
-								{part.name}
-								<span className="item-duration">{displayTime(part.payload?.duration)}</span>
-							</button>
-						</Link>
+								<button
+									className={classNames('part-button', {
+										floated: segment.float || part.float
+									})}
+								>
+									{part.name}
+									<span className="item-duration">{displayTime(part.payload?.duration)}</span>
+								</button>
+							</Link>
+							<Button onClick={() => handleCopyPart(part.id)}>Copy</Button>
+						</>
 					)}
 					id={segment.id}
 					reorder={handleReorderPart}

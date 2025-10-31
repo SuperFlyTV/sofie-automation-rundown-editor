@@ -1,6 +1,8 @@
 import type {
 	ApplicationSettings,
 	CoreConnectionInfo,
+	MutationPartCopy,
+	MutationPartCopyResult,
 	MutationPartCreate,
 	MutationPartMove,
 	MutationPartUpdate,
@@ -58,6 +60,7 @@ export interface BackendApi {
 
 	getParts: (rundownId: string) => Promise<Part[]>
 	addNewPart: (part: MutationPartCreate) => Promise<Part>
+	copyPart: (payload: MutationPartCopy) => Promise<MutationPartCopyResult>
 	movePart: (payload: MutationPartMove) => Promise<Part>
 	updatePart: (part: MutationPartUpdate) => Promise<Part>
 	reorderParts: (payload: MutationReorder<MutationPartUpdate>) => Promise<Part[]>

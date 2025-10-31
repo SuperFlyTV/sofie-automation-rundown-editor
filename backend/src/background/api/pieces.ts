@@ -89,22 +89,19 @@ export const mutations = {
 					)
 					if (partError || !targetPart) throw partError || new Error('Target part not found')
 
-					targetPartId = targetPart.id
 					targetPlaylistId = targetPart.playlistId
 					targetRundownId = targetPart.rundownId
 					targetSegmentId = targetPart.segmentId
 				}
 
 				const { result: newPiece, error: createError } = await mutations.create({
+					...sourcePiece,
 					playlistId: targetPlaylistId,
 					rundownId: targetRundownId,
 					segmentId: targetSegmentId,
 					partId: targetPartId,
 					name: sourcePiece.name + ' Copy',
-					start: sourcePiece.start,
-					duration: sourcePiece.duration,
-					pieceType: sourcePiece.pieceType,
-					payload: sourcePiece.payload
+					id: undefined
 				})
 
 				if (createError) returnedError = createError

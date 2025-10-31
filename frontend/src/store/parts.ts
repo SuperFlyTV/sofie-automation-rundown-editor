@@ -1,4 +1,5 @@
 import type {
+	MutationPartCopy,
 	MutationPartMove,
 	MutationPartUpdate,
 	MutationReorder,
@@ -45,6 +46,12 @@ export const addNewPart = createAppAsyncThunk(
 			float: false,
 			payload: payload.payload ?? {}
 		})
+	}
+)
+export const copyPart = createAppAsyncThunk(
+	'pieces/copyPart',
+	async (payload: MutationPartCopy) => {
+		return ipcAPI.copyPart(payload)
 	}
 )
 export const movePart = createAppAsyncThunk(
@@ -133,6 +140,9 @@ const partsSlice = createSlice({
 			})
 			.addCase(addNewPart.fulfilled, (state, action) => {
 				state.parts.push(action.payload)
+			})
+			.addCase(copyPart.fulfilled, (state, action) => {
+				state.parts.push(action.payload.part)
 			})
 			.addCase(updatePart.fulfilled, (state, action) => {
 				const index = state.parts.findIndex((part) => part.id === action.payload.id)

@@ -94,10 +94,14 @@ const piecesSlice = createSlice({
 		error: null
 	} as PiecesState,
 	reducers: {
-		// initPieces: (_state, action: { type: string; payload: Piece[] }) => {
-		// 	console.log('initPieces', action)
-		// 	return action.payload
-		// }
+		// TODO: prevent already existing IDs to be pushed
+		pushPiece: (state, action: { type: string; payload: Piece | Piece[] }) => {
+			if (Array.isArray(action.payload)) {
+				state.pieces.push(...action.payload)
+			} else {
+				state.pieces.push(action.payload)
+			}
+		}
 	},
 	extraReducers(builder) {
 		builder
@@ -158,4 +162,5 @@ const piecesSlice = createSlice({
 // Export the auto-generated action creator with the same name
 // export const {} = piecesSlice.actions
 
+export const { pushPiece } = piecesSlice.actions
 export default piecesSlice.reducer
