@@ -10,7 +10,6 @@ import { DragTypes } from '~/components/drag-and-drop/DragTypes'
 import { DraggableContainer } from '../drag-and-drop/DraggableContainer'
 import { createSelector } from '@reduxjs/toolkit'
 import { Button } from 'react-bootstrap'
-import { pushPiece } from '~/store/pieces'
 
 const selectAllParts = (state: RootState) => state.parts.parts
 
@@ -117,20 +116,16 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			})
 	}
 
-	const handleCopyPart = (sourcePartId: string) => {
+	const handleCopyPart = (sourcePart: Part) => {
 		// perform operation
 		dispatch(
 			copyPart({
-				id: sourcePartId
+				id: sourcePart.id,
+				rundownId: sourcePart.rundownId
 			})
 		)
 			.unwrap()
 			.then((newPartResult) => {
-				// Hacky: Push the new pieces to the store. this should not be done in the UI!
-				if (newPartResult.pieces && newPartResult.pieces.length > 0) {
-					dispatch(pushPiece(newPartResult.pieces)) // TODO: look into if we can do this in the dispatched copyPart
-				}
-
 				// Navigate user to the new part
 				navigate({
 					to: '/rundown/$rundownId/segment/$segmentId/part/$partId',
@@ -234,7 +229,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 									<span className="item-duration">{displayTime(part.payload?.duration)}</span>
 								</button>
 							</Link>
-							<Button onClick={() => handleCopyPart(part.id)}>Copy</Button>
+							<Button onClick={() => handleCopyPart(part)}>Copy</Button>
 						</>
 					)}
 					id={segment.id}

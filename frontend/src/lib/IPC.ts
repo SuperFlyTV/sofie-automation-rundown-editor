@@ -139,6 +139,10 @@ export const ipcAPI: BackendApi = {
 	},
 	clonePiecesFromPartToPart: (payload: MutationPieceCloneFromParToPart) => {
 		return getSocket().emitWithAck('pieces', 'cloneSet', payload)
+	},
+
+	onPiecesUpdate: (callback) => {
+		return getSocket().on('pieces:update', callback)
 	}
 }
 

@@ -438,7 +438,7 @@ export const mutations = {
 	}
 }
 
-export function registerPartsHandlers(socket: Socket, _io: Server) {
+export function registerPartsHandlers(socket: Socket, io: Server) {
 	socket.on('parts', async (action, payload, callback) => {
 		switch (action) {
 			case IpcOperationType.Create:
@@ -450,6 +450,11 @@ export function registerPartsHandlers(socket: Socket, _io: Server) {
 			case IpcOperationType.Copy:
 				{
 					const { result, error } = await handleCopyPart(payload)
+					// TODO: Make these updates type safe
+					io.emit('pieces:update', {
+						action: 'update',
+						pieces: result?.pieces
+					})
 					callback(result || error)
 				}
 				break

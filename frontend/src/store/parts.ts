@@ -50,8 +50,12 @@ export const addNewPart = createAppAsyncThunk(
 )
 export const copyPart = createAppAsyncThunk(
 	'pieces/copyPart',
-	async (payload: MutationPartCopy) => {
-		return ipcAPI.copyPart(payload)
+	async (payload: MutationPartCopy, { dispatch }) => {
+		const partResult = ipcAPI.copyPart(payload)
+
+		await dispatch(loadPieces({ rundownId: payload.rundownId }))
+
+		return partResult
 	}
 )
 export const movePart = createAppAsyncThunk(

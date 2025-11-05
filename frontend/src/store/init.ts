@@ -5,6 +5,7 @@ import { loadPiecesManifest } from './piecesManifest'
 import { initPlaylists } from './playlists'
 import { initRundowns } from './rundowns'
 import { loadSettings } from './settings'
+import { pushPiece } from './pieces'
 
 export function initStore(dispatch: AppDispatch): void {
 	ipcAPI
@@ -45,5 +46,9 @@ export function initStore(dispatch: AppDispatch): void {
 
 	ipcAPI.onCoreConnectionInfo((newInfo) => {
 		dispatch(updateConnectionStatus(newInfo))
+	})
+
+	ipcAPI.onPiecesUpdate((update) => {
+		dispatch(pushPiece(update.pieces ? update.pieces : []))
 	})
 }

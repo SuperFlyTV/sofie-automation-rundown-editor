@@ -257,7 +257,10 @@ export interface MutatedPiece {
 
 export type MutationPartCreate = SetOptional<Part, 'id' | 'rank'>
 
-export type MutationPartCopy = SetOptional<Pick<Piece, 'id' | 'segmentId'>, 'segmentId'>
+export type MutationPartCopy = SetOptional<
+	Pick<Part, 'id' | 'rundownId' | 'segmentId'>,
+	'segmentId'
+>
 export type MutationPartCopyResult = { part: Part; pieces: Piece[] }
 
 export type MutationPartMove = {
@@ -333,4 +336,7 @@ export interface MutationReorder<T> {
 	element: T
 	sourceIndex: number
 	targetIndex: number
+}
+export interface PiecesUpdateEvent {
+	pieces?: Piece[]
 }
