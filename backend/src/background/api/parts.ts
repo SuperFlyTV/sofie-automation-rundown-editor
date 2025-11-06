@@ -450,7 +450,6 @@ export function registerPartsHandlers(socket: Socket, io: Server) {
 			case IpcOperationType.Copy:
 				{
 					const { result, error } = await handleCopyPart(payload)
-					// TODO: Make these updates type safe
 					io.emit('pieces:update', {
 						action: 'update',
 						pieces: result?.pieces

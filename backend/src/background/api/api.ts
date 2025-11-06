@@ -1,4 +1,3 @@
-import { Socket } from 'socket.io/dist/socket'
 import type {
 	ApplicationSettings,
 	CoreConnectionInfo,
@@ -74,5 +73,5 @@ export interface BackendApi {
 	updatePiece: (piece: MutationPieceUpdate) => Promise<Piece>
 	deletePiece: (pieceId: string) => Promise<void>
 	clonePiecesFromPartToPart: (payload: MutationPieceCloneFromParToPart) => Promise<Piece[]>
-	onPiecesUpdate: (callback: (update: PiecesUpdateEvent) => void) => Socket
+	onPiecesUpdate: (callback: (update: PiecesUpdateEvent) => void) => void
 }
