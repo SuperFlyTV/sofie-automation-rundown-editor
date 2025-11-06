@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import './piecesList.scss'
@@ -7,21 +7,32 @@ import { addNewPiece, copyPiece } from '~/store/pieces'
 import type { Part, Piece } from '~backend/background/interfaces'
 import { toTime } from '~/util/lib'
 import { useToasts } from '../toasts/toasts'
+import { createSelector } from '@reduxjs/toolkit'
+
+const selectPiecesByPart = createSelector(
+	[
+		(state) => state.pieces.pieces,
+		(_state, props: { rundownId: string; segmentId: string; partId: string }) => props
+	],
+	(pieces, props) =>
+		pieces.filter(
+			(p: Piece) =>
+				p.rundownId === props.rundownId &&
+				p.segmentId === props.segmentId &&
+				p.partId === props.partId
+		)
+)
 
 export function PiecesList({ part }: { part: Part }) {
-	const pieces = useAppSelector((state) =>
-		state.pieces.pieces.filter(
-			(piece) =>
-				piece.rundownId === part.rundownId &&
-				piece.segmentId === part.segmentId &&
-				piece.partId === part.id
-		)
-	)
+	const { rundownId, segmentId, id: partId } = part
+	const partIds = useMemo(() => ({ rundownId, segmentId, partId }), [rundownId, segmentId, partId])
+
+	const pieces = useAppSelector((state) => selectPiecesByPart(state, partIds))
 
 	return (
 		<table className="rundown-pieces-list">
 			<tbody>
-				{pieces.map((piece) => (
+				{pieces.map((piece: Piece) => (
 					<PieceRow key={piece.id} piece={piece} />
 				))}
 
@@ -96,7 +107,9 @@ function PieceRow({ piece }: { piece: Piece }) {
 				{manifest?.shortName || piece.pieceType}
 			</td>
 			<td className="piece-name">{piece.name}</td>
-			<Button onClick={performCopyPiece}>Copy</Button>
+			<td>
+				<Button onClick={performCopyPiece}>Copy</Button>
+			</td>
 			<td className="piece-start">{piece.start !== undefined ? toTime(piece.start) : ''}</td>
 			<td className="piece-duration">
 				{piece.duration !== undefined ? toTime(piece.duration) : ''}
@@ -194,7 +207,7 @@ function NewPieceButton({
 							onChange={(e) => setSelectedPieceType(e.target.value)}
 						>
 							{piecesManifest?.map((piece) => (
-								<option key={piece.id} value={piece.id}>
+								<option key={`pieceManifest_${piece.id}`} value={piece.id}>
 									{piece.name}
 								</option>
 							))}

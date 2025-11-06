@@ -27,13 +27,13 @@ function RouteComponent() {
 	}
 
 	return (
-		<Row>
+		<Row key={`form_${partId}`}>
 			<Col xs={6} style={{ backgroundColor: 'rgb(30, 30, 30)' }} className="p-4">
-				<PartPropertiesForm part={part} />
+				<PartPropertiesForm key={`partForm_${partId}`} part={part} />
 			</Col>
 
 			<Col xs={6} style={{ backgroundColor: '#000000' }} className="p-4">
-				<PiecesList part={part} />
+				<PiecesList key={`piecesList_${partId}`} part={part} />
 			</Col>
 		</Row>
 	)

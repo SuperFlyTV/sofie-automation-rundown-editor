@@ -212,7 +212,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 					Component={({ data: part }) => (
 						<>
 							<Link
-								key={part.id}
+								key={`sidebarPart_${part.id}`}
 								to="/rundown/$rundownId/segment/$segmentId/part/$partId"
 								params={{
 									rundownId: segment.rundownId,
