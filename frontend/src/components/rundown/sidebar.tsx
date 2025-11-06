@@ -130,9 +130,9 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 				navigate({
 					to: '/rundown/$rundownId/segment/$segmentId/part/$partId',
 					params: {
-						rundownId: newPartResult.part.rundownId,
-						segmentId: newPartResult.part.segmentId,
-						partId: newPartResult.part.id
+						rundownId: newPartResult.rundownId,
+						segmentId: newPartResult.segmentId,
+						partId: newPartResult.id
 					}
 				})
 			})

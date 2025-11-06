@@ -146,7 +146,7 @@ const partsSlice = createSlice({
 				state.parts.push(action.payload)
 			})
 			.addCase(copyPart.fulfilled, (state, action) => {
-				state.parts.push(action.payload.part)
+				state.parts.push(action.payload)
 			})
 			.addCase(updatePart.fulfilled, (state, action) => {
 				const index = state.parts.findIndex((part) => part.id === action.payload.id)

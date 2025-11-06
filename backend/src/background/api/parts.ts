@@ -153,13 +153,13 @@ export const mutations = {
 
 				// If a segmentId was passed, read its metadata for the new part
 				if (payload.segmentId && payload.segmentId !== sourcePart.segmentId) {
-					const { result: targetPart, error: partError } = await segmentsMutations.readOne(
+					const { result: targetSegment, error: partError } = await segmentsMutations.readOne(
 						payload.segmentId
 					)
-					if (partError || !targetPart) throw partError || new Error('Target segment not found')
+					if (partError || !targetSegment) throw partError || new Error('Target segment not found')
 
-					targetPlaylistId = targetPart.playlistId
-					targetRundownId = targetPart.rundownId
+					targetPlaylistId = targetSegment.playlistId
+					targetRundownId = targetSegment.rundownId
 				}
 
 				const { result: newPart, error: createError } = await mutations.create({
@@ -454,7 +454,7 @@ export function registerPartsHandlers(socket: Socket, io: Server) {
 						action: 'update',
 						pieces: result?.pieces
 					})
-					callback(result || error)
+					callback(result?.part || error)
 				}
 				break
 			case IpcOperationType.Move:
