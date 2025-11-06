@@ -8,13 +8,17 @@ import {
 	MutatedSegment,
 	Segment,
 	Rundown,
-	MutationReorder
+	MutationReorder,
+	MutationSegmentCopy,
+	MutationSegmentCopyResult
 } from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { getMutatedPartsFromSegment } from './parts'
 import { mutations as rundownMutations, sendRundownDiffToCore } from './rundowns'
+import { mutations as partMutations } from './parts'
+import { mutations as piecesMutations } from './pieces'
 import { spliceReorder } from '../util'
 import { Server, Socket } from 'socket.io'
 
@@ -95,6 +99,89 @@ export const mutations = {
 		} catch (e) {
 			console.error(e)
 			return { error: e as Error }
+		}
+	},
+	/**
+	 * Copy an existing Segment.
+	 *
+	 * This function creates a new `Segment` record by duplicating the data of an existing one.
+	 * If a `rundownId` is provided, the cloned piece will be created inside that target part.
+	 * If no `segmentId` is given, the cloned piece will be created within the same part
+	 * as the source piece.
+	 *
+	 * @async
+	 * @param {Object} payload - The clone parameters.
+	 * @param {string} payload.id - The ID of the source part to clone.
+	 * @param {string} [payload.segmentId] - Optional target segment ID where the cloned part should be placed.
+	 * @returns {Promise<{ result?: Piece; error?: Error }>}
+	 * Returns an object containing either the newly cloned `Part` (`result`)
+	 * or an `Error` (`error`) if the operation fails.
+	 */
+	async createSegmentCopy(payload: MutationSegmentCopy) {
+		{
+			let returnedError: unknown | Error | undefined
+			let result: MutationSegmentCopyResult | undefined
+
+			const { result: sourceSegment, error: segmentReadError } = await mutations.readOne(payload.id)
+
+			if (segmentReadError || !sourceSegment) returnedError = segmentReadError
+			else {
+				let targetPlaylistId = sourceSegment.playlistId
+				let targetRundownId = payload.rundownId
+
+				// If a segmentId was passed, read its metadata for the new part
+				if (payload.rundownId !== sourceSegment.rundownId) {
+					const { result: targetRundown, error: rundownError } = await rundownMutations.readOne(
+						payload.rundownId
+					)
+					if (rundownError || !targetRundown)
+						throw rundownError || new Error('Target segment not found')
+
+					targetPlaylistId = targetRundown.playlistId
+				}
+
+				const { result: newSegment, error: createError } = await mutations.create({
+					...sourceSegment,
+					playlistId: targetPlaylistId,
+					rundownId: targetRundownId,
+					name: sourceSegment.name + ' Copy',
+					id: undefined
+				})
+
+				if (!newSegment) {
+					console.error(createError)
+					throw new Error('Could not create new part while copying.')
+				}
+				const copiedParts = await partMutations.cloneFromSegmentToSegment({
+					fromSegmentId: sourceSegment.id,
+					toSegmentId: newSegment.id
+				})
+
+				if (copiedParts.error) {
+					throw new Error('Copying the parts into the segment failed')
+				}
+
+				const { result: newSegmentResult, error: _resultReadError } = await mutations.readOne(
+					newSegment.id
+				)
+				const { result: piecesResult, error: piecesResultReadError } = await piecesMutations.read({
+					segmentId: newSegment.id
+				})
+
+				if (createError || piecesResultReadError)
+					returnedError = createError || piecesResultReadError
+				else
+					result =
+						copiedParts.result && newSegmentResult && piecesResult
+							? {
+									segment: newSegmentResult,
+									parts: copiedParts.result,
+									pieces: Array.isArray(piecesResult) ? piecesResult : [piecesResult]
+								}
+							: undefined
+			}
+
+			return { result, error: returnedError }
 		}
 	},
 	async readOne(id: string): Promise<{ result?: Segment; error?: Error }> {
@@ -287,13 +374,27 @@ export const mutations = {
 	}
 }
 
-export function registerSegmentsHandlers(socket: Socket, _io: Server) {
+export function registerSegmentsHandlers(socket: Socket, io: Server) {
 	socket.on('segments', async (action, payload, callback) => {
 		switch (action) {
 			case IpcOperationType.Create:
 				{
 					const { result, error } = await handleCreateSegment(payload)
 					callback(result || error)
+				}
+				break
+			case IpcOperationType.Copy:
+				{
+					const { result, error } = await handleCopySegment(payload)
+					io.emit('parts:update', {
+						action: 'update',
+						pieces: result?.parts
+					})
+					io.emit('pieces:update', {
+						action: 'update',
+						pieces: result?.pieces
+					})
+					callback(result?.segment || error)
 				}
 				break
 			case IpcOperationType.Read:
@@ -351,6 +452,28 @@ async function handleCreateSegment(payload: MutationSegmentCreate) {
 
 		return { result, error: returnedError }
 	}
+}
+async function handleCopySegment(payload: MutationSegmentCopy) {
+	let returnedError: unknown | Error | undefined
+
+	const { result, error: cloneError } = await mutations.createSegmentCopy(payload)
+
+	if (cloneError) returnedError = cloneError
+
+	if (result) {
+		try {
+			const { result: resultRundown } = await rundownMutations.readOne(result.segment.rundownId)
+
+			if (result && resultRundown) {
+				await sendRundownDiffToCore(resultRundown, resultRundown)
+			} else throw new Error('Cannot find segments while copying part')
+		} catch (error) {
+			console.error(error)
+			returnedError = error
+		}
+	}
+
+	return { result, error: returnedError }
 }
 async function handleUpdateSegment(payload: MutationSegmentUpdate) {
 	{

@@ -6,6 +6,7 @@ import { initPlaylists } from './playlists'
 import { initRundowns } from './rundowns'
 import { loadSettings } from './settings'
 import { pushPiece } from './pieces'
+import { pushPart } from './parts'
 
 export function initStore(dispatch: AppDispatch): void {
 	ipcAPI
@@ -50,5 +51,8 @@ export function initStore(dispatch: AppDispatch): void {
 
 	ipcAPI.onPiecesUpdate((update) => {
 		dispatch(pushPiece(update.pieces ? update.pieces : []))
+	})
+	ipcAPI.onPartsUpdate((update) => {
+		dispatch(pushPart(update.parts ? update.parts : []))
 	})
 }

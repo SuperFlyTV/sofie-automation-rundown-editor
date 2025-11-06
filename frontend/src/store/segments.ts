@@ -1,5 +1,6 @@
 import type {
 	MutationReorder,
+	MutationSegmentCopy,
 	MutationSegmentUpdate,
 	Segment
 } from '~backend/background/interfaces.js'
@@ -7,6 +8,8 @@ import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 import { ipcAPI } from '~/lib/IPC'
 import { removeRundown } from './rundowns'
+import { loadPieces } from './pieces'
+import { loadParts } from './parts'
 
 export interface LoadSegmentsPayload {
 	rundownId: string
@@ -33,6 +36,17 @@ export const addNewSegment = createAppAsyncThunk(
 			rank: payload.rank,
 			float: false
 		})
+	}
+)
+export const copySegment = createAppAsyncThunk(
+	'pieces/copyPart',
+	async (payload: MutationSegmentCopy, { dispatch }) => {
+		const segmentResult = await ipcAPI.copySegment(payload)
+
+		await dispatch(loadPieces({ rundownId: payload.rundownId }))
+		await dispatch(loadParts({ rundownId: payload.rundownId }))
+
+		return segmentResult
 	}
 )
 export const updateSegment = createAppAsyncThunk(
@@ -108,6 +122,9 @@ const segmentsSlice = createSlice({
 				state.error = action.error.message ?? 'Unknown Error'
 			})
 			.addCase(addNewSegment.fulfilled, (state, action) => {
+				state.segments.push(action.payload)
+			})
+			.addCase(copySegment.fulfilled, (state, action) => {
 				state.segments.push(action.payload)
 			})
 			.addCase(updateSegment.fulfilled, (state, action) => {

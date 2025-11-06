@@ -12,10 +12,12 @@ import type {
 	MutationReorder,
 	MutationRundownCreate,
 	MutationRundownUpdate,
+	MutationSegmentCopy,
 	MutationSegmentCreate,
 	MutationSegmentUpdate,
 	OpenFromFileArgs,
 	Part,
+	PartsUpdateEvent,
 	Piece,
 	PiecesManifest,
 	PiecesUpdateEvent,
@@ -54,6 +56,7 @@ export interface BackendApi {
 
 	getSegments: (rundownId: string) => Promise<Segment[]>
 	addNewSegment: (segment: MutationSegmentCreate) => Promise<Segment>
+	copySegment: (payload: MutationSegmentCopy) => Promise<Segment>
 	updateSegment: (segment: MutationSegmentUpdate) => Promise<Segment>
 	reorderSegments: (payload: MutationReorder<MutationSegmentUpdate>) => Promise<Segment[]>
 	deleteSegment: (segmentId: string) => Promise<void>
@@ -73,4 +76,5 @@ export interface BackendApi {
 	deletePiece: (pieceId: string) => Promise<void>
 	clonePiecesFromPartToPart: (payload: MutationPieceCloneFromParToPart) => Promise<Piece[]>
 	onPiecesUpdate: (callback: (update: PiecesUpdateEvent) => void) => void
+	onPartsUpdate: (callback: (update: PartsUpdateEvent) => void) => void
 }

@@ -117,10 +117,14 @@ const partsSlice = createSlice({
 		error: null
 	} as PartsState,
 	reducers: {
-		// initParts: (_state, action: { type: string; payload: Part[] }) => {
-		// 	console.log('initParts', action)
-		// 	return action.payload
-		// }
+		// TODO: prevent already existing IDs to be pushed
+		pushPart: (state, action: { type: string; payload: Part | Part[] }) => {
+			if (Array.isArray(action.payload)) {
+				state.parts.push(...action.payload)
+			} else {
+				state.parts.push(action.payload)
+			}
+		}
 	},
 	extraReducers(builder) {
 		builder
@@ -184,4 +188,5 @@ const partsSlice = createSlice({
 // Export the auto-generated action creator with the same name
 // export const {} = partsSlice.actions
 
+export const { pushPart } = partsSlice.actions
 export default partsSlice.reducer

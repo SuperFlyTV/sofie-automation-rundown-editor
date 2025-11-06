@@ -11,7 +11,8 @@ import {
 	MutationReorder,
 	MutationRundownDelete,
 	MutationPartCopy,
-	MutationPartCopyResult
+	MutationPartCopyResult,
+	MutationPartCloneFromSegmentToSegment
 } from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
@@ -197,6 +198,46 @@ export const mutations = {
 			}
 
 			return { result, error: returnedError }
+		}
+	},
+	// TODO: add an optional argument to keep the original name
+	async cloneFromSegmentToSegment({
+		fromSegmentId,
+		toSegmentId
+	}: MutationPartCloneFromSegmentToSegment): Promise<{ result?: Part[]; error?: Error }> {
+		try {
+			const { result: fromSegment } = await segmentsMutations.readOne(fromSegmentId)
+			const { result: toSegment } = await segmentsMutations.readOne(toSegmentId)
+
+			if (!fromSegment || !toSegment) {
+				throw new Error('Either the source or target Part was not found')
+			}
+
+			const { result: sourceParts } = await mutations.read({ segmentId: fromSegmentId })
+			if (sourceParts && Array.isArray(sourceParts)) {
+				await Promise.all(
+					sourceParts.map(async (part) => {
+						return await mutations.createPartCopy({
+							id: part.id,
+							rundownId: toSegment.rundownId,
+							segmentId: toSegment.id
+						})
+					})
+				)
+
+				// TODO: I think we should also return the pieces here maybe
+				const { result: resultParts } = await mutations.read({ segmentId: toSegmentId })
+				if (resultParts) {
+					return { result: Array.isArray(resultParts) ? resultParts : [resultParts] }
+				} else {
+					throw new Error("Couldn't retrieve cloned parts after creation.")
+				}
+			} else {
+				throw new Error('Pre-conditions for cloning were not met.')
+			}
+		} catch (e) {
+			console.error(e)
+			return { error: e as Error }
 		}
 	},
 	async move(

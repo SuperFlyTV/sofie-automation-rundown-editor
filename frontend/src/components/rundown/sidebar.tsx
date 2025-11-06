@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector, type RootState } from '~/store/app'
 import { addNewPart, copyPart, movePart, reorderParts } from '~/store/parts'
-import { addNewSegment, reorderSegments } from '~/store/segments'
+import { addNewSegment, copySegment, reorderSegments } from '~/store/segments'
 import type { Part, Segment } from '~backend/background/interfaces'
 import './sidebar.scss'
 import classNames from 'classnames'
@@ -47,6 +47,34 @@ export function RundownSidebar({
 			})
 	}
 
+	const handleCopySegment = (sourceSegment: Segment) => {
+		// perform operation
+		dispatch(
+			copySegment({
+				id: sourceSegment.id,
+				rundownId: sourceSegment.rundownId
+			})
+		)
+			.unwrap()
+			.then((newSegmentResult) => {
+				// Navigate user to the new part
+				navigate({
+					to: '/rundown/$rundownId/segment/$segmentId',
+					params: {
+						rundownId: newSegmentResult.rundownId,
+						segmentId: newSegmentResult.id
+					}
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Adding segment',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			})
+	}
+
 	const handleReorderSegment = (
 		_targetSegment: Segment,
 		sourceSegment: Segment,
@@ -74,7 +102,12 @@ export function RundownSidebar({
 			<DraggableContainer
 				items={sortedSegments}
 				itemType={DragTypes.SEGMENT}
-				Component={({ data: segment }) => <SidebarSegment key={segment.id} segment={segment} />}
+				Component={({ data: segment }) => (
+					<>
+						<Button onClick={() => handleCopySegment(segment)}>Copy Segment</Button>
+						<SidebarSegment key={segment.id} segment={segment} />
+					</>
+				)}
 				id={rundownId}
 				reorder={handleReorderSegment}
 			/>

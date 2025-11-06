@@ -263,6 +263,11 @@ export type MutationPartCopy = SetOptional<
 >
 export type MutationPartCopyResult = { part: Part; pieces: Piece[] }
 
+export type MutationPartCloneFromSegmentToSegment = {
+	fromSegmentId: string
+	toSegmentId: string
+}
+
 export type MutationPartMove = {
 	sourcePart: Part
 	targetPart: Part
@@ -287,6 +292,10 @@ export type MutationPieceTypeManifestUpdate = Pick<PieceTypeManifest, 'id'> & {
 export type MutationPieceTypeManifestDelete = Pick<PieceTypeManifest, 'id'>
 
 export type MutationRundownCreate = SetOptional<Rundown, 'id'>
+
+export type MutationSegmentCopy = Pick<Segment, 'id' | 'rundownId'>
+
+export type MutationSegmentCopyResult = { segment: Segment; parts: Part[]; pieces: Piece[] }
 
 export type MutationRundownRead = Pick<Rundown, 'id'>
 
@@ -339,4 +348,7 @@ export interface MutationReorder<T> {
 }
 export interface PiecesUpdateEvent {
 	pieces?: Piece[]
+}
+export interface PartsUpdateEvent {
+	parts?: Part[]
 }

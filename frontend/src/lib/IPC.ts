@@ -12,6 +12,7 @@ import type {
 	MutationReorder,
 	MutationRundownCreate,
 	MutationRundownUpdate,
+	MutationSegmentCopy,
 	MutationSegmentCreate,
 	MutationSegmentUpdate,
 	OpenFromFileArgs,
@@ -84,6 +85,9 @@ export const ipcAPI: BackendApi = {
 	addNewSegment: (segment: MutationSegmentCreate) => {
 		return getSocket().emitWithAck('segments', 'create', segment)
 	},
+	copySegment: (segment: MutationSegmentCopy) => {
+		return getSocket().emitWithAck('segments', 'copy', segment)
+	},
 	updateSegment: (segment: MutationSegmentUpdate) => {
 		return getSocket().emitWithAck('segments', 'update', segment)
 	},
@@ -143,6 +147,9 @@ export const ipcAPI: BackendApi = {
 
 	onPiecesUpdate: (callback) => {
 		return getSocket().on('pieces:update', callback)
+	},
+	onPartsUpdate: (callback) => {
+		return getSocket().on('parts:update', callback)
 	}
 }
 
