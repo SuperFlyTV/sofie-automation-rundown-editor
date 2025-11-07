@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { Col, Row } from 'react-bootstrap'
 import { PiecePropertiesForm } from '~/components/rundown/piecePropertiesForm'
 import { PiecesList } from '~/components/rundown/piecesList'
@@ -12,6 +12,7 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
 	const { rundownId, segmentId, partId, pieceId } = Route.useParams()
+	const navigate = Route.useNavigate()
 
 	const part = useAppSelector((state) =>
 		state.parts.parts.find(
@@ -28,11 +29,12 @@ function RouteComponent() {
 				s.id === pieceId
 		)
 	)
-	if (!piece || !part)
-		throw redirect({
-			to: '/rundown/$rundownId/segment/$segmentId/part/$partId',
-			params: { rundownId, segmentId, partId }
+	if (!piece || !part) {
+		navigate({
+			to: `/rundown/${rundownId}/segment/${segmentId}/${partId}`
 		})
+		return null
+	}
 
 	return (
 		<Row key={`form_${partId}`}>

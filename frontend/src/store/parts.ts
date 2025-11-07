@@ -52,7 +52,7 @@ export const copyPart = createAppAsyncThunk(
 	'pieces/copyPart',
 	async (payload: MutationPartCopy, { dispatch }) => {
 		const partResult = await ipcAPI.copyPart(payload)
-
+		dispatch(pushPart(partResult))
 		await dispatch(loadPieces({ rundownId: payload.rundownId }))
 
 		return partResult
@@ -147,9 +147,6 @@ const partsSlice = createSlice({
 				state.error = action.error.message ?? 'Unknown Error'
 			})
 			.addCase(addNewPart.fulfilled, (state, action) => {
-				state.parts.push(action.payload)
-			})
-			.addCase(copyPart.fulfilled, (state, action) => {
 				state.parts.push(action.payload)
 			})
 			.addCase(updatePart.fulfilled, (state, action) => {

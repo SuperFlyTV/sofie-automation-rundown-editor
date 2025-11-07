@@ -43,8 +43,11 @@ export const addNewPiece = createAppAsyncThunk(
 )
 export const copyPiece = createAppAsyncThunk(
 	'pieces/copyPiece',
-	async (payload: MutationPieceCopy) => {
-		return ipcAPI.copyPiece(payload)
+	async (payload: MutationPieceCopy, { dispatch }) => {
+		const pieceResult = await ipcAPI.copyPiece(payload)
+		dispatch(pushPiece(pieceResult))
+
+		return pieceResult
 	}
 )
 export const updatePiece = createAppAsyncThunk(
@@ -124,9 +127,6 @@ const piecesSlice = createSlice({
 				state.error = action.error.message ?? 'Unknown Error'
 			})
 			.addCase(addNewPiece.fulfilled, (state, action) => {
-				state.pieces.push(action.payload)
-			})
-			.addCase(copyPiece.fulfilled, (state, action) => {
 				state.pieces.push(action.payload)
 			})
 			.addCase(updatePiece.fulfilled, (state, action) => {

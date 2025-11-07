@@ -43,6 +43,7 @@ export const copySegment = createAppAsyncThunk(
 	async (payload: MutationSegmentCopy, { dispatch }) => {
 		const segmentResult = await ipcAPI.copySegment(payload)
 
+		dispatch(pushSegment(segmentResult))
 		await dispatch(loadPieces({ rundownId: payload.rundownId }))
 		await dispatch(loadParts({ rundownId: payload.rundownId }))
 
@@ -126,9 +127,6 @@ const segmentsSlice = createSlice({
 				state.error = action.error.message ?? 'Unknown Error'
 			})
 			.addCase(addNewSegment.fulfilled, (state, action) => {
-				state.segments.push(action.payload)
-			})
-			.addCase(copySegment.fulfilled, (state, action) => {
 				state.segments.push(action.payload)
 			})
 			.addCase(updateSegment.fulfilled, (state, action) => {

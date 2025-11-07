@@ -81,9 +81,9 @@ function PieceRow({ piece }: { piece: Piece }) {
 			})
 		)
 			.unwrap()
-			.then((newPiece) => {
+			.then(async (newPiece) => {
 				// Navigate user to the new piece
-				navigate({
+				await navigate({
 					to: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId',
 					params: {
 						rundownId: newPiece.rundownId,
@@ -164,9 +164,9 @@ function NewPieceButton({
 			})
 		)
 			.unwrap()
-			.then((piece) => {
+			.then(async (piece) => {
 				// Navigate user to the new piece
-				navigate({
+				await navigate({
 					to: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId',
 					params: { rundownId, segmentId, partId, pieceId: piece.id }
 				})

@@ -33,13 +33,14 @@ export const addNewRundown = createAppAsyncThunk(
 export const copyRundown = createAppAsyncThunk(
 	'rundown/copyRundown',
 	async (payload: MutationRundownCopy, { dispatch }) => {
-		const segmentResult = await ipcAPI.copyRundown(payload)
+		const rundownResult = await ipcAPI.copyRundown(payload)
 
+		dispatch(pushRundown(rundownResult))
 		await dispatch(loadPieces({ rundownId: payload.id }))
 		await dispatch(loadParts({ rundownId: payload.id }))
 		await dispatch(loadSegments({ rundownId: payload.id }))
 
-		return segmentResult
+		return rundownResult
 	}
 )
 export const updateRundown = createAppAsyncThunk(
@@ -108,14 +109,19 @@ const rundownsSlice = createSlice({
 		initRundowns: (_state, action: { type: string; payload: Rundown[] }) => {
 			console.log('initRundowns', action)
 			return action.payload
+		},
+		// TODO: prevent already existing IDs to be pushed
+		pushRundown: (state, action: { type: string; payload: Rundown | Rundown[] }) => {
+			if (Array.isArray(action.payload)) {
+				state.push(...action.payload)
+			} else {
+				state.push(action.payload)
+			}
 		}
 	},
 	extraReducers(builder) {
 		builder
 			.addCase(addNewRundown.fulfilled, (state, action) => {
-				state.push(action.payload)
-			})
-			.addCase(copyRundown.fulfilled, (state, action) => {
 				state.push(action.payload)
 			})
 			.addCase(updateRundown.fulfilled, (state, action) => {
@@ -139,5 +145,6 @@ const rundownsSlice = createSlice({
 
 // Export the auto-generated action creator with the same name
 export const { initRundowns } = rundownsSlice.actions
+export const { pushRundown } = rundownsSlice.actions
 
 export default rundownsSlice.reducer

@@ -129,15 +129,9 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			})
 		)
 			.unwrap()
-			.then((newPartResult) => {
-				// Navigate user to the new part
-				navigate({
-					to: '/rundown/$rundownId/segment/$segmentId/part/$partId',
-					params: {
-						rundownId: newPartResult.rundownId,
-						segmentId: newPartResult.segmentId,
-						partId: newPartResult.id
-					}
+			.then(async (newPartResult) => {
+				await navigate({
+					to: `/rundown/${newPartResult.rundownId}/segment/${newPartResult.segmentId}/part/${newPartResult.id}`
 				})
 			})
 			.catch((e) => {
@@ -200,14 +194,9 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 			})
 		)
 			.unwrap()
-			.then((newSegmentResult) => {
-				// Navigate user to the new part
+			.then(async (newSegmentResult) => {
 				navigate({
-					to: '/rundown/$rundownId/segment/$segmentId',
-					params: {
-						rundownId: newSegmentResult.rundownId,
-						segmentId: newSegmentResult.id
-					}
+					to: `/rundown/${newSegmentResult.rundownId}/segment/${newSegmentResult.id}`
 				})
 			})
 			.catch((e) => {

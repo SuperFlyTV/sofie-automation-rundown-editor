@@ -31,13 +31,10 @@ function Index() {
 			})
 		)
 			.unwrap()
-			.then((newRundownResult) => {
+			.then(async (newRundownResult) => {
 				// Navigate user to the new rundown
-				navigate({
-					to: '/rundown/$rundownId',
-					params: {
-						rundownId: newRundownResult.id
-					}
+				await navigate({
+					to: `/rundown/${newRundownResult.id}`
 				})
 			})
 			.catch((e) => {
@@ -66,10 +63,7 @@ function Index() {
 							await dispatch(importRundown(serializedRundown))
 
 							await navigate({
-								to: '/rundown/$rundownId',
-								params: {
-									rundownId: serializedRundown.rundown.id
-								}
+								to: `/rundown/${serializedRundown.rundown.id}`
 							})
 						} catch (e: unknown) {
 							console.error(e)

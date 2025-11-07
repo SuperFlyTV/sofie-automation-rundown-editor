@@ -20,8 +20,7 @@ function RouteComponent() {
 
 	if (!part) {
 		navigate({
-			to: '/rundown/$rundownId/segment/$segmentId',
-			params: { rundownId, segmentId }
+			to: `/rundown/${rundownId}/segment/${segmentId}`
 		})
 		return null
 	}
