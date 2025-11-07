@@ -4,8 +4,9 @@ import { Button, ListGroup } from 'react-bootstrap'
 import { useToasts } from '~/components/toasts/toasts'
 import { ipcAPI } from '~/lib/IPC'
 import { useAppDispatch, useAppSelector } from '~/store/app'
-import { addNewRundown, importRundown } from '~/store/rundowns'
+import { addNewRundown, copyRundown, importRundown } from '~/store/rundowns'
 import { verifyImportIsRundown } from '~/util/verifyImport'
+import type { Rundown } from '~backend/background/interfaces'
 
 export const Route = createFileRoute('/_root/')({
 	component: Index
@@ -21,6 +22,31 @@ function Index() {
 		dispatch(addNewRundown({ playlistId: null })).unwrap()
 	}, [dispatch])
 
+	const handleCopyRundown = (sourceRundown: Rundown) => {
+		// perform operation
+		dispatch(
+			copyRundown({
+				id: sourceRundown.id
+			})
+		)
+			.unwrap()
+			.then((newRundownResult) => {
+				// Navigate user to the new rundown
+				navigate({
+					to: '/rundown/$rundownId',
+					params: {
+						rundownId: newRundownResult.id
+					}
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Adding rundown',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			})
+	}
 	const selectImportRundown = () => {
 		ipcAPI
 			.openFromFile({ title: 'Import rundown' })
@@ -86,6 +112,7 @@ function Index() {
 				{rundowns.map((rd) => (
 					<ListGroup.Item key={rd.id} action as={Link} to={`/rundown/${rd.id}`}>
 						{rd.name}
+						<Button onClick={() => handleCopyRundown(rd)}>Copy</Button>
 					</ListGroup.Item>
 				))}
 			</ListGroup>

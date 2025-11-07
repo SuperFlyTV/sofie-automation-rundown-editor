@@ -10,7 +10,8 @@ import {
 	Rundown,
 	MutationReorder,
 	MutationSegmentCopy,
-	MutationSegmentCopyResult
+	MutationSegmentCopyResult,
+	MutationSegmentCloneFromRundownToRundown
 } from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
@@ -205,6 +206,45 @@ export const mutations = {
 					rundownId: document.rundownId,
 					playlistId: document.playlistId
 				}
+			}
+		} catch (e) {
+			console.error(e)
+			return { error: e as Error }
+		}
+	},
+	// TODO: add an optional argument to keep the original name
+	async cloneFromRundownToRundown({
+		fromRundownId,
+		toRundownId
+	}: MutationSegmentCloneFromRundownToRundown): Promise<{ result?: Segment[]; error?: Error }> {
+		try {
+			const { result: fromRundown } = await rundownMutations.readOne(fromRundownId)
+			const { result: toRundown } = await rundownMutations.readOne(toRundownId)
+
+			if (!fromRundown || !toRundown) {
+				throw new Error('Either the source or target Part was not found')
+			}
+
+			const { result: sourceSegments } = await mutations.read({ rundownId: fromRundownId })
+			if (sourceSegments && Array.isArray(sourceSegments)) {
+				await Promise.all(
+					sourceSegments.map(async (segment) => {
+						return await mutations.createSegmentCopy({
+							id: segment.id,
+							rundownId: toRundown.id
+						})
+					})
+				)
+
+				// TODO: I think we should also return the parts and pieces here maybe
+				const { result: resultSegments } = await mutations.read({ rundownId: toRundownId })
+				if (resultSegments) {
+					return { result: Array.isArray(resultSegments) ? resultSegments : [resultSegments] }
+				} else {
+					throw new Error("Couldn't retrieve cloned segments after creation.")
+				}
+			} else {
+				throw new Error('Pre-conditions for cloning were not met.')
 			}
 		} catch (e) {
 			console.error(e)

@@ -96,10 +96,14 @@ const segmentsSlice = createSlice({
 		error: null
 	} as SegmentsState,
 	reducers: {
-		// initSegments: (_state, action: { type: string; payload: Segment[] }) => {
-		// 	console.log('initSegments', action)
-		// 	return action.payload
-		// }
+		// TODO: prevent already existing IDs to be pushed
+		pushSegment: (state, action: { type: string; payload: Segment | Segment[] }) => {
+			if (Array.isArray(action.payload)) {
+				state.segments.push(...action.payload)
+			} else {
+				state.segments.push(action.payload)
+			}
+		}
 	},
 	extraReducers(builder) {
 		builder
@@ -164,4 +168,5 @@ const segmentsSlice = createSlice({
 // Export the auto-generated action creator with the same name
 // export const {} = segmentsSlice.actions
 
+export const { pushSegment } = segmentsSlice.actions
 export default segmentsSlice.reducer

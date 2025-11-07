@@ -1,7 +1,14 @@
-import type { Rundown, SerializedRundown } from '~backend/background/interfaces.js'
+import type {
+	MutationRundownCopy,
+	Rundown,
+	SerializedRundown
+} from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 import { ipcAPI } from '~/lib/IPC'
+import { loadPieces } from './pieces'
+import { loadParts } from './parts'
+import { loadSegments } from './segments'
 
 export interface NewRundownPayload {
 	playlistId: string | null
@@ -21,6 +28,18 @@ export const addNewRundown = createAppAsyncThunk(
 			sync: false,
 			playlistId: initialRundown.playlistId
 		})
+	}
+)
+export const copyRundown = createAppAsyncThunk(
+	'rundown/copyRundown',
+	async (payload: MutationRundownCopy, { dispatch }) => {
+		const segmentResult = await ipcAPI.copyRundown(payload)
+
+		await dispatch(loadPieces({ rundownId: payload.id }))
+		await dispatch(loadParts({ rundownId: payload.id }))
+		await dispatch(loadSegments({ rundownId: payload.id }))
+
+		return segmentResult
 	}
 )
 export const updateRundown = createAppAsyncThunk(
@@ -94,6 +113,9 @@ const rundownsSlice = createSlice({
 	extraReducers(builder) {
 		builder
 			.addCase(addNewRundown.fulfilled, (state, action) => {
+				state.push(action.payload)
+			})
+			.addCase(copyRundown.fulfilled, (state, action) => {
 				state.push(action.payload)
 			})
 			.addCase(updateRundown.fulfilled, (state, action) => {

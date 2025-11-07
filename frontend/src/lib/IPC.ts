@@ -10,6 +10,7 @@ import type {
 	MutationPieceCreate,
 	MutationPieceUpdate,
 	MutationReorder,
+	MutationRundownCopy,
 	MutationRundownCreate,
 	MutationRundownUpdate,
 	MutationSegmentCopy,
@@ -71,6 +72,9 @@ export const ipcAPI: BackendApi = {
 	},
 	addNewRundown: (rundown: MutationRundownCreate) => {
 		return getSocket().emitWithAck('rundowns', 'create', rundown)
+	},
+	copyRundown: (rundown: MutationRundownCopy) => {
+		return getSocket().emitWithAck('rundowns', 'copy', rundown)
 	},
 	updateRundown: (rundown: MutationRundownUpdate) => {
 		return getSocket().emitWithAck('rundowns', 'update', rundown)
@@ -150,6 +154,9 @@ export const ipcAPI: BackendApi = {
 	},
 	onPartsUpdate: (callback) => {
 		return getSocket().on('parts:update', callback)
+	},
+	onSegmentsUpdate: (callback) => {
+		return getSocket().on('segments:update', callback)
 	}
 }
 

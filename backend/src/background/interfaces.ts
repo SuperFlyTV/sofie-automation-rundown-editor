@@ -297,7 +297,21 @@ export type MutationSegmentCopy = Pick<Segment, 'id' | 'rundownId'>
 
 export type MutationSegmentCopyResult = { segment: Segment; parts: Part[]; pieces: Piece[] }
 
+export type MutationSegmentCloneFromRundownToRundown = {
+	fromRundownId: string
+	toRundownId: string
+}
+
 export type MutationRundownRead = Pick<Rundown, 'id'>
+
+export type MutationRundownCopy = Pick<Rundown, 'id'> & { targetRundownId?: string }
+
+export type MutationRundownCopyResult = {
+	rundown: Rundown
+	segments: Segment[]
+	parts: Part[]
+	pieces: Piece[]
+}
 
 export type MutationRundownUpdate = Rundown
 
@@ -351,4 +365,7 @@ export interface PiecesUpdateEvent {
 }
 export interface PartsUpdateEvent {
 	parts?: Part[]
+}
+export interface SegmentsUpdateEvent {
+	segments?: Segment[]
 }

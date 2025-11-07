@@ -10,6 +10,7 @@ import type {
 	MutationPieceCreate,
 	MutationPieceUpdate,
 	MutationReorder,
+	MutationRundownCopy,
 	MutationRundownCreate,
 	MutationRundownUpdate,
 	MutationSegmentCopy,
@@ -25,7 +26,8 @@ import type {
 	Playlist,
 	Rundown,
 	SaveToFileArgs,
-	Segment
+	Segment,
+	SegmentsUpdateEvent
 } from '../interfaces'
 
 export interface BackendApi {
@@ -51,6 +53,7 @@ export interface BackendApi {
 
 	getRundowns: () => Promise<Rundown[]>
 	addNewRundown: (rundown: MutationRundownCreate) => Promise<Rundown>
+	copyRundown: (payload: MutationRundownCopy) => Promise<Rundown>
 	updateRundown: (rundown: MutationRundownUpdate) => Promise<Rundown>
 	deleteRundown: (rundownId: string) => Promise<void>
 
@@ -77,4 +80,5 @@ export interface BackendApi {
 	clonePiecesFromPartToPart: (payload: MutationPieceCloneFromParToPart) => Promise<Piece[]>
 	onPiecesUpdate: (callback: (update: PiecesUpdateEvent) => void) => void
 	onPartsUpdate: (callback: (update: PartsUpdateEvent) => void) => void
+	onSegmentsUpdate: (callback: (update: SegmentsUpdateEvent) => void) => void
 }
