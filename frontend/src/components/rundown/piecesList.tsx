@@ -8,6 +8,7 @@ import type { Part, Piece } from '~backend/background/interfaces'
 import { toTime } from '~/util/lib'
 import { useToasts } from '../toasts/toasts'
 import { createSelector } from '@reduxjs/toolkit'
+import { CopyIconButton } from '../copyIconButton'
 
 const selectPiecesByPart = createSelector(
 	[
@@ -108,7 +109,7 @@ function PieceRow({ piece }: { piece: Piece }) {
 			</td>
 			<td className="piece-name">{piece.name}</td>
 			<td>
-				<Button onClick={performCopyPiece}>Copy</Button>
+				<CopyIconButton onClick={performCopyPiece} />
 			</td>
 			<td className="piece-start">{piece.start !== undefined ? toTime(piece.start) : ''}</td>
 			<td className="piece-duration">

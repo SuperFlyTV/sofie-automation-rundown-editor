@@ -39,7 +39,7 @@ export const addNewSegment = createAppAsyncThunk(
 	}
 )
 export const copySegment = createAppAsyncThunk(
-	'pieces/copyPart',
+	'segments/copySegment',
 	async (payload: MutationSegmentCopy, { dispatch }) => {
 		const segmentResult = await ipcAPI.copySegment(payload)
 
@@ -56,7 +56,7 @@ export const updateSegment = createAppAsyncThunk(
 	}
 )
 export const reorderSegments = createAppAsyncThunk(
-	'parts/reorderSegments',
+	'segments/reorderSegments',
 	async (payload: MutationReorder<MutationSegmentUpdate>) => {
 		return ipcAPI.reorderSegments(payload)
 	}

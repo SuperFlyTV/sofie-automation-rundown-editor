@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useCallback } from 'react'
-import { Button, ListGroup } from 'react-bootstrap'
+import { Button, ListGroup, Stack } from 'react-bootstrap'
+import { CopyIconButton } from '~/components/copyIconButton'
 import { useToasts } from '~/components/toasts/toasts'
 import { ipcAPI } from '~/lib/IPC'
 import { useAppDispatch, useAppSelector } from '~/store/app'
@@ -110,9 +111,21 @@ function Index() {
 
 			<ListGroup>
 				{rundowns.map((rd) => (
-					<ListGroup.Item key={rd.id} action as={Link} to={`/rundown/${rd.id}`}>
-						{rd.name}
-						<Button onClick={() => handleCopyRundown(rd)}>Copy</Button>
+					<ListGroup.Item
+						key={rd.id}
+						action
+						as={Link}
+						to={`/rundown/${rd.id}`}
+						className="copy-item"
+					>
+						<Stack direction="horizontal">
+							{rd.name}
+							<CopyIconButton
+								onClick={() => handleCopyRundown(rd)}
+								className="ms-auto copy-icon-button"
+								style={{ position: 'relative', top: '-.25em' }}
+							/>
+						</Stack>
 					</ListGroup.Item>
 				))}
 			</ListGroup>
