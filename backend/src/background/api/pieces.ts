@@ -75,40 +75,44 @@ export const mutations = {
 
 			const { result: sourcePiece, error: pieceReadError } = await mutations.readOne(payload.id)
 
-			if (pieceReadError || !sourcePiece) returnedError = pieceReadError
-			else {
-				let targetPartId = payload.partId || sourcePiece.partId
-				let targetPlaylistId = sourcePiece.playlistId
-				let targetRundownId = sourcePiece.rundownId
-				let targetSegmentId = sourcePiece.segmentId
+			try {
+				if (pieceReadError || !sourcePiece) returnedError = pieceReadError
+				else {
+					let targetPartId = payload.partId || sourcePiece.partId
+					let targetPlaylistId = sourcePiece.playlistId
+					let targetRundownId = sourcePiece.rundownId
+					let targetSegmentId = sourcePiece.segmentId
 
-				// If a partId was passed, read its metadata for the new piece
-				if (payload.partId && payload.partId !== sourcePiece.partId) {
-					const { result: targetPart, error: partError } = await partsMutations.readOne(
-						payload.partId
-					)
-					if (partError || !targetPart) throw partError || new Error('Target part not found')
+					// If a partId was passed, read its metadata for the new piece
+					if (payload.partId && payload.partId !== sourcePiece.partId) {
+						const { result: targetPart, error: partError } = await partsMutations.readOne(
+							payload.partId
+						)
+						if (partError || !targetPart) throw partError || new Error('Target part not found')
 
-					targetPlaylistId = targetPart.playlistId
-					targetRundownId = targetPart.rundownId
-					targetSegmentId = targetPart.segmentId
+						targetPlaylistId = targetPart.playlistId
+						targetRundownId = targetPart.rundownId
+						targetSegmentId = targetPart.segmentId
+					}
+
+					const { result: newPiece, error: createError } = await mutations.create({
+						...sourcePiece,
+						playlistId: targetPlaylistId,
+						rundownId: targetRundownId,
+						segmentId: targetSegmentId,
+						partId: targetPartId,
+						name: sourcePiece.name + ' Copy',
+						id: undefined
+					})
+
+					if (createError) returnedError = createError
+					else result = newPiece
 				}
-
-				const { result: newPiece, error: createError } = await mutations.create({
-					...sourcePiece,
-					playlistId: targetPlaylistId,
-					rundownId: targetRundownId,
-					segmentId: targetSegmentId,
-					partId: targetPartId,
-					name: sourcePiece.name + ' Copy',
-					id: undefined
-				})
-
-				if (createError) returnedError = createError
-				else result = newPiece
+			} catch (e) {
+				returnedError = e
 			}
 
-			return { result, error: returnedError }
+			return { result: !returnedError ? result : undefined, error: returnedError }
 		}
 	},
 	async readOne(id: string): Promise<{ result?: Piece; error?: Error }> {
@@ -248,32 +252,30 @@ export const mutations = {
 				throw new Error('Either the source or target Part was not found')
 			}
 
-			const { result: sourcePieces } = await mutations.read({ partId: fromPartId })
-			if (sourcePieces && Array.isArray(sourcePieces)) {
-				await Promise.all(
-					sourcePieces.map(async (piece) => {
-						return await mutations.create({
-							playlistId: toPart.playlistId,
-							rundownId: toPart.rundownId,
-							segmentId: toPart.segmentId,
-							partId: toPart.id,
-							name: piece.name,
-							start: piece.start,
-							duration: piece.duration,
-							pieceType: piece.pieceType,
-							payload: piece.payload
-						})
+			const { result: sourcePiecesResult } = await mutations.read({ partId: fromPartId })
+			const sourcePieces = Array.isArray(sourcePiecesResult)
+				? sourcePiecesResult
+				: sourcePiecesResult
+					? [sourcePiecesResult]
+					: []
+			if (sourcePieces) {
+				return {
+					result: (
+						await Promise.all(
+							sourcePieces.map(async (piece) => {
+								return await mutations.createPieceCopy({
+									id: piece.id,
+									partId: toPart.id
+								})
+							})
+						)
+					).map((p) => {
+						if (p.error) throw p.error
+						return p.result as Piece
 					})
-				)
-
-				const { result: resultPieces } = await mutations.read({ partId: toPartId })
-				if (resultPieces) {
-					return { result: Array.isArray(resultPieces) ? resultPieces : [resultPieces] }
-				} else {
-					throw new Error("Couldn't retrieve cloned pieces after creation.")
 				}
 			} else {
-				throw new Error('Pre-conditions for cloning were not met.')
+				throw new Error(`Couldn't find source pieces`)
 			}
 		} catch (e) {
 			console.error(e)

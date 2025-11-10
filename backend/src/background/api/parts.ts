@@ -127,16 +127,16 @@ export const mutations = {
 	 * Copy an existing Part.
 	 *
 	 * This function creates a new `Part` record by duplicating the data of an existing one.
-	 * If a `segmentId` is provided, the cloned piece will be created inside that target part.
-	 * If no `segmentId` is given, the cloned piece will be created within the same part
-	 * as the source piece.
+	 * If a `segmentId` is provided, the cloned part will be created inside that target segment.
+	 * If no `segmentId` is given, the cloned part will be created within the same segment
+	 * as the source part.
 	 *
 	 * @async
 	 * @param {Object} payload - The clone parameters.
 	 * @param {string} payload.id - The ID of the source part to clone.
 	 * @param {string} [payload.segmentId] - Optional target segment ID where the cloned part should be placed.
-	 * @returns {Promise<{ result?: Piece; error?: Error }>}
-	 * Returns an object containing either the newly cloned `Part` (`result`)
+	 * @returns {Promise<{ result?: MutationPartCopyResult; error?: Error }>}
+	 * Returns an object containing either the newly cloned `Part` and it's newly cloned `Piece`s (`result`)
 	 * or an `Error` (`error`) if the operation fails.
 	 */
 	async createPartCopy(payload: MutationPartCopy) {
@@ -152,52 +152,56 @@ export const mutations = {
 				let targetPlaylistId = sourcePart.playlistId
 				let targetRundownId = sourcePart.rundownId
 
-				// If a segmentId was passed, read its metadata for the new part
-				if (payload.segmentId && payload.segmentId !== sourcePart.segmentId) {
-					const { result: targetSegment, error: partError } = await segmentsMutations.readOne(
-						payload.segmentId
+				try {
+					// If a segmentId was passed, read its metadata for the new part
+					if (payload.segmentId && payload.segmentId !== sourcePart.segmentId) {
+						const { result: targetSegment, error: partError } = await segmentsMutations.readOne(
+							payload.segmentId
+						)
+						if (partError || !targetSegment)
+							throw partError || new Error('Target segment not found')
+
+						targetPlaylistId = targetSegment.playlistId
+						targetRundownId = targetSegment.rundownId
+					}
+
+					const { result: newPart, error: createError } = await mutations.create({
+						...sourcePart,
+						playlistId: targetPlaylistId,
+						rundownId: targetRundownId,
+						segmentId: targetSegmentId,
+						name: sourcePart.name + ' Copy',
+						id: undefined
+					})
+
+					if (!newPart) {
+						console.error(createError)
+						throw new Error('Could not create new part while copying.')
+					}
+					const copiedPieces = await piecesMutations.cloneFromPartToPart({
+						fromPartId: sourcePart.id,
+						toPartId: newPart.id
+					})
+
+					if (copiedPieces.error) {
+						throw new Error('Copying the pieces into the part failed')
+					}
+					const { result: newPartResult, error: _resultReadError } = await mutations.readOne(
+						newPart.id
 					)
-					if (partError || !targetSegment) throw partError || new Error('Target segment not found')
 
-					targetPlaylistId = targetSegment.playlistId
-					targetRundownId = targetSegment.rundownId
+					if (createError) returnedError = createError
+					else
+						result =
+							copiedPieces.result && newPartResult
+								? { part: newPartResult, pieces: copiedPieces.result }
+								: undefined
+				} catch (e) {
+					returnedError = e
 				}
-
-				const { result: newPart, error: createError } = await mutations.create({
-					...sourcePart,
-					playlistId: targetPlaylistId,
-					rundownId: targetRundownId,
-					segmentId: targetSegmentId,
-					name: sourcePart.name + ' Copy',
-					id: undefined
-				})
-
-				if (!newPart) {
-					console.error(createError)
-					throw new Error('Could not create new part while copying.')
-				}
-				const copiedPieces = await piecesMutations.cloneFromPartToPart({
-					fromPartId: sourcePart.id,
-					toPartId: newPart.id
-				})
-
-				if (copiedPieces.error) {
-					throw new Error('Copying the pieces into the part failed')
-				}
-
-				const { result: newPartResult, error: _resultReadError } = await mutations.readOne(
-					newPart.id
-				)
-
-				if (createError) returnedError = createError
-				else
-					result =
-						copiedPieces.result && newPartResult
-							? { part: newPartResult, pieces: copiedPieces.result }
-							: undefined
 			}
 
-			return { result, error: returnedError }
+			return { result: !returnedError ? result : undefined, error: returnedError }
 		}
 	},
 	// TODO: add an optional argument to keep the original name
@@ -213,27 +217,31 @@ export const mutations = {
 				throw new Error('Either the source or target Part was not found')
 			}
 
-			const { result: sourceParts } = await mutations.read({ segmentId: fromSegmentId })
-			if (sourceParts && Array.isArray(sourceParts)) {
-				await Promise.all(
-					sourceParts.map(async (part) => {
-						return await mutations.createPartCopy({
-							id: part.id,
-							rundownId: toSegment.rundownId,
-							segmentId: toSegment.id
-						})
+			const { result: sourcePartsResult } = await mutations.read({ segmentId: fromSegmentId })
+			const sourceParts = Array.isArray(sourcePartsResult)
+				? sourcePartsResult
+				: sourcePartsResult
+					? [sourcePartsResult]
+					: []
+			if (sourceParts) {
+				return {
+					result: (
+						await Promise.all(
+							sourceParts.map(async (part) => {
+								return await mutations.createPartCopy({
+									id: part.id,
+									segmentId: toSegment.id,
+									rundownId: toSegment.rundownId
+								})
+							})
+						)
+					).map((p) => {
+						if (p.error) throw p.error
+						return p.result?.part as Part
 					})
-				)
-
-				// TODO: I think we should also return the pieces here maybe
-				const { result: resultParts } = await mutations.read({ segmentId: toSegmentId })
-				if (resultParts) {
-					return { result: Array.isArray(resultParts) ? resultParts : [resultParts] }
-				} else {
-					throw new Error("Couldn't retrieve cloned parts after creation.")
 				}
 			} else {
-				throw new Error('Pre-conditions for cloning were not met.')
+				throw new Error(`Couldn't find source parts`)
 			}
 		} catch (e) {
 			console.error(e)
@@ -570,11 +578,11 @@ async function handleCopyPart(payload: MutationPartCopy) {
 
 	if (result) {
 		try {
-			const { result: sourceSegment } = await segmentsMutations.readOne(result.part.segmentId)
+			const { result: targetSegment } = await segmentsMutations.readOne(result.part.segmentId)
 
-			if (result && sourceSegment) {
-				await sendSegmentDiffToCore(sourceSegment, sourceSegment)
-			} else throw new Error('Cannot find segments while copying part')
+			if (targetSegment) {
+				await sendSegmentDiffToCore(targetSegment, targetSegment)
+			} else throw new Error('Cannot find the target segment to send to Core while copying part.')
 		} catch (error) {
 			console.error(error)
 			returnedError = error

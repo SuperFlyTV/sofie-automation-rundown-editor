@@ -73,18 +73,16 @@ export const mutations = {
 			return { error: e as Error }
 		}
 	},
-	// TODO: make sure these descriptions are correct
 	/**
-	 * Copy an existing Segment.
+	 * Copy an existing Rundown.
 	 *
 	 * This function creates a new `Rundown` record by duplicating the data of an existing one.
 	 *
 	 * @async
 	 * @param {Object} payload - The clone parameters.
 	 * @param {string} payload.id - The ID of the source part to clone.
-	 * @param {string} [payload.targetRundownId] - Optional target rundown ID where Rundown should be appended // TODO: Should we just use the rundown to rundown mutation from the segments for this?
 	 * @returns {Promise<{ result?: MutationRundownCopyResult; error?: Error }>}
-	 * Returns an object containing either the newly cloned `Part` (`result`)
+	 * Returns an object containing either the newly cloned `Rundown`, it's `Segment`s, `Part`s and `Piece`s (`result`)
 	 * or an `Error` (`error`) if the operation fails.
 	 */
 	async createRundownCopy(payload: MutationRundownCopy) {
@@ -96,62 +94,52 @@ export const mutations = {
 
 			if (rundownReadError || !sourceRundown) returnedError = rundownReadError
 			else {
-				let targetPlaylistId = sourceRundown.playlistId
+				try {
+					const { result: newRundown, error: createError } = await mutations.create({
+						...sourceRundown,
+						name: sourceRundown.name + ' Copy',
+						id: undefined
+					})
 
-				// If a segmentId was passed, read its metadata for the new part
-				if (payload.targetRundownId && payload.targetRundownId !== sourceRundown.id) {
-					const { result: targetRundown, error: rundownError } = await mutations.readOne(
-						payload.targetRundownId
+					if (!newRundown) {
+						console.error(createError)
+						throw new Error('Could not create new Rundown while copying.')
+					}
+					const copiedSegments = await segmentsMutations.cloneFromRundownToRundown({
+						fromRundownId: sourceRundown.id,
+						toRundownId: newRundown.id
+					})
+
+					if (copiedSegments.error) {
+						throw new Error('Copying the segments into the rundown failed')
+					}
+
+					const { result: partsResult, error: partsResultReadError } = await partMutations.read({
+						rundownId: newRundown.id
+					})
+					const { result: piecesResult, error: piecesResultReadError } = await piecesMutations.read(
+						{
+							segmentId: newRundown.id
+						}
 					)
-					if (rundownError || !targetRundown)
-						throw rundownError || new Error('Target segment not found')
 
-					targetPlaylistId = targetRundown.playlistId
+					if (createError || piecesResultReadError || partsResultReadError)
+						returnedError = createError || piecesResultReadError || partsResultReadError
+					else
+						result =
+							copiedSegments.result && partsResult && piecesResult && newRundown
+								? {
+										rundown: newRundown,
+										segments: copiedSegments.result,
+										parts: Array.isArray(partsResult) ? partsResult : [partsResult],
+										pieces: Array.isArray(piecesResult) ? piecesResult : [piecesResult]
+									}
+								: undefined
+				} catch (e) {
+					returnedError = e
 				}
-
-				const { result: newRundown, error: createError } = !payload.targetRundownId
-					? await mutations.create({
-							...sourceRundown,
-							playlistId: targetPlaylistId,
-							name: sourceRundown.name + ' Copy',
-							id: undefined
-						})
-					: await mutations.readOne(payload.targetRundownId) // TODO: this should be simplified
-
-				if (!newRundown) {
-					console.error(createError)
-					throw new Error('Could not create new Rundown while copying.')
-				}
-				const copiedSegments = await segmentsMutations.cloneFromRundownToRundown({
-					fromRundownId: sourceRundown.id,
-					toRundownId: newRundown.id
-				})
-
-				if (copiedSegments.error) {
-					throw new Error('Copying the segments into the rundown failed')
-				}
-
-				const { result: partsResult, error: partsResultReadError } = await partMutations.read({
-					rundownId: newRundown.id
-				})
-				const { result: piecesResult, error: piecesResultReadError } = await piecesMutations.read({
-					segmentId: newRundown.id
-				})
-
-				if (createError || piecesResultReadError || partsResultReadError)
-					returnedError = createError || piecesResultReadError || partsResultReadError
-				else
-					result =
-						copiedSegments.result && partsResult && piecesResult && newRundown
-							? {
-									rundown: newRundown,
-									segments: copiedSegments.result,
-									parts: Array.isArray(partsResult) ? partsResult : [partsResult],
-									pieces: Array.isArray(piecesResult) ? piecesResult : [piecesResult]
-								}
-							: undefined
 			}
-			return { result, error: returnedError }
+			return { result: !returnedError ? result : undefined, error: returnedError }
 		}
 	},
 	async readOne(id: string): Promise<{ result?: Rundown; error?: Error }> {
@@ -335,19 +323,13 @@ async function handleCopyRundown(payload: MutationRundownCopy) {
 
 	if (cloneError) returnedError = cloneError
 
-	if (result) {
-		try {
-			const { result: resultRundown } = await mutations.readOne(result.rundown.id)
-
-			if (result && resultRundown) {
-				if (payload.targetRundownId) await sendRundownDiffToCore(resultRundown, resultRundown)
-				else
-					await coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(result.rundown))
-			} else throw new Error('Error sending rundown update to core.')
-		} catch (error) {
-			console.error(error)
-			returnedError = error
-		}
+	try {
+		if (result) {
+			await coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(result.rundown))
+		} else throw new Error('Error sending rundown update to core.')
+	} catch (error) {
+		console.error(error)
+		returnedError = error
 	}
 
 	return { result, error: returnedError }

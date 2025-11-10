@@ -304,7 +304,7 @@ export type MutationSegmentCloneFromRundownToRundown = {
 
 export type MutationRundownRead = Pick<Rundown, 'id'>
 
-export type MutationRundownCopy = Pick<Rundown, 'id'> & { targetRundownId?: string }
+export type MutationRundownCopy = Pick<Rundown, 'id'>
 
 export type MutationRundownCopyResult = {
 	rundown: Rundown
