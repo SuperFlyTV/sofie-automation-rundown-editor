@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.4.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.3.0...v2.4.0) (2025-11-10)
+
+
+### Features
+
+* copy elements ([98472d3](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/98472d3934ed54a8225ddc88dcaa573ca19e23ba))
+* copy parts ([8ef4253](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/8ef425313066cb577ba5e6bc7448be6c512a9155))
+* copy pieces ([5280c01](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/5280c011e49ad8e2458b9220c1b6848124bbbc67))
+* copy rundowns ([e5c07e9](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/e5c07e998549db89334d7a757b1c484ff9e34780))
+* copy segments ([ab4f411](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/ab4f4118fdd2c6eeef9002b1e08f96577b150a15))
+
+
+### Bug Fixes
+
+* fallback route in the pieceForm ([e4b8cbc](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/e4b8cbc52fbe80cc9046941c2acb4ea0add4e159))
+
 ## [2.3.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.2.4...v2.3.0) (2025-10-29)
 
 
