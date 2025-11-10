@@ -6,12 +6,17 @@ import {
 	MutationRundownRead,
 	MutationRundownUpdate,
 	MutatedRundown,
-	Rundown
+	Rundown,
+	MutationRundownCopyResult,
+	MutationRundownCopy
 } from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
 import { getMutatedSegmentsFromRundown } from './segments'
+import { mutations as partMutations } from './parts'
+import { mutations as piecesMutations } from './pieces'
+import { mutations as segmentsMutations } from './segments'
 import { Server, Socket } from 'socket.io'
 
 export async function mutateRundown(rundown: Rundown): Promise<MutatedRundown> {
@@ -66,6 +71,75 @@ export const mutations = {
 		} catch (e) {
 			console.error(e)
 			return { error: e as Error }
+		}
+	},
+	/**
+	 * Copy an existing Rundown.
+	 *
+	 * This function creates a new `Rundown` record by duplicating the data of an existing one.
+	 *
+	 * @async
+	 * @param {Object} payload - The clone parameters.
+	 * @param {string} payload.id - The ID of the source part to clone.
+	 * @returns {Promise<{ result?: MutationRundownCopyResult; error?: Error }>}
+	 * Returns an object containing either the newly cloned `Rundown`, it's `Segment`s, `Part`s and `Piece`s (`result`)
+	 * or an `Error` (`error`) if the operation fails.
+	 */
+	async createRundownCopy(payload: MutationRundownCopy) {
+		{
+			let returnedError: unknown | Error | undefined
+			let result: MutationRundownCopyResult | undefined
+
+			const { result: sourceRundown, error: rundownReadError } = await mutations.readOne(payload.id)
+
+			if (rundownReadError || !sourceRundown) returnedError = rundownReadError
+			else {
+				try {
+					const { result: newRundown, error: createError } = await mutations.create({
+						...sourceRundown,
+						name: `${sourceRundown.name}${!payload.preserveName ? ' Copy' : ''}`,
+						id: undefined
+					})
+
+					if (!newRundown) {
+						console.error(createError)
+						throw new Error('Could not create new Rundown while copying.')
+					}
+					const copiedSegments = await segmentsMutations.cloneFromRundownToRundown({
+						fromRundownId: sourceRundown.id,
+						toRundownId: newRundown.id
+					})
+
+					if (copiedSegments.error) {
+						throw new Error('Copying the segments into the rundown failed')
+					}
+
+					const { result: partsResult, error: partsResultReadError } = await partMutations.read({
+						rundownId: newRundown.id
+					})
+					const { result: piecesResult, error: piecesResultReadError } = await piecesMutations.read(
+						{
+							segmentId: newRundown.id
+						}
+					)
+
+					if (createError || piecesResultReadError || partsResultReadError)
+						returnedError = createError || piecesResultReadError || partsResultReadError
+					else
+						result =
+							copiedSegments.result && partsResult && piecesResult && newRundown
+								? {
+										rundown: newRundown,
+										segments: copiedSegments.result,
+										parts: Array.isArray(partsResult) ? partsResult : [partsResult],
+										pieces: Array.isArray(piecesResult) ? piecesResult : [piecesResult]
+									}
+								: undefined
+				} catch (e) {
+					returnedError = e
+				}
+			}
+			return { result: !returnedError ? result : undefined, error: returnedError }
 		}
 	},
 	async readOne(id: string): Promise<{ result?: Rundown; error?: Error }> {
@@ -170,13 +244,31 @@ export const mutations = {
 	}
 }
 
-export function registerRundownsHandlers(socket: Socket, _io: Server) {
+export function registerRundownsHandlers(socket: Socket, io: Server) {
 	socket.on('rundowns', async (action, payload, callback) => {
 		switch (action) {
 			case IpcOperationType.Create:
 				{
 					const { result, error } = await handleCreateRundown(payload)
 					callback(result || error)
+				}
+				break
+			case IpcOperationType.Copy:
+				{
+					const { result, error } = await handleCopyRundown(payload)
+					io.emit('segments:update', {
+						action: 'update',
+						pieces: result?.segments
+					})
+					io.emit('parts:update', {
+						action: 'update',
+						pieces: result?.parts
+					})
+					io.emit('pieces:update', {
+						action: 'update',
+						pieces: result?.pieces
+					})
+					callback(result?.rundown || error)
 				}
 				break
 			case IpcOperationType.Read:
@@ -223,6 +315,24 @@ async function handleCreateRundown(payload: MutationRundownCreate) {
 
 		return { result, error: returnedError }
 	}
+}
+async function handleCopyRundown(payload: MutationRundownCopy) {
+	let returnedError: unknown | Error | undefined
+
+	const { result, error: cloneError } = await mutations.createRundownCopy(payload)
+
+	if (cloneError) returnedError = cloneError
+
+	try {
+		if (result) {
+			await coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(result.rundown))
+		} else throw new Error('Error sending rundown update to core.')
+	} catch (error) {
+		console.error(error)
+		returnedError = error
+	}
+
+	return { result, error: returnedError }
 }
 async function handleUpdateRundown(payload: MutationRundownUpdate) {
 	{

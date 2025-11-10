@@ -1,4 +1,8 @@
-import type { MutationPieceCloneFromParToPart, Piece } from '~backend/background/interfaces.js'
+import type {
+	MutationPieceCloneFromParToPart,
+	MutationPieceCopy,
+	Piece
+} from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 import { ipcAPI } from '~/lib/IPC'
@@ -35,6 +39,15 @@ export const addNewPiece = createAppAsyncThunk(
 			pieceType: payload.pieceType,
 			payload: {}
 		})
+	}
+)
+export const copyPiece = createAppAsyncThunk(
+	'pieces/copyPiece',
+	async (payload: MutationPieceCopy, { dispatch }) => {
+		const pieceResult = await ipcAPI.copyPiece(payload)
+		dispatch(pushPiece(pieceResult))
+
+		return pieceResult
 	}
 )
 export const updatePiece = createAppAsyncThunk(
@@ -84,10 +97,15 @@ const piecesSlice = createSlice({
 		error: null
 	} as PiecesState,
 	reducers: {
-		// initPieces: (_state, action: { type: string; payload: Piece[] }) => {
-		// 	console.log('initPieces', action)
-		// 	return action.payload
-		// }
+		pushPiece: (state, action: { type: string; payload: Piece | Piece[] }) => {
+			const pieces = Array.isArray(action.payload) ? action.payload : [action.payload]
+			const merged = new Map(state.pieces.map((p) => [p.id, p]))
+
+			for (const newPiece of pieces)
+				merged.set(newPiece.id, { ...merged.get(newPiece.id), ...newPiece })
+
+			state.pieces = Array.from(merged.values())
+		}
 	},
 	extraReducers(builder) {
 		builder
@@ -145,4 +163,5 @@ const piecesSlice = createSlice({
 // Export the auto-generated action creator with the same name
 // export const {} = piecesSlice.actions
 
+export const { pushPiece } = piecesSlice.actions
 export default piecesSlice.reducer

@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import type { ComponentProps, ReactElement } from 'react'
 import { useCallback, useState } from 'react'
 import {
 	DraggableComponentWrapper,
@@ -35,7 +35,7 @@ export const DraggableContainer = <T extends DraggableItemData>({
 	itemType,
 	Component,
 	reorder
-}: DraggableContainerProps<T>): ReactElement => {
+}: DraggableContainerProps<T> & ComponentProps<'div'>): ReactElement => {
 	const [hoverState, setHoverState] = useState<HoverState<T>>({
 		hoveredItem: null,
 		newPosition: null,

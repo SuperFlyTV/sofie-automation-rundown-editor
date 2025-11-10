@@ -171,12 +171,17 @@ export interface DBSettings {
 
 export enum IpcOperationType {
 	Create = 'create',
+	Copy = 'copy',
 	Read = 'read',
 	Update = 'update',
 	Reorder = 'reorder',
 	Delete = 'delete',
 	CloneSet = 'cloneSet',
 	Move = 'move'
+}
+
+export interface MutationCopy {
+	preserveName?: boolean
 }
 
 export interface IpcOperation {
@@ -186,6 +191,8 @@ export interface IpcOperation {
 }
 
 export type MutationPieceCreate = SetOptional<Piece, 'id'>
+
+export type MutationPieceCopy = SetOptional<Pick<Piece, 'id' | 'partId'>, 'partId'> & MutationCopy
 
 export type MutationPieceRead = Pick<Piece, 'id' | 'rundownId' | 'segmentId' | 'partId'>
 
@@ -254,6 +261,19 @@ export interface MutatedPiece {
 
 export type MutationPartCreate = SetOptional<Part, 'id' | 'rank'>
 
+export type MutationPartCopy = SetOptional<
+	Pick<Part, 'id' | 'rundownId' | 'segmentId'>,
+	'segmentId'
+> &
+	MutationCopy
+
+export type MutationPartCopyResult = { part: Part; pieces: Piece[] }
+
+export type MutationPartCloneFromSegmentToSegment = {
+	fromSegmentId: string
+	toSegmentId: string
+}
+
 export type MutationPartMove = {
 	sourcePart: Part
 	targetPart: Part
@@ -279,7 +299,25 @@ export type MutationPieceTypeManifestDelete = Pick<PieceTypeManifest, 'id'>
 
 export type MutationRundownCreate = SetOptional<Rundown, 'id'>
 
+export type MutationSegmentCopy = Pick<Segment, 'id' | 'rundownId'> & MutationCopy
+
+export type MutationSegmentCopyResult = { segment: Segment; parts: Part[]; pieces: Piece[] }
+
+export type MutationSegmentCloneFromRundownToRundown = {
+	fromRundownId: string
+	toRundownId: string
+}
+
 export type MutationRundownRead = Pick<Rundown, 'id'>
+
+export type MutationRundownCopy = Pick<Rundown, 'id'> & MutationCopy
+
+export type MutationRundownCopyResult = {
+	rundown: Rundown
+	segments: Segment[]
+	parts: Part[]
+	pieces: Piece[]
+}
 
 export type MutationRundownUpdate = Rundown
 
@@ -327,4 +365,13 @@ export interface MutationReorder<T> {
 	element: T
 	sourceIndex: number
 	targetIndex: number
+}
+export interface PiecesUpdateEvent {
+	pieces?: Piece[]
+}
+export interface PartsUpdateEvent {
+	parts?: Part[]
+}
+export interface SegmentsUpdateEvent {
+	segments?: Segment[]
 }

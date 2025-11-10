@@ -1,15 +1,19 @@
 import type { BackendApi } from '../../../backend/src/background/api/api.js'
 import type {
+	MutationPartCopy,
 	// CoreConnectionInfo,
 	MutationPartCreate,
 	MutationPartMove,
 	MutationPartUpdate,
 	MutationPieceCloneFromParToPart,
+	MutationPieceCopy,
 	MutationPieceCreate,
 	MutationPieceUpdate,
 	MutationReorder,
+	MutationRundownCopy,
 	MutationRundownCreate,
 	MutationRundownUpdate,
+	MutationSegmentCopy,
 	MutationSegmentCreate,
 	MutationSegmentUpdate,
 	OpenFromFileArgs,
@@ -69,6 +73,9 @@ export const ipcAPI: BackendApi = {
 	addNewRundown: (rundown: MutationRundownCreate) => {
 		return getSocket().emitWithAck('rundowns', 'create', rundown)
 	},
+	copyRundown: (rundown: MutationRundownCopy) => {
+		return getSocket().emitWithAck('rundowns', 'copy', rundown)
+	},
 	updateRundown: (rundown: MutationRundownUpdate) => {
 		return getSocket().emitWithAck('rundowns', 'update', rundown)
 	},
@@ -81,6 +88,9 @@ export const ipcAPI: BackendApi = {
 	},
 	addNewSegment: (segment: MutationSegmentCreate) => {
 		return getSocket().emitWithAck('segments', 'create', segment)
+	},
+	copySegment: (segment: MutationSegmentCopy) => {
+		return getSocket().emitWithAck('segments', 'copy', segment)
 	},
 	updateSegment: (segment: MutationSegmentUpdate) => {
 		return getSocket().emitWithAck('segments', 'update', segment)
@@ -96,6 +106,9 @@ export const ipcAPI: BackendApi = {
 
 	getParts: (rundownId: string) => {
 		return getSocket().emitWithAck('parts', 'read', { rundownId })
+	},
+	copyPart: (part: MutationPartCopy) => {
+		return getSocket().emitWithAck('parts', 'copy', part)
 	},
 	addNewPart: (part: MutationPartCreate) => {
 		return getSocket().emitWithAck('parts', 'create', part)
@@ -121,6 +134,9 @@ export const ipcAPI: BackendApi = {
 	addNewPiece: (piece: MutationPieceCreate) => {
 		return getSocket().emitWithAck('pieces', 'create', piece)
 	},
+	copyPiece: (piece: MutationPieceCopy) => {
+		return getSocket().emitWithAck('pieces', 'copy', piece)
+	},
 	updatePiece: (piece: MutationPieceUpdate) => {
 		return getSocket().emitWithAck('pieces', 'update', piece)
 	},
@@ -131,6 +147,16 @@ export const ipcAPI: BackendApi = {
 	},
 	clonePiecesFromPartToPart: (payload: MutationPieceCloneFromParToPart) => {
 		return getSocket().emitWithAck('pieces', 'cloneSet', payload)
+	},
+
+	onPiecesUpdate: (callback) => {
+		return getSocket().on('pieces:update', callback)
+	},
+	onPartsUpdate: (callback) => {
+		return getSocket().on('parts:update', callback)
+	},
+	onSegmentsUpdate: (callback) => {
+		return getSocket().on('segments:update', callback)
 	}
 }
 

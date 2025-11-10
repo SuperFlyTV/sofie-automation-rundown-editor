@@ -1,5 +1,6 @@
 import type {
 	MutationReorder,
+	MutationSegmentCopy,
 	MutationSegmentUpdate,
 	Segment
 } from '~backend/background/interfaces.js'
@@ -7,6 +8,8 @@ import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 import { ipcAPI } from '~/lib/IPC'
 import { removeRundown } from './rundowns'
+import { loadPieces } from './pieces'
+import { loadParts } from './parts'
 
 export interface LoadSegmentsPayload {
 	rundownId: string
@@ -35,6 +38,18 @@ export const addNewSegment = createAppAsyncThunk(
 		})
 	}
 )
+export const copySegment = createAppAsyncThunk(
+	'segments/copySegment',
+	async (payload: MutationSegmentCopy, { dispatch }) => {
+		const segmentResult = await ipcAPI.copySegment(payload)
+
+		dispatch(pushSegment(segmentResult))
+		await dispatch(loadPieces({ rundownId: payload.rundownId }))
+		await dispatch(loadParts({ rundownId: payload.rundownId }))
+
+		return segmentResult
+	}
+)
 export const updateSegment = createAppAsyncThunk(
 	'segments/updateSegment',
 	async (payload: UpdateSegmentPayload) => {
@@ -42,7 +57,7 @@ export const updateSegment = createAppAsyncThunk(
 	}
 )
 export const reorderSegments = createAppAsyncThunk(
-	'parts/reorderSegments',
+	'segments/reorderSegments',
 	async (payload: MutationReorder<MutationSegmentUpdate>) => {
 		return ipcAPI.reorderSegments(payload)
 	}
@@ -82,10 +97,15 @@ const segmentsSlice = createSlice({
 		error: null
 	} as SegmentsState,
 	reducers: {
-		// initSegments: (_state, action: { type: string; payload: Segment[] }) => {
-		// 	console.log('initSegments', action)
-		// 	return action.payload
-		// }
+		pushSegment: (state, action: { type: string; payload: Segment | Segment[] }) => {
+			const segments = Array.isArray(action.payload) ? action.payload : [action.payload]
+			const merged = new Map(state.segments.map((s) => [s.id, s]))
+
+			for (const newSegment of segments)
+				merged.set(newSegment.id, { ...merged.get(newSegment.id), ...newSegment })
+
+			state.segments = Array.from(merged.values())
+		}
 	},
 	extraReducers(builder) {
 		builder
@@ -147,4 +167,5 @@ const segmentsSlice = createSlice({
 // Export the auto-generated action creator with the same name
 // export const {} = segmentsSlice.actions
 
+export const { pushSegment } = segmentsSlice.actions
 export default segmentsSlice.reducer

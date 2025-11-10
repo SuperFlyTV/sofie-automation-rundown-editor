@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useCallback } from 'react'
-import { Button, ListGroup } from 'react-bootstrap'
+import { Button, ListGroup, Stack } from 'react-bootstrap'
+import { CopyIconButton } from '~/components/copyIconButton'
 import { useToasts } from '~/components/toasts/toasts'
 import { ipcAPI } from '~/lib/IPC'
 import { useAppDispatch, useAppSelector } from '~/store/app'
-import { addNewRundown, importRundown } from '~/store/rundowns'
+import { addNewRundown, copyRundown, importRundown } from '~/store/rundowns'
 import { verifyImportIsRundown } from '~/util/verifyImport'
+import type { Rundown } from '~backend/background/interfaces'
 
 export const Route = createFileRoute('/_root/')({
 	component: Index
@@ -21,6 +23,28 @@ function Index() {
 		dispatch(addNewRundown({ playlistId: null })).unwrap()
 	}, [dispatch])
 
+	const handleCopyRundown = (sourceRundown: Rundown) => {
+		// perform operation
+		dispatch(
+			copyRundown({
+				id: sourceRundown.id
+			})
+		)
+			.unwrap()
+			.then(async (newRundownResult) => {
+				// Navigate user to the new rundown
+				await navigate({
+					to: `/rundown/${newRundownResult.id}`
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Adding rundown',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			})
+	}
 	const selectImportRundown = () => {
 		ipcAPI
 			.openFromFile({ title: 'Import rundown' })
@@ -39,10 +63,7 @@ function Index() {
 							await dispatch(importRundown(serializedRundown))
 
 							await navigate({
-								to: '/rundown/$rundownId',
-								params: {
-									rundownId: serializedRundown.rundown.id
-								}
+								to: `/rundown/${serializedRundown.rundown.id}`
 							})
 						} catch (e: unknown) {
 							console.error(e)
@@ -84,8 +105,21 @@ function Index() {
 
 			<ListGroup>
 				{rundowns.map((rd) => (
-					<ListGroup.Item key={rd.id} action as={Link} to={`/rundown/${rd.id}`}>
-						{rd.name}
+					<ListGroup.Item
+						key={rd.id}
+						action
+						as={Link}
+						to={`/rundown/${rd.id}`}
+						className="copy-item"
+					>
+						<Stack direction="horizontal">
+							{rd.name}
+							<CopyIconButton
+								onClick={() => handleCopyRundown(rd)}
+								className="ms-auto copy-icon-button"
+								style={{ position: 'relative', top: '-.25em' }}
+							/>
+						</Stack>
 					</ListGroup.Item>
 				))}
 			</ListGroup>

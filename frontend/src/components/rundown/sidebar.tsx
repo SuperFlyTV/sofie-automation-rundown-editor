@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector, type RootState } from '~/store/app'
-import { addNewPart, movePart, reorderParts } from '~/store/parts'
-import { addNewSegment, reorderSegments } from '~/store/segments'
+import { addNewPart, copyPart, movePart, reorderParts } from '~/store/parts'
+import { addNewSegment, copySegment, reorderSegments } from '~/store/segments'
 import type { Part, Segment } from '~backend/background/interfaces'
 import './sidebar.scss'
 import classNames from 'classnames'
@@ -9,6 +9,7 @@ import { useToasts } from '../toasts/toasts'
 import { DragTypes } from '~/components/drag-and-drop/DragTypes'
 import { DraggableContainer } from '../drag-and-drop/DraggableContainer'
 import { createSelector } from '@reduxjs/toolkit'
+import { CopyIconButton } from '../copyIconButton'
 
 const selectAllParts = (state: RootState) => state.parts.parts
 
@@ -73,7 +74,11 @@ export function RundownSidebar({
 			<DraggableContainer
 				items={sortedSegments}
 				itemType={DragTypes.SEGMENT}
-				Component={({ data: segment }) => <SidebarSegment key={segment.id} segment={segment} />}
+				Component={({ data: segment }) => (
+					<>
+						<SidebarSegment key={segment.id} segment={segment} />
+					</>
+				)}
 				id={rundownId}
 				reorder={handleReorderSegment}
 			/>
@@ -110,6 +115,29 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 				console.error(e)
 				toasts.show({
 					headerContent: 'Adding part',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			})
+	}
+
+	const handleCopyPart = (sourcePart: Part) => {
+		// perform operation
+		dispatch(
+			copyPart({
+				id: sourcePart.id,
+				rundownId: sourcePart.rundownId
+			})
+		)
+			.unwrap()
+			.then(async (newPartResult) => {
+				await navigate({
+					to: `/rundown/${newPartResult.rundownId}/segment/${newPartResult.segmentId}/part/${newPartResult.id}`
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Adding piece',
 					bodyContent: 'Encountered an unexpected error'
 				})
 			})
@@ -157,47 +185,82 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 	}
 
 	const segmentDuration = sortedParts.reduce((acc, part) => acc + (part.payload?.duration ?? 0), 0)
-
+	const handleCopySegment = (sourceSegment: Segment) => {
+		// perform operation
+		dispatch(
+			copySegment({
+				id: sourceSegment.id,
+				rundownId: sourceSegment.rundownId
+			})
+		)
+			.unwrap()
+			.then(async (newSegmentResult) => {
+				navigate({
+					to: `/rundown/${newSegmentResult.rundownId}/segment/${newSegmentResult.id}`
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Adding segment',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			})
+	}
 	return (
 		<div>
-			<Link
-				to="/rundown/$rundownId/segment/$segmentId"
-				params={{ rundownId: segment.rundownId, segmentId: segment.id }}
-			>
-				<button
-					className={classNames('segment-button', {
-						floated: segment.float
-					})}
-					style={{ marginBottom: '2px' }}
+			<div className={'copy-item'}>
+				<Link
+					to="/rundown/$rundownId/segment/$segmentId"
+					params={{ rundownId: segment.rundownId, segmentId: segment.id }}
 				>
-					{segment.name}
-					<span className="item-duration">{displayTime(segmentDuration)}</span>
-				</button>
-			</Link>
-
+					<button
+						className={classNames('segment-button', {
+							floated: segment.float
+						})}
+						style={{ marginBottom: '2px' }}
+					>
+						{segment.name}
+						<span className="item-duration">{displayTime(segmentDuration)}</span>
+					</button>
+				</Link>
+				<CopyIconButton
+					onClick={() => handleCopySegment(segment)}
+					style={{ position: 'absolute', zIndex: '99', top: '.5em', width: 'auto', right: '.25em' }}
+					className="copy-icon-button"
+				/>
+			</div>
 			<div className="ps-3">
 				<DraggableContainer
 					items={sortedParts}
 					itemType={DragTypes.PART}
 					Component={({ data: part }) => (
-						<Link
-							key={part.id}
-							to="/rundown/$rundownId/segment/$segmentId/part/$partId"
-							params={{
-								rundownId: segment.rundownId,
-								segmentId: segment.id,
-								partId: part.id
-							}}
-						>
-							<button
-								className={classNames('part-button', {
-									floated: segment.float || part.float
-								})}
+						<div className={'copy-item'}>
+							<Link
+								key={`sidebarPart_${part.id}`}
+								to="/rundown/$rundownId/segment/$segmentId/part/$partId"
+								params={{
+									rundownId: segment.rundownId,
+									segmentId: segment.id,
+									partId: part.id
+								}}
 							>
-								{part.name}
-								<span className="item-duration">{displayTime(part.payload?.duration)}</span>
-							</button>
-						</Link>
+								<button
+									className={classNames('part-button', {
+										floated: segment.float || part.float
+									})}
+								>
+									{part.name}
+									<span className="item-duration">{displayTime(part.payload?.duration)}</span>
+								</button>
+							</Link>
+
+							<CopyIconButton
+								onClick={() => handleCopyPart(part)}
+								style={{ position: 'absolute', zIndex: '99', top: '0', width: 'auto', right: 0 }}
+								className="copy-icon-button"
+							/>
+						</div>
 					)}
 					id={segment.id}
 					reorder={handleReorderPart}

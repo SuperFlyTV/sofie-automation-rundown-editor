@@ -1,4 +1,5 @@
 import type {
+	MutationPartCopy,
 	MutationPartMove,
 	MutationPartUpdate,
 	MutationReorder,
@@ -47,10 +48,20 @@ export const addNewPart = createAppAsyncThunk(
 		})
 	}
 )
+export const copyPart = createAppAsyncThunk(
+	'pieces/copyPart',
+	async (payload: MutationPartCopy, { dispatch }) => {
+		const partResult = await ipcAPI.copyPart(payload)
+		dispatch(pushPart(partResult))
+		await dispatch(loadPieces({ rundownId: payload.rundownId }))
+
+		return partResult
+	}
+)
 export const movePart = createAppAsyncThunk(
 	'parts/movePart',
 	async (payload: MutationPartMove, { dispatch }) => {
-		const partResult = ipcAPI.movePart(payload)
+		const partResult = await ipcAPI.movePart(payload)
 
 		//update parts and pieces
 		await dispatch(loadParts({ rundownId: payload.sourcePart.rundownId }))
@@ -106,10 +117,14 @@ const partsSlice = createSlice({
 		error: null
 	} as PartsState,
 	reducers: {
-		// initParts: (_state, action: { type: string; payload: Part[] }) => {
-		// 	console.log('initParts', action)
-		// 	return action.payload
-		// }
+		pushPart: (state, action: { type: string; payload: Part | Part[] }) => {
+			const parts = Array.isArray(action.payload) ? action.payload : [action.payload]
+			const merged = new Map(state.parts.map((p) => [p.id, p]))
+
+			for (const newPart of parts) merged.set(newPart.id, { ...merged.get(newPart.id), ...newPart })
+
+			state.parts = Array.from(merged.values())
+		}
 	},
 	extraReducers(builder) {
 		builder
@@ -170,4 +185,5 @@ const partsSlice = createSlice({
 // Export the auto-generated action creator with the same name
 // export const {} = partsSlice.actions
 
+export const { pushPart } = partsSlice.actions
 export default partsSlice.reducer

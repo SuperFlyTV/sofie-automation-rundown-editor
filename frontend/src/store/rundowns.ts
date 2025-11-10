@@ -1,7 +1,14 @@
-import type { Rundown, SerializedRundown } from '~backend/background/interfaces.js'
+import type {
+	MutationRundownCopy,
+	Rundown,
+	SerializedRundown
+} from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 import { ipcAPI } from '~/lib/IPC'
+import { loadPieces } from './pieces'
+import { loadParts } from './parts'
+import { loadSegments } from './segments'
 
 export interface NewRundownPayload {
 	playlistId: string | null
@@ -21,6 +28,19 @@ export const addNewRundown = createAppAsyncThunk(
 			sync: false,
 			playlistId: initialRundown.playlistId
 		})
+	}
+)
+export const copyRundown = createAppAsyncThunk(
+	'rundown/copyRundown',
+	async (payload: MutationRundownCopy, { dispatch }) => {
+		const rundownResult = await ipcAPI.copyRundown(payload)
+
+		dispatch(pushRundown(rundownResult))
+		await dispatch(loadPieces({ rundownId: payload.id }))
+		await dispatch(loadParts({ rundownId: payload.id }))
+		await dispatch(loadSegments({ rundownId: payload.id }))
+
+		return rundownResult
 	}
 )
 export const updateRundown = createAppAsyncThunk(
@@ -89,6 +109,14 @@ const rundownsSlice = createSlice({
 		initRundowns: (_state, action: { type: string; payload: Rundown[] }) => {
 			console.log('initRundowns', action)
 			return action.payload
+		},
+		// TODO: prevent already existing IDs to be pushed
+		pushRundown: (state, action: { type: string; payload: Rundown | Rundown[] }) => {
+			if (Array.isArray(action.payload)) {
+				state.push(...action.payload)
+			} else {
+				state.push(action.payload)
+			}
 		}
 	},
 	extraReducers(builder) {
@@ -117,5 +145,6 @@ const rundownsSlice = createSlice({
 
 // Export the auto-generated action creator with the same name
 export const { initRundowns } = rundownsSlice.actions
+export const { pushRundown } = rundownsSlice.actions
 
 export default rundownsSlice.reducer

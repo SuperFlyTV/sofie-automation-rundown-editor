@@ -1,26 +1,33 @@
 import type {
 	ApplicationSettings,
 	CoreConnectionInfo,
+	MutationPartCopy,
 	MutationPartCreate,
 	MutationPartMove,
 	MutationPartUpdate,
 	MutationPieceCloneFromParToPart,
+	MutationPieceCopy,
 	MutationPieceCreate,
 	MutationPieceUpdate,
 	MutationReorder,
+	MutationRundownCopy,
 	MutationRundownCreate,
 	MutationRundownUpdate,
+	MutationSegmentCopy,
 	MutationSegmentCreate,
 	MutationSegmentUpdate,
 	OpenFromFileArgs,
 	Part,
+	PartsUpdateEvent,
 	Piece,
 	PiecesManifest,
+	PiecesUpdateEvent,
 	PieceTypeManifest,
 	Playlist,
 	Rundown,
 	SaveToFileArgs,
-	Segment
+	Segment,
+	SegmentsUpdateEvent
 } from '../interfaces'
 
 export interface BackendApi {
@@ -46,17 +53,20 @@ export interface BackendApi {
 
 	getRundowns: () => Promise<Rundown[]>
 	addNewRundown: (rundown: MutationRundownCreate) => Promise<Rundown>
+	copyRundown: (payload: MutationRundownCopy) => Promise<Rundown>
 	updateRundown: (rundown: MutationRundownUpdate) => Promise<Rundown>
 	deleteRundown: (rundownId: string) => Promise<void>
 
 	getSegments: (rundownId: string) => Promise<Segment[]>
 	addNewSegment: (segment: MutationSegmentCreate) => Promise<Segment>
+	copySegment: (payload: MutationSegmentCopy) => Promise<Segment>
 	updateSegment: (segment: MutationSegmentUpdate) => Promise<Segment>
 	reorderSegments: (payload: MutationReorder<MutationSegmentUpdate>) => Promise<Segment[]>
 	deleteSegment: (segmentId: string) => Promise<void>
 
 	getParts: (rundownId: string) => Promise<Part[]>
 	addNewPart: (part: MutationPartCreate) => Promise<Part>
+	copyPart: (payload: MutationPartCopy) => Promise<Part>
 	movePart: (payload: MutationPartMove) => Promise<Part>
 	updatePart: (part: MutationPartUpdate) => Promise<Part>
 	reorderParts: (payload: MutationReorder<MutationPartUpdate>) => Promise<Part[]>
@@ -64,7 +74,11 @@ export interface BackendApi {
 
 	getPieces: (rundownId: string) => Promise<Piece[]>
 	addNewPiece: (piece: MutationPieceCreate) => Promise<Piece>
+	copyPiece: (payload: MutationPieceCopy) => Promise<Piece>
 	updatePiece: (piece: MutationPieceUpdate) => Promise<Piece>
 	deletePiece: (pieceId: string) => Promise<void>
 	clonePiecesFromPartToPart: (payload: MutationPieceCloneFromParToPart) => Promise<Piece[]>
+	onPiecesUpdate: (callback: (update: PiecesUpdateEvent) => void) => void
+	onPartsUpdate: (callback: (update: PartsUpdateEvent) => void) => void
+	onSegmentsUpdate: (callback: (update: SegmentsUpdateEvent) => void) => void
 }

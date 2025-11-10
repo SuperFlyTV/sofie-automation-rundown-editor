@@ -3,6 +3,7 @@ import {
 	IpcOperationType,
 	MutatedPiece,
 	MutationPieceCloneFromParToPart,
+	MutationPieceCopy,
 	MutationPieceCreate,
 	MutationPieceDelete,
 	MutationPieceRead,
@@ -49,6 +50,69 @@ export const mutations = {
 		} catch (e) {
 			console.error(e)
 			return { error: e as Error }
+		}
+	},
+	/**
+	 * Copy an existing Piece.
+	 *
+	 * This function creates a new `Piece` record by duplicating the data of an existing one.
+	 * If a `partId` is provided, the cloned piece will be created inside that target part.
+	 * If no `partId` is given, the cloned piece will be created within the same part
+	 * as the source piece.
+	 *
+	 * @async
+	 * @param {Object} payload - The clone parameters.
+	 * @param {string} payload.id - The ID of the source piece to clone.
+	 * @param {string} [payload.partId] - Optional target part ID where the cloned piece should be placed.
+	 * @returns {Promise<{ result?: Piece; error?: Error }>}
+	 * Returns an object containing either the newly cloned `Piece` (`result`)
+	 * or an `Error` (`error`) if the operation fails.
+	 */
+	async createPieceCopy(payload: MutationPieceCopy) {
+		{
+			let returnedError: unknown | Error | undefined
+			let result: Piece | undefined
+
+			const { result: sourcePiece, error: pieceReadError } = await mutations.readOne(payload.id)
+
+			try {
+				if (pieceReadError || !sourcePiece) returnedError = pieceReadError
+				else {
+					let targetPartId = payload.partId || sourcePiece.partId
+					let targetPlaylistId = sourcePiece.playlistId
+					let targetRundownId = sourcePiece.rundownId
+					let targetSegmentId = sourcePiece.segmentId
+
+					// If a partId was passed, read its metadata for the new piece
+					if (payload.partId && payload.partId !== sourcePiece.partId) {
+						const { result: targetPart, error: partError } = await partsMutations.readOne(
+							payload.partId
+						)
+						if (partError || !targetPart) throw partError || new Error('Target part not found')
+
+						targetPlaylistId = targetPart.playlistId
+						targetRundownId = targetPart.rundownId
+						targetSegmentId = targetPart.segmentId
+					}
+
+					const { result: newPiece, error: createError } = await mutations.create({
+						...sourcePiece,
+						playlistId: targetPlaylistId,
+						rundownId: targetRundownId,
+						segmentId: targetSegmentId,
+						partId: targetPartId,
+						name: `${sourcePiece.name}${!payload.preserveName ? ' Copy' : ''}`,
+						id: undefined
+					})
+
+					if (createError) returnedError = createError
+					else result = newPiece
+				}
+			} catch (e) {
+				returnedError = e
+			}
+
+			return { result: !returnedError ? result : undefined, error: returnedError }
 		}
 	},
 	async readOne(id: string): Promise<{ result?: Piece; error?: Error }> {
@@ -188,32 +252,31 @@ export const mutations = {
 				throw new Error('Either the source or target Part was not found')
 			}
 
-			const { result: sourcePieces } = await mutations.read({ partId: fromPartId })
-			if (sourcePieces && Array.isArray(sourcePieces)) {
-				await Promise.all(
-					sourcePieces.map(async (piece) => {
-						return await mutations.create({
-							playlistId: toPart.playlistId,
-							rundownId: toPart.rundownId,
-							segmentId: toPart.segmentId,
-							partId: toPart.id,
-							name: piece.name,
-							start: piece.start,
-							duration: piece.duration,
-							pieceType: piece.pieceType,
-							payload: piece.payload
-						})
+			const { result: sourcePiecesResult } = await mutations.read({ partId: fromPartId })
+			const sourcePieces = Array.isArray(sourcePiecesResult)
+				? sourcePiecesResult
+				: sourcePiecesResult
+					? [sourcePiecesResult]
+					: []
+			if (sourcePieces) {
+				return {
+					result: (
+						await Promise.all(
+							sourcePieces.map(async (piece) => {
+								return await mutations.createPieceCopy({
+									id: piece.id,
+									partId: toPart.id,
+									preserveName: true
+								})
+							})
+						)
+					).map((p) => {
+						if (p.error) throw p.error
+						return p.result as Piece
 					})
-				)
-
-				const { result: resultPieces } = await mutations.read({ partId: toPartId })
-				if (resultPieces) {
-					return { result: Array.isArray(resultPieces) ? resultPieces : [resultPieces] }
-				} else {
-					throw new Error("Couldn't retrieve cloned pieces after creation.")
 				}
 			} else {
-				throw new Error('Pre-conditions for cloning were not met.')
+				throw new Error(`Couldn't find source pieces`)
 			}
 		} catch (e) {
 			console.error(e)
@@ -228,6 +291,12 @@ export function registerPiecesHandlers(socket: Socket, _io: Server) {
 			case IpcOperationType.Create:
 				{
 					const { result, error } = await handleCreatePiece(payload)
+					callback(result || error)
+				}
+				break
+			case IpcOperationType.Copy:
+				{
+					const { result, error } = await handleCopyPiece(payload)
 					callback(result || error)
 				}
 				break
@@ -276,6 +345,25 @@ async function handleCreatePiece(payload: MutationPieceCreate) {
 	}
 }
 
+async function handleCopyPiece(payload: MutationPieceCopy) {
+	let returnedError: unknown | Error | undefined
+
+	const { result, error: cloneError } = await mutations.createPieceCopy(payload)
+
+	if (cloneError) returnedError = cloneError
+
+	if (result) {
+		try {
+			await sendPartUpdateToCore(result.partId)
+		} catch (error) {
+			console.error(error)
+			returnedError = error
+		}
+	}
+
+	return { result, error: returnedError }
+}
+
 async function handleUpdatePiece(payload: MutationPieceUpdate) {
 	{
 		let returnedError: unknown | Error | undefined
@@ -319,7 +407,7 @@ async function handleDeletePiece(payload: MutationPieceDelete) {
 	}
 }
 
-async function handleCloneSetPiece(payload: MutationPieceCloneFromParToPart) {
+export async function handleCloneSetPiece(payload: MutationPieceCloneFromParToPart) {
 	{
 		let returnedError: unknown | Error | undefined
 

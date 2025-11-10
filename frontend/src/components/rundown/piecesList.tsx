@@ -1,27 +1,39 @@
 import { useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import './piecesList.scss'
-import { addNewPiece } from '~/store/pieces'
+import { addNewPiece, copyPiece } from '~/store/pieces'
 import type { Part, Piece } from '~backend/background/interfaces'
 import { toTime } from '~/util/lib'
 import { useToasts } from '../toasts/toasts'
+import { createSelector } from '@reduxjs/toolkit'
+import { CopyIconButton } from '../copyIconButton'
+
+const selectPiecesByPart = createSelector(
+	[
+		(state) => state.pieces.pieces,
+		(_state, props: { rundownId: string; segmentId: string; partId: string }) => props
+	],
+	(pieces, props) =>
+		pieces.filter(
+			(p: Piece) =>
+				p.rundownId === props.rundownId &&
+				p.segmentId === props.segmentId &&
+				p.partId === props.partId
+		)
+)
 
 export function PiecesList({ part }: { part: Part }) {
-	const pieces = useAppSelector((state) =>
-		state.pieces.pieces.filter(
-			(piece) =>
-				piece.rundownId === part.rundownId &&
-				piece.segmentId === part.segmentId &&
-				piece.partId === part.id
-		)
-	)
+	const { rundownId, segmentId, id: partId } = part
+	const partIds = useMemo(() => ({ rundownId, segmentId, partId }), [rundownId, segmentId, partId])
+
+	const pieces = useAppSelector((state) => selectPiecesByPart(state, partIds))
 
 	return (
 		<table className="rundown-pieces-list">
 			<tbody>
-				{pieces.map((piece) => (
+				{pieces.map((piece: Piece) => (
 					<PieceRow key={piece.id} piece={piece} />
 				))}
 
@@ -41,7 +53,9 @@ export function PiecesList({ part }: { part: Part }) {
 }
 
 function PieceRow({ piece }: { piece: Piece }) {
+	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
+	const toasts = useToasts()
 
 	const manifest = useAppSelector((state) =>
 		state.piecesManifest.manifest?.find((p) => p.id === piece.pieceType)
@@ -59,12 +73,44 @@ function PieceRow({ piece }: { piece: Piece }) {
 		})
 	}
 
+	const performCopyPiece = () => {
+		// perform operation
+		dispatch(
+			copyPiece({
+				id: piece.id
+			})
+		)
+			.unwrap()
+			.then(async (newPiece) => {
+				// Navigate user to the new piece
+				await navigate({
+					to: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId',
+					params: {
+						rundownId: newPiece.rundownId,
+						segmentId: newPiece.segmentId,
+						partId: newPiece.partId,
+						pieceId: newPiece.id
+					}
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Adding piece',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			})
+	}
+
 	return (
 		<tr onClick={pieceRowClick}>
 			<td className="piece-type" style={{ backgroundColor: manifest?.colour }}>
 				{manifest?.shortName || piece.pieceType}
 			</td>
 			<td className="piece-name">{piece.name}</td>
+			<td>
+				<CopyIconButton onClick={performCopyPiece} />
+			</td>
 			<td className="piece-start">{piece.start !== undefined ? toTime(piece.start) : ''}</td>
 			<td className="piece-duration">
 				{piece.duration !== undefined ? toTime(piece.duration) : ''}
@@ -118,9 +164,9 @@ function NewPieceButton({
 			})
 		)
 			.unwrap()
-			.then((piece) => {
+			.then(async (piece) => {
 				// Navigate user to the new piece
-				navigate({
+				await navigate({
 					to: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId',
 					params: { rundownId, segmentId, partId, pieceId: piece.id }
 				})
@@ -162,7 +208,7 @@ function NewPieceButton({
 							onChange={(e) => setSelectedPieceType(e.target.value)}
 						>
 							{piecesManifest?.map((piece) => (
-								<option key={piece.id} value={piece.id}>
+								<option key={`pieceManifest_${piece.id}`} value={piece.id}>
 									{piece.name}
 								</option>
 							))}
