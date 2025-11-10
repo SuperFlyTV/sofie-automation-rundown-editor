@@ -97,13 +97,14 @@ const segmentsSlice = createSlice({
 		error: null
 	} as SegmentsState,
 	reducers: {
-		// TODO: prevent already existing IDs to be pushed
 		pushSegment: (state, action: { type: string; payload: Segment | Segment[] }) => {
-			if (Array.isArray(action.payload)) {
-				state.segments.push(...action.payload)
-			} else {
-				state.segments.push(action.payload)
-			}
+			const segments = Array.isArray(action.payload) ? action.payload : [action.payload]
+			const merged = new Map(state.segments.map((s) => [s.id, s]))
+
+			for (const newSegment of segments)
+				merged.set(newSegment.id, { ...merged.get(newSegment.id), ...newSegment })
+
+			state.segments = Array.from(merged.values())
 		}
 	},
 	extraReducers(builder) {

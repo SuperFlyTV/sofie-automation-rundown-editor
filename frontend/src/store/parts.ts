@@ -117,13 +117,13 @@ const partsSlice = createSlice({
 		error: null
 	} as PartsState,
 	reducers: {
-		// TODO: prevent already existing IDs to be pushed
 		pushPart: (state, action: { type: string; payload: Part | Part[] }) => {
-			if (Array.isArray(action.payload)) {
-				state.parts.push(...action.payload)
-			} else {
-				state.parts.push(action.payload)
-			}
+			const parts = Array.isArray(action.payload) ? action.payload : [action.payload]
+			const merged = new Map(state.parts.map((p) => [p.id, p]))
+
+			for (const newPart of parts) merged.set(newPart.id, { ...merged.get(newPart.id), ...newPart })
+
+			state.parts = Array.from(merged.values())
 		}
 	},
 	extraReducers(builder) {
