@@ -145,7 +145,7 @@ export const mutations = {
 						...sourceSegment,
 						playlistId: targetPlaylistId,
 						rundownId: targetRundownId,
-						name: sourceSegment.name + ' Copy',
+						name: `${sourceSegment.name}${!payload.preserveName ? ' Copy' : ''}`,
 						id: undefined
 					})
 
@@ -243,7 +243,8 @@ export const mutations = {
 							sourceSegments.map(async (segment) => {
 								return await mutations.createSegmentCopy({
 									id: segment.id,
-									rundownId: toRundown.id
+									rundownId: toRundown.id,
+									preserveName: true
 								})
 							})
 						)

@@ -180,6 +180,10 @@ export enum IpcOperationType {
 	Move = 'move'
 }
 
+export interface MutationCopy {
+	preserveName?: boolean
+}
+
 export interface IpcOperation {
 	type: IpcOperationType
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -188,7 +192,7 @@ export interface IpcOperation {
 
 export type MutationPieceCreate = SetOptional<Piece, 'id'>
 
-export type MutationPieceCopy = SetOptional<Pick<Piece, 'id' | 'partId'>, 'partId'>
+export type MutationPieceCopy = SetOptional<Pick<Piece, 'id' | 'partId'>, 'partId'> & MutationCopy
 
 export type MutationPieceRead = Pick<Piece, 'id' | 'rundownId' | 'segmentId' | 'partId'>
 
@@ -260,7 +264,9 @@ export type MutationPartCreate = SetOptional<Part, 'id' | 'rank'>
 export type MutationPartCopy = SetOptional<
 	Pick<Part, 'id' | 'rundownId' | 'segmentId'>,
 	'segmentId'
->
+> &
+	MutationCopy
+
 export type MutationPartCopyResult = { part: Part; pieces: Piece[] }
 
 export type MutationPartCloneFromSegmentToSegment = {
@@ -293,7 +299,7 @@ export type MutationPieceTypeManifestDelete = Pick<PieceTypeManifest, 'id'>
 
 export type MutationRundownCreate = SetOptional<Rundown, 'id'>
 
-export type MutationSegmentCopy = Pick<Segment, 'id' | 'rundownId'>
+export type MutationSegmentCopy = Pick<Segment, 'id' | 'rundownId'> & MutationCopy
 
 export type MutationSegmentCopyResult = { segment: Segment; parts: Part[]; pieces: Piece[] }
 
@@ -304,7 +310,7 @@ export type MutationSegmentCloneFromRundownToRundown = {
 
 export type MutationRundownRead = Pick<Rundown, 'id'>
 
-export type MutationRundownCopy = Pick<Rundown, 'id'>
+export type MutationRundownCopy = Pick<Rundown, 'id'> & MutationCopy
 
 export type MutationRundownCopyResult = {
 	rundown: Rundown

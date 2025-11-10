@@ -101,7 +101,7 @@ export const mutations = {
 						rundownId: targetRundownId,
 						segmentId: targetSegmentId,
 						partId: targetPartId,
-						name: sourcePiece.name + ' Copy',
+						name: `${sourcePiece.name}${!payload.preserveName ? ' Copy' : ''}`,
 						id: undefined
 					})
 
@@ -265,7 +265,8 @@ export const mutations = {
 							sourcePieces.map(async (piece) => {
 								return await mutations.createPieceCopy({
 									id: piece.id,
-									partId: toPart.id
+									partId: toPart.id,
+									preserveName: true
 								})
 							})
 						)

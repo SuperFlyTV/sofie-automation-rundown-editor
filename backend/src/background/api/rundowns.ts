@@ -97,7 +97,7 @@ export const mutations = {
 				try {
 					const { result: newRundown, error: createError } = await mutations.create({
 						...sourceRundown,
-						name: sourceRundown.name + ' Copy',
+						name: `${sourceRundown.name}${!payload.preserveName ? ' Copy' : ''}`,
 						id: undefined
 					})
 
