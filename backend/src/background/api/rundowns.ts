@@ -35,13 +35,19 @@ export async function mutateRundown(rundown: Rundown): Promise<MutatedRundown> {
 }
 
 export async function sendRundownDiffToCore(oldDocument: Rundown, newDocument: Rundown) {
-	if (oldDocument.sync && !newDocument.sync) {
+	const wasSynced = oldDocument.sync && !oldDocument.isTemplate
+	const willSync = newDocument.sync && !newDocument.isTemplate
+
+	if (wasSynced && !willSync) {
+		// The rundown was synced, but now it should NOT be synced (so we delete it from core)
 		console.log('delete rundown', oldDocument, newDocument)
 		return coreHandler.core.coreMethods.dataRundownDelete(oldDocument.id)
-	} else if (!oldDocument.sync && newDocument.sync) {
+	} else if (!wasSynced && willSync) {
+		// The rundown was not synced, but now it should be synced (so we create it in core)
 		console.log('create rundown', oldDocument, newDocument)
 		return coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(newDocument))
-	} else if (oldDocument.sync && newDocument.sync) {
+	} else if (wasSynced && willSync) {
+		// The rundown was synced and still should be synced (so we send an update to core)
 		console.log('update rundown', oldDocument, newDocument)
 		return coreHandler.core.coreMethods.dataRundownUpdate(await mutateRundown(newDocument))
 	}

@@ -87,24 +87,53 @@ export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 						</>
 					)}
 				/>
-				<form.Field
-					name="sync"
-					children={(field) => (
+				<form.Subscribe selector={(state) => state.values.isTemplate}>
+					{(isTemplate) => (
+						<form.Field name="sync">
+							{(syncField) => {
+								// UI should show unchecked while isTemplate is true,
+								// but the underlying value remains unchanged
+								const displayChecked = isTemplate ? false : syncField.state.value
+
+								return (
+									<>
+										<Form.Group className="mb-3">
+											<Form.Label htmlFor={syncField.name}>Sync to Sofie:</Form.Label>
+											<Form.Switch
+												name={syncField.name}
+												checked={displayChecked}
+												onBlur={syncField.handleBlur}
+												onChange={(e) => syncField.handleChange(e.target.checked)}
+												disabled={isTemplate} // greyed out when template is on
+											/>
+										</Form.Group>
+										<FieldInfo field={syncField} />
+									</>
+								)
+							}}
+						</form.Field>
+					)}
+				</form.Subscribe>
+				<form.Field name="isTemplate">
+					{(templateField) => (
 						<>
 							<Form.Group className="mb-3">
-								<Form.Label htmlFor={field.name}>Sync to Sofie:</Form.Label>
+								<Form.Label htmlFor={templateField.name}>Template:</Form.Label>
 								<Form.Switch
-									name={field.name}
+									name={templateField.name}
 									type="text"
-									checked={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.checked)}
+									checked={templateField.state.value}
+									onBlur={templateField.handleBlur}
+									onChange={(e) => {
+										const checked = e.target.checked
+										templateField.handleChange(checked)
+									}}
 								/>
 							</Form.Group>
-							<FieldInfo field={field} />
+							<FieldInfo field={templateField} />
 						</>
 					)}
-				/>
+				</form.Field>
 
 				<form.Field
 					name="expectedStartTime"

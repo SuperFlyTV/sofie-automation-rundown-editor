@@ -24,6 +24,8 @@ export interface Rundown {
 	name: string
 	/** Whether to sync the rundown to Sofie */
 	sync: boolean
+	/** Flags the rundown as template. Template rundowns cannot sync to Sofie. */
+	isTemplate: boolean
 
 	/** Date of when the rundown is supposed to start */
 	expectedStartTime?: number
