@@ -235,8 +235,6 @@ export const mutations = {
 				.map((s) => {
 					const doc = JSON.parse(s.document)
 
-					console.log(doc.isTemplate)
-
 					return {
 						...doc,
 						id: s.id,
@@ -246,8 +244,6 @@ export const mutations = {
 					}
 				})
 				.filter((s) => s.isTemplate)
-			console.log('normalized below')
-			normalizedSegments.forEach((s) => console.log(s))
 
 			return {
 				result: normalizedSegments

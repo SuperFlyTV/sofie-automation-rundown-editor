@@ -57,7 +57,8 @@ export const mutations = {
 	async create(payload: MutationRundownCreate): Promise<{ result?: Rundown; error?: Error }> {
 		const id = payload.id || uuid()
 		const document: Partial<MutationRundownCreate> = {
-			...payload
+			...payload,
+			sync: false
 		}
 		delete document.id
 		delete document.playlistId
@@ -105,7 +106,7 @@ export const mutations = {
 						...sourceRundown,
 						name: getNewRundownName(sourceRundown, {
 							preserveName: false,
-							fromTemplate: true
+							fromTemplate: sourceRundown.isTemplate
 						}),
 						isTemplate: false,
 						id: undefined
@@ -332,15 +333,6 @@ async function handleCopyRundown(payload: MutationRundownCopy) {
 	const { result, error: cloneError } = await mutations.createRundownCopy(payload)
 
 	if (cloneError) returnedError = cloneError
-
-	try {
-		if (result) {
-			await coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(result.rundown))
-		} else throw new Error('Error sending rundown update to core.')
-	} catch (error) {
-		console.error(error)
-		returnedError = error
-	}
 
 	return { result, error: returnedError }
 }
