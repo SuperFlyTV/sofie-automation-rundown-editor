@@ -14,9 +14,10 @@ function RouteComponent() {
 	)
 	if (!segment) throw redirect({ to: '/rundown/$rundownId', params: { rundownId } })
 
+	const rundown = useAppSelector((state) => state.rundowns.find((r) => r.id === rundownId))
 	return (
 		<div className="p-4">
-			<SegmentPropertiesForm segment={segment} />
+			<SegmentPropertiesForm segment={segment} rundownIsTemplate={rundown?.isTemplate ?? false} />
 		</div>
 	)
 }

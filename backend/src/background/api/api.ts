@@ -13,8 +13,10 @@ import type {
 	MutationRundownCopy,
 	MutationRundownCreate,
 	MutationRundownUpdate,
+	MutationSegmentCloneFromRundownToRundown,
 	MutationSegmentCopy,
 	MutationSegmentCreate,
+	MutationSegmentsRead,
 	MutationSegmentUpdate,
 	OpenFromFileArgs,
 	Part,
@@ -57,9 +59,12 @@ export interface BackendApi {
 	updateRundown: (rundown: MutationRundownUpdate) => Promise<Rundown>
 	deleteRundown: (rundownId: string) => Promise<void>
 
-	getSegments: (rundownId: string) => Promise<Segment[]>
+	getSegments: (payload: MutationSegmentsRead) => Promise<Segment[]>
 	addNewSegment: (segment: MutationSegmentCreate) => Promise<Segment>
 	copySegment: (payload: MutationSegmentCopy) => Promise<Segment>
+	cloneSegmentsFromRundownToRundown: (
+		payload: MutationSegmentCloneFromRundownToRundown
+	) => Promise<Segment[]>
 	updateSegment: (segment: MutationSegmentUpdate) => Promise<Segment>
 	reorderSegments: (payload: MutationReorder<MutationSegmentUpdate>) => Promise<Segment[]>
 	deleteSegment: (segmentId: string) => Promise<void>

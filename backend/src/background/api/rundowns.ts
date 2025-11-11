@@ -103,7 +103,11 @@ export const mutations = {
 				try {
 					const { result: newRundown, error: createError } = await mutations.create({
 						...sourceRundown,
-						name: `${sourceRundown.name}${!payload.preserveName ? ' Copy' : ''}`,
+						name: getNewRundownName(sourceRundown, {
+							preserveName: false,
+							fromTemplate: true
+						}),
+						isTemplate: false,
 						id: undefined
 					})
 
@@ -381,4 +385,29 @@ async function handleDeleteRundown(payload: MutationRundownDelete) {
 
 		return { result: returnedError === undefined ? true : undefined, error: returnedError }
 	}
+}
+
+function getNewRundownName(
+	sourceRundown: Rundown,
+	payload: { preserveName?: boolean; fromTemplate?: boolean }
+) {
+	const now = new Date()
+	const dateSuffix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+		now.getDate()
+	).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(
+		now.getMinutes()
+	).padStart(2, '0')}`
+
+	if (payload.fromTemplate) {
+		// From template → append date/time
+		return `${sourceRundown.name} ${dateSuffix}`
+	}
+
+	if (!payload.preserveName) {
+		// Not preserving name → append ' Copy'
+		return `${sourceRundown.name} Copy`
+	}
+
+	// Preserve original name
+	return sourceRundown.name
 }

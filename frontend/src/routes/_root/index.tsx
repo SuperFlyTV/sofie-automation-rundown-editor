@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useCallback } from 'react'
-import { Button, ListGroup, Stack } from 'react-bootstrap'
+import { Badge, Button, ListGroup, Stack } from 'react-bootstrap'
 import { CopyIconButton } from '~/components/copyIconButton'
 import { EditIconButton } from '~/components/editIconButton'
 import { useToasts } from '~/components/toasts/toasts'
@@ -83,7 +83,7 @@ function Index() {
 				</div>
 			</div>
 
-			<RundownList title="Templates" rundowns={templateRundowns} />
+			<RundownList title="" rundowns={templateRundowns} />
 			<RundownList title="Rundowns" rundowns={normalRundowns} hideIfEmpty={false} />
 		</div>
 	)
@@ -94,11 +94,12 @@ function RundownListItem({ rundown }: { rundown: Rundown }) {
 	const navigate = useNavigate()
 	const toasts = useToasts()
 
-	const handleCopyRundown = (sourceRundown: Rundown) => {
+	const handleCopyRundown = (sourceRundown: Rundown, fromTemplate: boolean = false) => {
 		// perform operation
 		dispatch(
 			copyRundown({
-				id: sourceRundown.id
+				id: sourceRundown.id,
+				fromTemplate
 			})
 		)
 			.unwrap()
@@ -129,6 +130,11 @@ function RundownListItem({ rundown }: { rundown: Rundown }) {
 	return (
 		<ListGroup.Item action onClick={handleClick} className="copy-item">
 			<Stack direction="horizontal">
+				{rundown.isTemplate ? (
+					<Badge pill bg="danger" className="me-2">
+						Template
+					</Badge>
+				) : null}
 				{rundown.name}
 				{rundown.isTemplate ? (
 					<EditIconButton
