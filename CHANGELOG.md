@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.5.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.4.0...v2.5.0) (2025-11-12)
+
+
+### Features
+
+* basic rundown templates ([b91c2bd](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/b91c2bd0c1cdd892e8c6ea5b21ae129a70a2ba22))
+* import segments from other rundowns ([4af45e9](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/4af45e915b071aee5defbcb8075eeed430664f0f))
+* templates ([30c0259](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/30c0259d8fdf82426cdc899e79fe3d204f97953c))
+
+
+### Bug Fixes
+
+* prevent accidental sync of rundowns on copy ([18af080](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/18af080854bf34ab189b726c0c6d7bf521b09fd3))
+
 ## [2.4.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.3.0...v2.4.0) (2025-11-10)
 
 
