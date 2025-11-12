@@ -8,7 +8,13 @@ import { useAppDispatch } from '~/store/app'
 import { removeSegment, updateSegment } from '~/store/segments'
 import { useToasts } from '../toasts/toasts'
 
-export function SegmentPropertiesForm({ segment }: { segment: Segment }) {
+export function SegmentPropertiesForm({
+	segment,
+	rundownIsTemplate
+}: {
+	segment: Segment
+	rundownIsTemplate: boolean
+}) {
 	const dispatch = useAppDispatch()
 	const toasts = useToasts()
 
@@ -79,7 +85,28 @@ export function SegmentPropertiesForm({ segment }: { segment: Segment }) {
 						</>
 					)}
 				/>
-
+				{rundownIsTemplate && (
+					<form.Field name="isTemplate">
+						{(templateField) => (
+							<>
+								<Form.Group className="mb-3">
+									<Form.Label htmlFor={templateField.name}>Template:</Form.Label>
+									<Form.Switch
+										name={templateField.name}
+										type="text"
+										checked={templateField.state.value}
+										onBlur={templateField.handleBlur}
+										onChange={(e) => {
+											const checked = e.target.checked
+											templateField.handleChange(checked)
+										}}
+									/>
+								</Form.Group>
+								<FieldInfo field={templateField} />
+							</>
+						)}
+					</form.Field>
+				)}
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting, state.isPristine]}
 					children={([canSubmit, isSubmitting, isPristine]) => (

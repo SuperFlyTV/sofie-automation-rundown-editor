@@ -13,8 +13,10 @@ import type {
 	MutationRundownCopy,
 	MutationRundownCreate,
 	MutationRundownUpdate,
+	MutationSegmentCloneFromRundownToRundown,
 	MutationSegmentCopy,
 	MutationSegmentCreate,
+	MutationSegmentsRead,
 	MutationSegmentUpdate,
 	OpenFromFileArgs,
 	Part,
@@ -83,14 +85,17 @@ export const ipcAPI: BackendApi = {
 		return getSocket().emitWithAck('rundowns', 'delete', { id: rundownId })
 	},
 
-	getSegments: (rundownId: string) => {
-		return getSocket().emitWithAck('segments', 'read', { rundownId })
+	getSegments: (payload: MutationSegmentsRead) => {
+		return getSocket().emitWithAck('segments', 'read', payload)
 	},
 	addNewSegment: (segment: MutationSegmentCreate) => {
 		return getSocket().emitWithAck('segments', 'create', segment)
 	},
 	copySegment: (segment: MutationSegmentCopy) => {
 		return getSocket().emitWithAck('segments', 'copy', segment)
+	},
+	cloneSegmentsFromRundownToRundown: (payload: MutationSegmentCloneFromRundownToRundown) => {
+		return getSocket().emitWithAck('segments', 'cloneSet', payload)
 	},
 	updateSegment: (segment: MutationSegmentUpdate) => {
 		return getSocket().emitWithAck('segments', 'update', segment)

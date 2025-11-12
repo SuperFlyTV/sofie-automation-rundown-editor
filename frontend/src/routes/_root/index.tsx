@@ -1,7 +1,8 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useCallback } from 'react'
-import { Button, ListGroup, Stack } from 'react-bootstrap'
+import { Badge, Button, ListGroup, Stack } from 'react-bootstrap'
 import { CopyIconButton } from '~/components/copyIconButton'
+import { EditIconButton } from '~/components/editIconButton'
 import { useToasts } from '~/components/toasts/toasts'
 import { ipcAPI } from '~/lib/IPC'
 import { useAppDispatch, useAppSelector } from '~/store/app'
@@ -23,28 +24,6 @@ function Index() {
 		dispatch(addNewRundown({ playlistId: null })).unwrap()
 	}, [dispatch])
 
-	const handleCopyRundown = (sourceRundown: Rundown) => {
-		// perform operation
-		dispatch(
-			copyRundown({
-				id: sourceRundown.id
-			})
-		)
-			.unwrap()
-			.then(async (newRundownResult) => {
-				// Navigate user to the new rundown
-				await navigate({
-					to: `/rundown/${newRundownResult.id}`
-				})
-			})
-			.catch((e) => {
-				console.error(e)
-				toasts.show({
-					headerContent: 'Adding rundown',
-					bodyContent: 'Encountered an unexpected error'
-				})
-			})
-	}
 	const selectImportRundown = () => {
 		ipcAPI
 			.openFromFile({ title: 'Import rundown' })
@@ -88,7 +67,8 @@ function Index() {
 				})
 			})
 	}
-
+	const templateRundowns = rundowns.filter((r) => r.isTemplate)
+	const normalRundowns = rundowns.filter((r) => !r.isTemplate)
 	return (
 		<div className="p-2">
 			<div className="d-flex justify-content-between align-items-center">
@@ -103,25 +83,108 @@ function Index() {
 				</div>
 			</div>
 
+			<RundownList title="" rundowns={templateRundowns} />
+			<RundownList title="Rundowns" rundowns={normalRundowns} hideIfEmpty={false} />
+		</div>
+	)
+}
+
+function RundownListItem({ rundown }: { rundown: Rundown }) {
+	const dispatch = useAppDispatch()
+	const navigate = useNavigate()
+	const toasts = useToasts()
+
+	const handleCopyRundown = (sourceRundown: Rundown, fromTemplate: boolean = false) => {
+		// perform operation
+		dispatch(
+			copyRundown({
+				id: sourceRundown.id,
+				fromTemplate
+			})
+		)
+			.unwrap()
+			.then(async (newRundownResult) => {
+				// Navigate user to the new rundown
+				await navigate({
+					to: `/rundown/${newRundownResult.id}`
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Adding rundown',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			})
+	}
+	const handleClick = () => {
+		if (rundown.isTemplate) {
+			// Clicking template creates a new rundown based on it
+			handleCopyRundown(rundown)
+		} else {
+			// Navigate to the rundown page
+			navigate({ to: `/rundown/${rundown.id}` })
+		}
+	}
+
+	return (
+		<ListGroup.Item action onClick={handleClick} className="copy-item">
+			<Stack direction="horizontal">
+				{rundown.isTemplate ? (
+					<Badge pill bg="danger" className="me-2">
+						Template
+					</Badge>
+				) : null}
+				{rundown.name}
+				{rundown.isTemplate ? (
+					<EditIconButton
+						onClick={(e) => {
+							e.preventDefault()
+							e.stopPropagation()
+							navigate({ to: `/rundown/${rundown.id}` })
+						}}
+						className="ms-auto copy-icon-button"
+						style={{ position: 'relative', top: '-.25em' }}
+					/>
+				) : (
+					<CopyIconButton
+						onClick={(e) => {
+							e.preventDefault()
+							e.stopPropagation()
+							handleCopyRundown(rundown)
+						}}
+						className="ms-auto copy-icon-button"
+						style={{ position: 'relative', top: '-.25em' }}
+					/>
+				)}
+			</Stack>
+		</ListGroup.Item>
+	)
+}
+
+interface RundownListProps {
+	title: string
+	rundowns: Rundown[]
+	hideIfEmpty?: boolean
+}
+
+function RundownList({ title, rundowns, hideIfEmpty = true }: RundownListProps) {
+	if (hideIfEmpty && rundowns.length === 0) return null
+
+	return (
+		<div className="mb-4">
+			<h4 className="mt-3 mb-2">{title}</h4>
 			<ListGroup>
-				{rundowns.map((rd) => (
+				{rundowns.length > 0 ? (
+					rundowns.map((rd) => <RundownListItem key={rd.id} rundown={rd} />)
+				) : (
 					<ListGroup.Item
-						key={rd.id}
-						action
-						as={Link}
-						to={`/rundown/${rd.id}`}
-						className="copy-item"
+						className="text-muted fst-italic"
+						style={{ textAlign: 'center', opacity: '50%' }}
 					>
-						<Stack direction="horizontal">
-							{rd.name}
-							<CopyIconButton
-								onClick={() => handleCopyRundown(rd)}
-								className="ms-auto copy-icon-button"
-								style={{ position: 'relative', top: '-.25em' }}
-							/>
-						</Stack>
+						No rundowns found, create or import one!
 					</ListGroup.Item>
-				))}
+				)}
 			</ListGroup>
 		</div>
 	)

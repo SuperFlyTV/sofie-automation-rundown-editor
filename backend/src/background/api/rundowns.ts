@@ -35,13 +35,19 @@ export async function mutateRundown(rundown: Rundown): Promise<MutatedRundown> {
 }
 
 export async function sendRundownDiffToCore(oldDocument: Rundown, newDocument: Rundown) {
-	if (oldDocument.sync && !newDocument.sync) {
+	const wasSynced = oldDocument.sync && !oldDocument.isTemplate
+	const willSync = newDocument.sync && !newDocument.isTemplate
+
+	if (wasSynced && !willSync) {
+		// The rundown was synced, but now it should NOT be synced (so we delete it from core)
 		console.log('delete rundown', oldDocument, newDocument)
 		return coreHandler.core.coreMethods.dataRundownDelete(oldDocument.id)
-	} else if (!oldDocument.sync && newDocument.sync) {
+	} else if (!wasSynced && willSync) {
+		// The rundown was not synced, but now it should be synced (so we create it in core)
 		console.log('create rundown', oldDocument, newDocument)
 		return coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(newDocument))
-	} else if (oldDocument.sync && newDocument.sync) {
+	} else if (wasSynced && willSync) {
+		// The rundown was synced and still should be synced (so we send an update to core)
 		console.log('update rundown', oldDocument, newDocument)
 		return coreHandler.core.coreMethods.dataRundownUpdate(await mutateRundown(newDocument))
 	}
@@ -51,7 +57,8 @@ export const mutations = {
 	async create(payload: MutationRundownCreate): Promise<{ result?: Rundown; error?: Error }> {
 		const id = payload.id || uuid()
 		const document: Partial<MutationRundownCreate> = {
-			...payload
+			...payload,
+			sync: false
 		}
 		delete document.id
 		delete document.playlistId
@@ -97,7 +104,11 @@ export const mutations = {
 				try {
 					const { result: newRundown, error: createError } = await mutations.create({
 						...sourceRundown,
-						name: `${sourceRundown.name}${!payload.preserveName ? ' Copy' : ''}`,
+						name: getNewRundownName(sourceRundown, {
+							preserveName: false,
+							fromTemplate: sourceRundown.isTemplate
+						}),
+						isTemplate: false,
 						id: undefined
 					})
 
@@ -323,15 +334,6 @@ async function handleCopyRundown(payload: MutationRundownCopy) {
 
 	if (cloneError) returnedError = cloneError
 
-	try {
-		if (result) {
-			await coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(result.rundown))
-		} else throw new Error('Error sending rundown update to core.')
-	} catch (error) {
-		console.error(error)
-		returnedError = error
-	}
-
 	return { result, error: returnedError }
 }
 async function handleUpdateRundown(payload: MutationRundownUpdate) {
@@ -375,4 +377,29 @@ async function handleDeleteRundown(payload: MutationRundownDelete) {
 
 		return { result: returnedError === undefined ? true : undefined, error: returnedError }
 	}
+}
+
+function getNewRundownName(
+	sourceRundown: Rundown,
+	payload: { preserveName?: boolean; fromTemplate?: boolean }
+) {
+	const now = new Date()
+	const dateSuffix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+		now.getDate()
+	).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(
+		now.getMinutes()
+	).padStart(2, '0')}`
+
+	if (payload.fromTemplate) {
+		// From template → append date/time
+		return `${sourceRundown.name} ${dateSuffix}`
+	}
+
+	if (!payload.preserveName) {
+		// Not preserving name → append ' Copy'
+		return `${sourceRundown.name} Copy`
+	}
+
+	// Preserve original name
+	return sourceRundown.name
 }

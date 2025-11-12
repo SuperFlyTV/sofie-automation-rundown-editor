@@ -10,7 +10,11 @@ import {
 	MutationReorder,
 	MutationSegmentCopy,
 	MutationSegmentCopyResult,
-	MutationSegmentCloneFromRundownToRundown
+	MutationSegmentCloneFromRundownToRundown,
+	MutationSegmentsRead,
+	MutationRundownCopyResult,
+	Part,
+	Piece
 } from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
@@ -18,7 +22,7 @@ import { coreHandler } from '../coreHandler'
 import { getMutatedPartsFromSegment } from './parts'
 import { mutations as rundownMutations, sendRundownDiffToCore } from './rundowns'
 import { mutations as partMutations } from './parts'
-import { mutations as piecesMutations } from './pieces'
+import { mutations as pieceMutations } from './pieces'
 import { spliceReorder } from '../util'
 import { Server, Socket } from 'socket.io'
 
@@ -70,6 +74,7 @@ export const mutations = {
 				: 0
 
 		const document: Partial<MutationSegmentCreate> = {
+			isTemplate: false,
 			...payload,
 			rank: payload.rank ?? segmentsLength
 		}
@@ -146,7 +151,8 @@ export const mutations = {
 						playlistId: targetPlaylistId,
 						rundownId: targetRundownId,
 						name: `${sourceSegment.name}${!payload.preserveName ? ' Copy' : ''}`,
-						id: undefined
+						id: undefined,
+						isTemplate: false
 					})
 
 					if (!newSegment) {
@@ -165,11 +171,9 @@ export const mutations = {
 					const { result: newSegmentResult, error: _resultReadError } = await mutations.readOne(
 						newSegment.id
 					)
-					const { result: piecesResult, error: piecesResultReadError } = await piecesMutations.read(
-						{
-							segmentId: newSegment.id
-						}
-					)
+					const { result: piecesResult, error: piecesResultReadError } = await pieceMutations.read({
+						segmentId: newSegment.id
+					})
 
 					if (createError || piecesResultReadError)
 						returnedError = createError || piecesResultReadError
@@ -217,7 +221,38 @@ export const mutations = {
 			return { error: e as Error }
 		}
 	},
-	// TODO: add an optional argument to keep the original name
+	async readTemplateSegments() {
+		try {
+			const stmt = db.prepare(`
+      SELECT s.*
+      FROM segments s
+		  JOIN rundowns r ON s.rundownId = r.id
+		  WHERE json_extract(r.document, '$.isTemplate') = 1
+    `)
+			const segments = stmt.all() as unknown as (DBSegment & { rundownDoc: string })[]
+
+			const normalizedSegments = segments
+				.map((s) => {
+					const doc = JSON.parse(s.document)
+
+					return {
+						...doc,
+						id: s.id,
+						rundownId: s.rundownId,
+						playlistId: s.playlistId,
+						isTemplate: doc.isTemplate === true
+					}
+				})
+				.filter((s) => s.isTemplate)
+
+			return {
+				result: normalizedSegments
+			}
+		} catch (error) {
+			console.error(error)
+			return { error: error as Error }
+		}
+	},
 	async cloneFromRundownToRundown({
 		fromRundownId,
 		toRundownId
@@ -447,12 +482,32 @@ export function registerSegmentsHandlers(socket: Socket, io: Server) {
 					callback(result?.segment || error)
 				}
 				break
-			case IpcOperationType.Read:
+			case IpcOperationType.CloneSet:
 				{
-					const { result, error } = await mutations.read(payload)
+					const { result, error } = await handleCloneSetSegment(payload)
+					io.emit('parts:update', {
+						action: 'update',
+						pieces: result
+					})
+					io.emit('pieces:update', {
+						action: 'update',
+						pieces: result?.pieces
+					})
+					callback(result?.segments || error)
+				}
+				break
+			case IpcOperationType.Read: {
+				const payloadSegmentRead = payload as MutationSegmentsRead
+
+				if ('isTemplate' in payloadSegmentRead) {
+					const { result, error } = await mutations.readTemplateSegments()
+					callback(result || error)
+				} else {
+					const { result, error } = await mutations.read(payloadSegmentRead)
 					callback(result || error)
 				}
 				break
+			}
 			case IpcOperationType.Update:
 				{
 					const { result, error } = await handleUpdateSegment(payload)
@@ -581,6 +636,63 @@ async function handleReorderSegments(payload: MutationReorder<MutationSegmentUpd
 		return { result: reorderedSegments, error: returnedError }
 	}
 }
+export async function handleCloneSetSegment(
+	payload: MutationSegmentCloneFromRundownToRundown
+): Promise<{ result?: MutationRundownCopyResult; error?: unknown }> {
+	let returnedError: unknown
+
+	try {
+		const { result: clonedSegments, error: cloneError } =
+			await mutations.cloneFromRundownToRundown(payload)
+
+		if (cloneError) throw cloneError
+		if (!clonedSegments) throw new Error('Clone operation returned no segments.')
+
+		const { result: targetRundown } = await rundownMutations.readOne(payload.toRundownId)
+		if (!targetRundown) throw new Error('Cannot find the target rundown for Core sync.')
+
+		const parts: Part[] = (
+			await Promise.all(
+				clonedSegments.map((segment) =>
+					partMutations
+						.read({ segmentId: segment.id })
+						.then((res) =>
+							Array.isArray(res.result) ? res.result : res.result ? [res.result] : []
+						)
+				)
+			)
+		).flat()
+
+		const pieces: Piece[] = (
+			await Promise.all(
+				clonedSegments.map((segment) =>
+					pieceMutations
+						.read({ segmentId: segment.id })
+						.then((res) =>
+							Array.isArray(res.result) ? res.result : res.result ? [res.result] : []
+						)
+				)
+			)
+		).flat()
+
+		await sendRundownDiffToCore(targetRundown, targetRundown)
+
+		return {
+			result: {
+				rundown: targetRundown,
+				segments: clonedSegments,
+				parts,
+				pieces
+			}
+		}
+	} catch (error) {
+		console.error(error)
+		returnedError = error
+	}
+
+	return { error: returnedError }
+}
+
 async function handleDeleteSegment(payload: MutationSegmentDelete) {
 	{
 		let returnedError: unknown | Error | undefined

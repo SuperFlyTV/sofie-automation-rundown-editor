@@ -26,7 +26,8 @@ export const addNewRundown = createAppAsyncThunk(
 		return ipcAPI.addNewRundown({
 			name: 'New rundown',
 			sync: false,
-			playlistId: initialRundown.playlistId
+			playlistId: initialRundown.playlistId,
+			isTemplate: false
 		})
 	}
 )

@@ -1,5 +1,6 @@
 import type {
 	MutationReorder,
+	MutationSegmentCloneFromRundownToRundown,
 	MutationSegmentCopy,
 	MutationSegmentUpdate,
 	Segment
@@ -34,7 +35,8 @@ export const addNewSegment = createAppAsyncThunk(
 			playlistId: payload.playlistId,
 			rundownId: payload.rundownId,
 			rank: payload.rank,
-			float: false
+			float: false,
+			isTemplate: false
 		})
 	}
 )
@@ -48,6 +50,22 @@ export const copySegment = createAppAsyncThunk(
 		await dispatch(loadParts({ rundownId: payload.rundownId }))
 
 		return segmentResult
+	}
+)
+
+export const cloneSegmentsFromRundownToRundown = createAppAsyncThunk(
+	'segments/cloneSegmentsFromRundownToRundown',
+	async (payload: MutationSegmentCloneFromRundownToRundown, { dispatch }) => {
+		const result = await ipcAPI.cloneSegmentsFromRundownToRundown(payload)
+
+		if (result.length) {
+			dispatch(pushSegment(result))
+		}
+
+		await dispatch(loadParts({ rundownId: payload.toRundownId }))
+		await dispatch(loadPieces({ rundownId: payload.toRundownId }))
+
+		return result
 	}
 )
 export const updateSegment = createAppAsyncThunk(
@@ -80,7 +98,7 @@ interface SegmentsState {
 export const loadSegments = createAppAsyncThunk(
 	'segments/loadSegments',
 	async (payload: LoadSegmentsPayload) => {
-		const segments = await ipcAPI.getSegments(payload.rundownId)
+		const segments = await ipcAPI.getSegments({ rundownId: payload.rundownId })
 		return {
 			rundownId: payload.rundownId,
 			segments

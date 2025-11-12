@@ -24,6 +24,8 @@ export interface Rundown {
 	name: string
 	/** Whether to sync the rundown to Sofie */
 	sync: boolean
+	/** Flags the rundown as template. Template rundowns cannot sync to Sofie. */
+	isTemplate: boolean
 
 	/** Date of when the rundown is supposed to start */
 	expectedStartTime?: number
@@ -45,6 +47,8 @@ export interface Segment {
 	rank: number
 	/** Whether this segment is floated */
 	float: boolean
+	/** Flags the segment as template. Template segments can be selected individually to be imported into other rundowns. */
+	isTemplate: boolean
 }
 export interface Part {
 	/** Id of the part as reported by the ingest gateway. Must be unique for each part in the rundown */
@@ -182,6 +186,7 @@ export enum IpcOperationType {
 
 export interface MutationCopy {
 	preserveName?: boolean
+	fromTemplate?: boolean
 }
 
 export interface IpcOperation {
@@ -323,7 +328,9 @@ export type MutationRundownUpdate = Rundown
 
 export type MutationRundownDelete = Pick<Rundown, 'id'>
 
-export type MutationSegmentCreate = SetOptional<Segment, 'id' | 'rank'>
+export type MutationSegmentsRead = { rundownId: string } | { isTemplate: boolean }
+
+export type MutationSegmentCreate = SetOptional<Segment, 'id' | 'rank' | 'isTemplate'>
 
 export type MutationSegmentRead = Pick<Segment, 'id' | 'rundownId'>
 

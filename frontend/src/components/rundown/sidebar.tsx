@@ -10,6 +10,9 @@ import { DragTypes } from '~/components/drag-and-drop/DragTypes'
 import { DraggableContainer } from '../drag-and-drop/DraggableContainer'
 import { createSelector } from '@reduxjs/toolkit'
 import { CopyIconButton } from '../copyIconButton'
+import { BsBoxArrowInDownRight } from 'react-icons/bs'
+import { useState } from 'react'
+import ImportSegmentModal from './importSegmentModal/importSegmentModal'
 
 const selectAllParts = (state: RootState) => state.parts.parts
 
@@ -28,6 +31,7 @@ export function RundownSidebar({
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
 	const toasts = useToasts()
+	const [showImportModal, setShowImportModal] = useState(false)
 
 	const segments = useAppSelector((state) => state.segments.segments)
 	const sortedSegments = [...segments].sort((a, b) => a.rank - b.rank)
@@ -82,9 +86,21 @@ export function RundownSidebar({
 				id={rundownId}
 				reorder={handleReorderSegment}
 			/>
-			<button className="segment-button add-button" onClick={handleAddSegment}>
-				+ Add Segment
-			</button>
+			<div className="d-flex gap-1">
+				<button className="segment-button add-button" onClick={handleAddSegment}>
+					+ Add Segment
+				</button>
+
+				<button className="segment-button add-button" onClick={() => setShowImportModal(true)}>
+					<BsBoxArrowInDownRight style={{ top: '-.15em', position: 'relative' }} /> Import Segment
+				</button>
+			</div>
+
+			<ImportSegmentModal
+				show={showImportModal}
+				onClose={() => setShowImportModal(false)}
+				targetRundownId={rundownId}
+			/>
 		</div>
 	)
 }
