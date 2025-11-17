@@ -1,9 +1,21 @@
 import path from 'path'
+import fs from 'fs'
 import sqlite from 'node:sqlite'
 
 // In dev, store the database in the current working directory
 // In production, store the database in the user data directory
 const dbFile = path.join(process.cwd(), '../data/data.db')
+const dbDir = path.dirname(dbFile)
+
+// Ensure the database directory exists
+if (!fs.existsSync(dbDir)) {
+    try {
+        fs.mkdirSync(dbDir)
+    } catch (err) {
+        console.error('Unable to create database directory:', dbDir, err)
+        process.exit(1)
+    }
+}
 console.log('Database location:', dbFile)
 
 let db: sqlite.DatabaseSync
