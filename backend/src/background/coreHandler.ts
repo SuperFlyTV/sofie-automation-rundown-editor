@@ -9,6 +9,7 @@ import {
 	PeripheralDevicePubSubCollectionsNames,
 	stringifyError
 } from '@sofie-automation/server-core-integration'
+import process from 'node:process'
 import * as P from '@sofie-automation/shared-lib/dist/peripheralDevice/peripheralDeviceAPI'
 import { StatusCode } from '@sofie-automation/shared-lib/dist/lib/status'
 import { protectString } from '@sofie-automation/shared-lib/dist/lib/protectedString'
@@ -80,8 +81,8 @@ export class CoreHandler {
 		})
 
 		const ddpConfig: DDPConnectorOptions = {
-			host: (settings || {}).coreUrl || '127.0.0.1',
-			port: (settings || {}).corePort || 3000
+			host: (settings || {}).coreUrl || process.env.CORE_HOST || '127.0.0.1',
+			port: (settings || {}).corePort || Number(process.env.CORE_PORT) || 3000
 		}
 		this._connectionInfo.url = ddpConfig.host
 		this._connectionInfo.port = ddpConfig.port
