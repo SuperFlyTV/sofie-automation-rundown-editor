@@ -7,17 +7,8 @@ import {
 const deviceConfigSchema: JSONSchema = {
 	$schema: 'https://json-schema.org/draft/2020-12/schema',
 	type: 'object',
-	properties: {
-		deviceId: {
-			type: 'string',
-			description: 'The ID of the device'
-		},
-		deviceToken: {
-			type: 'string',
-			description: 'The token of the device'
-		}
-	},
-	required: ['deviceId', 'deviceToken']
+	properties: {},
+	required: []
 }
 const subDeviceConfigSchema: JSONSchema = {
 	$schema: 'https://json-schema.org/draft/2020-12/schema',
