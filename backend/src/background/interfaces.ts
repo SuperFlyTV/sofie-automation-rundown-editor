@@ -186,7 +186,7 @@ export enum IpcOperationType {
 
 export interface MutationCopy {
 	preserveName?: boolean
-	fromTemplate?: boolean
+	preserveTemplate?: boolean
 }
 
 export interface IpcOperation {
@@ -358,6 +358,7 @@ export interface SerializedRundown {
 	segments: Segment[]
 	parts: Part[]
 	pieces: Piece[]
+	isTemplate?: boolean
 }
 
 export interface OpenFromFileArgs {

@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useCallback } from 'react'
-import { Badge, Button, ListGroup, Stack } from 'react-bootstrap'
-import { CopyIconButton } from '~/components/copyIconButton'
-import { EditIconButton } from '~/components/editIconButton'
+import { useCallback, useState } from 'react'
+import { Button, Dropdown, SplitButton, Stack, Tab, Tabs } from 'react-bootstrap'
+import { BsBoxArrowInUp, BsPlus } from 'react-icons/bs'
+import { RundownList } from '~/components/rundownList/rundownList'
 import { useToasts } from '~/components/toasts/toasts'
 import { ipcAPI } from '~/lib/IPC'
 import { useAppDispatch, useAppSelector } from '~/store/app'
@@ -15,16 +15,41 @@ export const Route = createFileRoute('/_root/')({
 })
 
 function Index() {
+	const [activeTab, setActiveTab] = useState<string | null>('rundowns')
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
 	const rundowns = useAppSelector((state) => state.rundowns)
 	const toasts = useToasts()
 
-	const createNewRundown = useCallback(() => {
-		dispatch(addNewRundown({ playlistId: null })).unwrap()
-	}, [dispatch])
+	const createNewRundown = useCallback(
+		(isTemplate: boolean) => {
+			dispatch(addNewRundown({ playlistId: null, isTemplate })).unwrap()
+		},
+		[dispatch]
+	)
+	const handleCopyRundown = (sourceRundown: Rundown, preserveTemplate: boolean = false) => {
+		dispatch(
+			copyRundown({
+				id: sourceRundown.id,
+				preserveTemplate
+			})
+		)
+			.unwrap()
+			.then(async (newRundownResult) => {
+				await navigate({
+					to: `/rundown/${newRundownResult.id}`
+				})
+			})
+			.catch((e) => {
+				console.error(e)
+				toasts.show({
+					headerContent: 'Adding rundown',
+					bodyContent: 'Encountered an unexpected error'
+				})
+			})
+	}
 
-	const selectImportRundown = () => {
+	const selectImportRundown = (isTemplate: boolean) => {
 		ipcAPI
 			.openFromFile({ title: 'Import rundown' })
 			.then(async (serializedRundown) => {
@@ -39,7 +64,7 @@ function Index() {
 						})
 					} else {
 						try {
-							await dispatch(importRundown(serializedRundown))
+							await dispatch(importRundown({ ...serializedRundown, isTemplate }))
 
 							await navigate({
 								to: `/rundown/${serializedRundown.rundown.id}`
@@ -71,121 +96,60 @@ function Index() {
 	const normalRundowns = rundowns.filter((r) => !r.isTemplate)
 	return (
 		<div className="p-2">
-			<div className="d-flex justify-content-between align-items-center">
-				<h2>Home</h2>
-				<div className="d-flex">
-					<Button className="m-2" onClick={createNewRundown}>
-						New
-					</Button>
-					<Button className="m-2" onClick={selectImportRundown}>
-						Import
-					</Button>
-				</div>
-			</div>
-
-			<RundownList title="" rundowns={templateRundowns} />
-			<RundownList title="Rundowns" rundowns={normalRundowns} hideIfEmpty={false} />
-		</div>
-	)
-}
-
-function RundownListItem({ rundown }: { rundown: Rundown }) {
-	const dispatch = useAppDispatch()
-	const navigate = useNavigate()
-	const toasts = useToasts()
-
-	const handleCopyRundown = (sourceRundown: Rundown, fromTemplate: boolean = false) => {
-		// perform operation
-		dispatch(
-			copyRundown({
-				id: sourceRundown.id,
-				fromTemplate
-			})
-		)
-			.unwrap()
-			.then(async (newRundownResult) => {
-				// Navigate user to the new rundown
-				await navigate({
-					to: `/rundown/${newRundownResult.id}`
-				})
-			})
-			.catch((e) => {
-				console.error(e)
-				toasts.show({
-					headerContent: 'Adding rundown',
-					bodyContent: 'Encountered an unexpected error'
-				})
-			})
-	}
-	const handleClick = () => {
-		if (rundown.isTemplate) {
-			// Clicking template creates a new rundown based on it
-			handleCopyRundown(rundown)
-		} else {
-			// Navigate to the rundown page
-			navigate({ to: `/rundown/${rundown.id}` })
-		}
-	}
-
-	return (
-		<ListGroup.Item action onClick={handleClick} className="copy-item">
-			<Stack direction="horizontal">
-				{rundown.isTemplate ? (
-					<Badge pill bg="danger" className="me-2">
-						Template
-					</Badge>
-				) : null}
-				{rundown.name}
-				{rundown.isTemplate ? (
-					<EditIconButton
-						onClick={(e) => {
-							e.preventDefault()
-							e.stopPropagation()
-							navigate({ to: `/rundown/${rundown.id}` })
-						}}
-						className="ms-auto copy-icon-button"
-						style={{ position: 'relative', top: '-.25em' }}
-					/>
-				) : (
-					<CopyIconButton
-						onClick={(e) => {
-							e.preventDefault()
-							e.stopPropagation()
-							handleCopyRundown(rundown)
-						}}
-						className="ms-auto copy-icon-button"
-						style={{ position: 'relative', top: '-.25em' }}
-					/>
-				)}
+			<Stack direction="horizontal" className="mb-2">
+				<Tabs
+					style={{
+						flexGrow: 2
+					}}
+					defaultActiveKey="rundowns"
+					activeKey={activeTab ?? 'rundowns'}
+					onSelect={(k) => setActiveTab(k)}
+				>
+					<Tab eventKey="rundowns" title="Rundowns" />
+					<Tab eventKey="templates" title="Templates" />
+				</Tabs>
+				<Stack
+					direction="horizontal"
+					className="align-items-end justify-content-end"
+					style={{
+						borderBottom: '1px solid #495057'
+					}}
+				>
+					<div>
+						<SplitButton
+							className="m-1 split-button-divider"
+							size="sm"
+							title={
+								<span className="d-inline-flex align-items-center">
+									<BsPlus className="bttn-icon icon-lg" aria-hidden />
+									<span className="ms-4 ml-3">New</span>
+								</span>
+							}
+							onClick={() => createNewRundown(activeTab === 'templates')}
+							variant="primary"
+						>
+							{templateRundowns.map((templateRundown) => (
+								<Dropdown.Item
+									onClick={() => handleCopyRundown(templateRundown, activeTab === 'templates')}
+								>
+									{templateRundown.name}
+								</Dropdown.Item>
+							))}
+						</SplitButton>
+						<Button
+							className="m-1"
+							onClick={() => selectImportRundown(activeTab === 'templates')}
+							size="sm"
+						>
+							<BsBoxArrowInUp className="bttn-icon icon-md mt-1" aria-hidden />
+							<span className="ms-4 ml-3">Import</span>
+						</Button>
+					</div>
+				</Stack>
 			</Stack>
-		</ListGroup.Item>
-	)
-}
+			{activeTab === 'rundowns' && <RundownList title="Rundown" rundowns={normalRundowns} />}
 
-interface RundownListProps {
-	title: string
-	rundowns: Rundown[]
-	hideIfEmpty?: boolean
-}
-
-function RundownList({ title, rundowns, hideIfEmpty = true }: RundownListProps) {
-	if (hideIfEmpty && rundowns.length === 0) return null
-
-	return (
-		<div className="mb-4">
-			<h4 className="mt-3 mb-2">{title}</h4>
-			<ListGroup>
-				{rundowns.length > 0 ? (
-					rundowns.map((rd) => <RundownListItem key={rd.id} rundown={rd} />)
-				) : (
-					<ListGroup.Item
-						className="text-muted fst-italic"
-						style={{ textAlign: 'center', opacity: '50%' }}
-					>
-						No rundowns found, create or import one!
-					</ListGroup.Item>
-				)}
-			</ListGroup>
+			{activeTab === 'templates' && <RundownList rundowns={templateRundowns} title="Template" />}
 		</div>
 	)
 }

@@ -1,13 +1,12 @@
 import { useForm } from '@tanstack/react-form'
-import { Button, ButtonGroup, Form, Modal } from 'react-bootstrap'
+import { Button, ButtonGroup, Form } from 'react-bootstrap'
 import type { Rundown, SerializedRundown } from '~backend/background/interfaces'
 import { CustomDateTimePicker, FieldInfo } from '../form'
-import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import { removeRundown, updateRundown } from '~/store/rundowns'
+import { updateRundown } from '~/store/rundowns'
 import { useAppDispatch, useAppSelector, useAppStore } from '~/store/app'
 import { useToasts } from '../toasts/toasts'
 import { ipcAPI } from '~/lib/IPC'
+import { DeleteRundownButton } from './deleteRundown'
 
 export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 	const dispatch = useAppDispatch()
@@ -255,65 +254,5 @@ export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 				/>
 			</Form>
 		</div>
-	)
-}
-
-function DeleteRundownButton({
-	rundownId,
-	rundownName,
-	disabled
-}: {
-	rundownId: string
-	rundownName: string
-	disabled: boolean
-}) {
-	const navigate = useNavigate({ from: '/rundown/$rundownId' })
-	const dispatch = useAppDispatch()
-	const toasts = useToasts()
-
-	const [showDelete, setShowDelete] = useState(false)
-	const handleDeleteClose = () => setShowDelete(false)
-
-	const deleteRundown = (e: React.MouseEvent) => {
-		e.preventDefault()
-		e.stopPropagation()
-
-		setShowDelete(true)
-	}
-	const performDeleteRundown = () => {
-		// Navigate user to the list of rundowns
-		navigate({ to: '/' })
-
-		// perform operation
-		dispatch(removeRundown({ id: rundownId })).catch((e) => {
-			console.error(e)
-			toasts.show({
-				headerContent: 'Deleting rundown',
-				bodyContent: 'Encountered an unexpected error'
-			})
-		})
-	}
-
-	return (
-		<>
-			<Button onClick={deleteRundown} disabled={disabled} variant="danger">
-				Delete
-			</Button>
-
-			<Modal show={showDelete} onHide={handleDeleteClose}>
-				<Modal.Header closeButton>
-					<Modal.Title>Delete rundown</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>Are you sure you want to delete "{rundownName}"?</Modal.Body>
-				<Modal.Footer>
-					<Button variant="secondary" onClick={handleDeleteClose}>
-						Cancel
-					</Button>
-					<Button variant="danger" onClick={performDeleteRundown}>
-						Delete
-					</Button>
-				</Modal.Footer>
-			</Modal>
-		</>
 	)
 }

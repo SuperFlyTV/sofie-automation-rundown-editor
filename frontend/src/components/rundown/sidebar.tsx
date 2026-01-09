@@ -9,7 +9,7 @@ import { useToasts } from '../toasts/toasts'
 import { DragTypes } from '~/components/drag-and-drop/DragTypes'
 import { DraggableContainer } from '../drag-and-drop/DraggableContainer'
 import { createSelector } from '@reduxjs/toolkit'
-import { CopyIconButton } from '../copyIconButton'
+import { IconButton } from '../iconButton'
 import { BsBoxArrowInDownRight } from 'react-icons/bs'
 import { useState } from 'react'
 import ImportSegmentModal from './importSegmentModal/importSegmentModal'
@@ -240,7 +240,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 						<span className="item-duration">{displayTime(segmentDuration)}</span>
 					</button>
 				</Link>
-				<CopyIconButton
+				<IconButton
 					onClick={() => handleCopySegment(segment)}
 					style={{ position: 'absolute', zIndex: '99', top: '.5em', width: 'auto', right: '.25em' }}
 					className="copy-icon-button"
@@ -271,7 +271,7 @@ function SidebarSegment({ segment }: { segment: Segment }) {
 								</button>
 							</Link>
 
-							<CopyIconButton
+							<IconButton
 								onClick={() => handleCopyPart(part)}
 								style={{ position: 'absolute', zIndex: '99', top: '0', width: 'auto', right: 0 }}
 								className="copy-icon-button"
