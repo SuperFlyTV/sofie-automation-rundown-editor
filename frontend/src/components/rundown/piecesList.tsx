@@ -6,9 +6,9 @@ import './piecesList.scss'
 import { addNewPiece, copyPiece } from '~/store/pieces'
 import type { Part, Piece } from '~backend/background/interfaces'
 import { toTime } from '~/util/lib'
-import { useToasts } from '../toasts/toasts'
 import { createSelector } from '@reduxjs/toolkit'
 import { IconButton } from '../iconButton'
+import { useToasts } from '../toasts/useToasts'
 
 const selectPiecesByPart = createSelector(
 	[

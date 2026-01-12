@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { removeRundown } from '~/store/rundowns'
 import { useAppDispatch } from '~/store/app'
-import { useToasts } from '../toasts/toasts'
+import { useToasts } from '../toasts/useToasts'
 
 export function DeleteRundownButton({
 	rundownId,

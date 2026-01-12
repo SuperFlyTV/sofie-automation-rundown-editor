@@ -1,6 +1,6 @@
 import type { UseNavigateResult } from '@tanstack/react-router'
 import { ListGroup, Stack, Button } from 'react-bootstrap'
-import { useToasts } from '~/components/toasts/toasts'
+import { useToasts } from '~/components/toasts/useToasts'
 import { useAppDispatch } from '~/store/app'
 import { copySegment } from '~/store/segments'
 import type { Segment } from '~backend/background/interfaces'

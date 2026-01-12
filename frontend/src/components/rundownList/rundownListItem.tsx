@@ -1,6 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
 import { ListGroup, Stack, type ButtonProps } from 'react-bootstrap'
-import { useToasts } from '~/components/toasts/toasts'
 import { useAppDispatch } from '~/store/app'
 import { copyRundown } from '~/store/rundowns'
 import type { Rundown } from '~backend/background/interfaces'
@@ -8,6 +7,7 @@ import { SyncButton } from './syncButton'
 import { HoverIconButton } from './hoverIconButton'
 import { BsArrowRightShort, BsCopy, BsFillTrashFill, BsTrash } from 'react-icons/bs'
 import { DeleteRundownButton } from '../rundown/deleteRundown'
+import { useToasts } from '../toasts/useToasts'
 
 export function RundownListItem({ rundown }: { rundown: Rundown }) {
 	const dispatch = useAppDispatch()

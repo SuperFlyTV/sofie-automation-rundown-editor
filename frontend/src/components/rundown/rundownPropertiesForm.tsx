@@ -4,9 +4,9 @@ import type { Rundown, SerializedRundown } from '~backend/background/interfaces'
 import { CustomDateTimePicker, FieldInfo } from '../form'
 import { updateRundown } from '~/store/rundowns'
 import { useAppDispatch, useAppSelector, useAppStore } from '~/store/app'
-import { useToasts } from '../toasts/toasts'
 import { ipcAPI } from '~/lib/IPC'
 import { DeleteRundownButton } from './deleteRundown'
+import { useToasts } from '../toasts/useToasts'
 
 export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 	const dispatch = useAppDispatch()

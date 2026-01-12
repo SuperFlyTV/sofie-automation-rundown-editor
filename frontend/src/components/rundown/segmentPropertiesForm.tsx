@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useAppDispatch } from '~/store/app'
 import { removeSegment, updateSegment } from '~/store/segments'
-import { useToasts } from '../toasts/toasts'
+import { useToasts } from '../toasts/useToasts'
 
 export function SegmentPropertiesForm({
 	segment,

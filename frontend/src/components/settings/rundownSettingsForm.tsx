@@ -10,7 +10,7 @@ import { useAppDispatch } from '~/store/app'
 import { updateSettings } from '~/store/settings'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
-import { useToasts } from '../toasts/toasts'
+import { useToasts } from '../toasts/useToasts'
 
 export function RundownSettingsForm({ settings }: { settings: ApplicationSettings }) {
 	const dispatch = useAppDispatch()

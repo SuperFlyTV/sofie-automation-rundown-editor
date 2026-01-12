@@ -4,7 +4,7 @@ import type { ApplicationSettings } from '~backend/background/interfaces'
 import { FieldInfo } from '../form'
 import { useAppDispatch } from '~/store/app'
 import { updateSettings } from '~/store/settings'
-import { useToasts } from '../toasts/toasts'
+import { useToasts } from '../toasts/useToasts'
 
 export function CoreConnectionSettingsForm({ settings }: { settings: ApplicationSettings }) {
 	const dispatch = useAppDispatch()

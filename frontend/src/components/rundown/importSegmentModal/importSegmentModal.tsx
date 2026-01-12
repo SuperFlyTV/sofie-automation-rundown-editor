@@ -5,9 +5,9 @@ import { useAppDispatch, useAppSelector } from '~/store/app'
 import { loadTemplateSegments } from '~/store/templateSegments'
 import { cloneSegmentsFromRundownToRundown } from '~/store/segments'
 import type { Rundown } from '~backend/background/interfaces'
-import { useToasts } from '~/components/toasts/toasts'
 import RundownItem from './rundownItem'
 import TemplateRundownCard from './templateRundownCard'
+import { useToasts } from '~/components/toasts/useToasts'
 
 interface ImportSegmentModalProps {
 	show: boolean
