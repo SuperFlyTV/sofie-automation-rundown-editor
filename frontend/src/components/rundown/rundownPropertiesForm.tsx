@@ -5,7 +5,7 @@ import { CustomDateTimePicker, FieldInfo } from '../form'
 import { updateRundown } from '~/store/rundowns'
 import { useAppDispatch, useAppSelector, useAppStore } from '~/store/app'
 import { ipcAPI } from '~/lib/IPC'
-import { DeleteRundownButton } from './deleteRundown'
+import { DeleteRundownButton } from './deleteRundownButton'
 import { useToasts } from '../toasts/useToasts'
 
 export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {

@@ -9,6 +9,12 @@ import { DraggableContainer } from '~/components/drag-and-drop/DraggableContaine
 import { SidebarPart } from './part'
 import { SidebarElementHeader } from './sidebarElementHeader'
 import { useToasts } from '~/components/toasts/useToasts'
+import { BsCaretDownFill, BsFillTrashFill, BsPlus, BsTrash } from 'react-icons/bs'
+import { Stack, type ButtonProps } from 'react-bootstrap'
+import { HoverIconButton } from '~/components/rundownList/hoverIconButton'
+import { SegmentButtons } from './segmentButtons'
+import { DeleteSegmentButton } from '../deleteSegmentButton'
+import type { Dispatch, SetStateAction } from 'react'
 
 const selectAllParts = (state: RootState) => state.parts.parts
 
@@ -17,7 +23,17 @@ const selectPartsBySegmentId = createSelector(
 	(parts, segmentId) => parts.filter((p) => p.segmentId === segmentId)
 )
 
-export function SidebarSegment({ segment }: { segment: Segment }) {
+export function SidebarSegment({
+	segment,
+	isOpen,
+	onToggleOpen,
+	setShowImportModal
+}: {
+	segment: Segment
+	isOpen: boolean
+	onToggleOpen: () => void
+	setShowImportModal: Dispatch<SetStateAction<number | undefined>>
+}) {
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
 	const toasts = useToasts()
@@ -27,12 +43,13 @@ export function SidebarSegment({ segment }: { segment: Segment }) {
 
 	const segmentDuration = sortedParts.reduce((acc, part) => acc + (part.payload?.duration ?? 0), 0)
 
-	const handleAddPart = () =>
+	const handleAddPart = (part?: Part) =>
 		dispatch(
 			addNewPart({
 				rundownId: segment.rundownId,
 				playlistId: segment.playlistId,
-				segmentId: segment.id
+				segmentId: segment.id,
+				rank: part?.rank
 			})
 		)
 			.unwrap()
@@ -105,36 +122,78 @@ export function SidebarSegment({ segment }: { segment: Segment }) {
 			)
 
 	return (
-		<div>
+		<div className={`sidebar-segment ${isOpen ? 'open' : 'closed'}`}>
 			<div className={'copy-item'}>
-				<SidebarElementHeader
-					label={segment.name}
-					handleCopy={handleCopySegment}
-					linkTo={'/rundown/$rundownId/segment/$segmentId'}
-					linkParams={{ rundownId: segment.rundownId, segmentId: segment.id }}
-					floated={segment.float}
-					buttonClassName="segment-button"
-					duration={segmentDuration}
-				/>
+				<Stack direction="horizontal">
+					<span
+						className="segment-toggle"
+						onClick={(e) => {
+							e.preventDefault()
+							e.stopPropagation()
+							onToggleOpen()
+						}}
+						aria-label={isOpen ? 'Collapse segment' : 'Expand segment'}
+						style={{ width: '2em', height: '2em' }}
+					>
+						<BsCaretDownFill />
+					</span>
+					<div style={{ flexGrow: 2 }}>
+						<SidebarElementHeader
+							label={segment.name}
+							duration={segmentDuration}
+							linkTo="/rundown/$rundownId/segment/$segmentId"
+							linkParams={{ rundownId: segment.rundownId, segmentId: segment.id }}
+							buttonClassName="segment-button copy-item text-light"
+							handleCopy={handleCopySegment}
+							deleteButton={
+								<DeleteSegmentButton
+									rundownId={segment.rundownId}
+									segmentId={segment.id}
+									segmentName={segment.name}
+									disabled={false}
+									style={{ zIndex: 4 }}
+									renderButton={({ onClick, disabled }: ButtonProps) => (
+										<HoverIconButton
+											onClick={onClick}
+											disabled={disabled}
+											className="sync-plus-wrapper ms-auto"
+											defaultIcon={<BsTrash className="icon-md" color="var(--bs-danger)" />}
+											hoverIcon={<BsFillTrashFill className="icon-md" color="var(--bs-danger)" />}
+										/>
+									)}
+								/>
+							}
+						/>
+					</div>
+				</Stack>
 			</div>
 
-			<div className="ps-3">
-				<DraggableContainer
-					items={sortedParts}
-					itemType={DragTypes.PART}
-					id={segment.id}
-					reorder={handleReorderPart}
-					Component={({ data }) => <SidebarPart part={data} segment={segment} />}
-				/>
-
-				<button
-					className="part-button add-button"
-					style={{ marginTop: '2px' }}
-					onClick={handleAddPart}
-				>
-					+ Add Part
-				</button>
+			<div className="ps-3 segment-content">
+				{sortedParts.length > 0 ? (
+					<DraggableContainer
+						items={sortedParts}
+						itemType={DragTypes.PART}
+						id={segment.id}
+						reorder={handleReorderPart}
+						Component={({ data }) => (
+							<SidebarPart part={data} segment={segment} handleAddPart={handleAddPart} />
+						)}
+					/>
+				) : (
+					<Stack className="add-button-container">
+						<button className="add-button" onClick={() => handleAddPart()}>
+							<BsPlus className="icon-lg" aria-hidden />
+							Add Part
+						</button>
+					</Stack>
+				)}
 			</div>
+			<SegmentButtons
+				rundownId={segment.rundownId}
+				playlistId={segment.playlistId}
+				rank={segment.rank}
+				setShowImportModal={setShowImportModal}
+			/>
 		</div>
 	)
 }

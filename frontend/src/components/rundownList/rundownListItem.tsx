@@ -6,7 +6,7 @@ import type { Rundown } from '~backend/background/interfaces'
 import { SyncButton } from './syncButton'
 import { HoverIconButton } from './hoverIconButton'
 import { BsArrowRightShort, BsCopy, BsFillTrashFill, BsTrash } from 'react-icons/bs'
-import { DeleteRundownButton } from '../rundown/deleteRundown'
+import { DeleteRundownButton } from '../rundown/deleteRundownButton'
 import { useToasts } from '../toasts/useToasts'
 
 export function RundownListItem({ rundown }: { rundown: Rundown }) {
@@ -89,7 +89,7 @@ export function RundownListItem({ rundown }: { rundown: Rundown }) {
 						rundownName={rundown.name}
 						disabled={false}
 						style={{ zIndex: 4 }}
-						renderButton={({ onClick, disabled }: Pick<ButtonProps, 'onClick' | 'disabled'>) => (
+						renderButton={({ onClick, disabled }: ButtonProps) => (
 							<HoverIconButton
 								onClick={onClick}
 								disabled={disabled}

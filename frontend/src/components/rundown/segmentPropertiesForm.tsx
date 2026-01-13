@@ -1,12 +1,11 @@
 import { useForm } from '@tanstack/react-form'
-import { Button, ButtonGroup, Form, Modal } from 'react-bootstrap'
+import { Button, ButtonGroup, Form } from 'react-bootstrap'
 import type { Segment } from '~backend/background/interfaces'
 import { FieldInfo } from '../form'
-import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
 import { useAppDispatch } from '~/store/app'
-import { removeSegment, updateSegment } from '~/store/segments'
+import { updateSegment } from '~/store/segments'
 import { useToasts } from '../toasts/useToasts'
+import { DeleteSegmentButton } from './deleteSegmentButton'
 
 export function SegmentPropertiesForm({
 	segment,
@@ -136,67 +135,5 @@ export function SegmentPropertiesForm({
 				/>
 			</Form>
 		</div>
-	)
-}
-
-function DeleteSegmentButton({
-	rundownId,
-	segmentId,
-	segmentName,
-	disabled
-}: {
-	rundownId: string
-	segmentId: string
-	segmentName: string
-	disabled: boolean
-}) {
-	const navigate = useNavigate({ from: '/rundown/$rundownId/segment/$segmentId' })
-	const dispatch = useAppDispatch()
-	const toasts = useToasts()
-
-	const [showDelete, setShowDelete] = useState(false)
-	const handleDeleteClose = () => setShowDelete(false)
-
-	const deleteSegment = (e: React.MouseEvent) => {
-		e.preventDefault()
-		e.stopPropagation()
-
-		setShowDelete(true)
-	}
-	const performDeleteSegment = () => {
-		// Navigate user to the list of segments
-		navigate({ to: '/rundown/$rundownId', params: { rundownId: rundownId } })
-
-		// perform operation
-		dispatch(removeSegment({ id: segmentId })).catch((e) => {
-			console.error(e)
-			toasts.show({
-				headerContent: 'Deleting segment',
-				bodyContent: 'Encountered an unexpected error'
-			})
-		})
-	}
-
-	return (
-		<>
-			<Button onClick={deleteSegment} disabled={disabled} variant="danger">
-				Delete
-			</Button>
-
-			<Modal show={showDelete} onHide={handleDeleteClose}>
-				<Modal.Header closeButton>
-					<Modal.Title>Delete segment</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>Are you sure you want to delete "{segmentName}"?</Modal.Body>
-				<Modal.Footer>
-					<Button variant="secondary" onClick={handleDeleteClose}>
-						Cancel
-					</Button>
-					<Button variant="danger" onClick={performDeleteSegment}>
-						Delete
-					</Button>
-				</Modal.Footer>
-			</Modal>
-		</>
 	)
 }

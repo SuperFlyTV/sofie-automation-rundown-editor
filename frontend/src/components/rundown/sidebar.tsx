@@ -1,15 +1,15 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '~/store/app'
-import { addNewSegment, reorderSegments } from '~/store/segments'
+import { reorderSegments } from '~/store/segments'
 import type { Segment } from '~backend/background/interfaces'
 import './sidebar.scss'
 import { DragTypes } from '~/components/drag-and-drop/DragTypes'
 import { DraggableContainer } from '../drag-and-drop/DraggableContainer'
-import { BsBoxArrowInDownRight } from 'react-icons/bs'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import ImportSegmentModal from './importSegmentModal/importSegmentModal'
 import { SidebarSegment } from './sidebar/segment'
 import { useToasts } from '../toasts/useToasts'
+import { SegmentButtons } from './sidebar/segmentButtons'
 
 export function RundownSidebar({
 	rundownId,
@@ -21,25 +21,24 @@ export function RundownSidebar({
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
 	const toasts = useToasts()
-	const [showImportModal, setShowImportModal] = useState(false)
+	const [showImportModal, setShowImportModal] = useState<number | undefined>(undefined)
 
 	const segments = useAppSelector((state) => state.segments.segments)
 	const sortedSegments = [...segments].sort((a, b) => a.rank - b.rank)
 
-	const handleAddSegment = () => {
-		dispatch(addNewSegment({ rundownId, playlistId, rank: sortedSegments.length }))
-			.unwrap()
-			.then(async (segment) => {
-				await navigate({ to: `/rundown/${rundownId}/segment/${segment.id}` })
-			})
-			.catch((e) => {
-				console.error(e)
-				toasts.show({
-					headerContent: 'Adding segment',
-					bodyContent: 'Encountered an unexpected error'
-				})
-			})
-	}
+	const [openSegments, setOpenSegments] = useState<Record<string, boolean>>({})
+
+	const isSegmentOpen = useCallback(
+		(segmentId: string) => openSegments[segmentId] ?? true,
+		[openSegments]
+	)
+
+	const toggleSegmentOpen = useCallback((segmentId: string) => {
+		setOpenSegments((prev) => ({
+			...prev,
+			[segmentId]: !(prev[segmentId] ?? true)
+		}))
+	}, [])
 
 	const handleReorderSegment = (
 		_targetSegment: Segment,
@@ -64,31 +63,38 @@ export function RundownSidebar({
 	}
 
 	return (
-		<div className="rundown-sidebar" style={{ marginTop: '2px' }}>
+		<div
+			className="rundown-sidebar"
+			style={{ marginTop: '2px', overflowY: 'auto', overflowX: 'hidden' }}
+		>
 			<DraggableContainer
 				items={sortedSegments}
 				itemType={DragTypes.SEGMENT}
 				Component={({ data: segment }) => (
 					<>
-						<SidebarSegment key={segment.id} segment={segment} />
+						<SidebarSegment
+							key={segment.id}
+							segment={segment}
+							isOpen={isSegmentOpen(segment.id)}
+							onToggleOpen={() => toggleSegmentOpen(segment.id)}
+							setShowImportModal={setShowImportModal}
+						/>
 					</>
 				)}
 				id={rundownId}
 				reorder={handleReorderSegment}
 			/>
-			<div className="d-flex gap-1">
-				<button className="segment-button add-button" onClick={handleAddSegment}>
-					+ Add Segment
-				</button>
 
-				<button className="segment-button add-button" onClick={() => setShowImportModal(true)}>
-					<BsBoxArrowInDownRight style={{ top: '-.15em', position: 'relative' }} /> Import Segment
-				</button>
-			</div>
+			<SegmentButtons
+				rundownId={rundownId}
+				playlistId={playlistId}
+				rank={sortedSegments.length}
+				setShowImportModal={setShowImportModal}
+			/>
 
 			<ImportSegmentModal
-				show={showImportModal}
-				onClose={() => setShowImportModal(false)}
+				rank={showImportModal}
+				onClose={() => setShowImportModal(undefined)}
 				targetRundownId={rundownId}
 			/>
 		</div>

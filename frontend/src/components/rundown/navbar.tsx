@@ -8,6 +8,7 @@ import { faClose } from '@fortawesome/free-solid-svg-icons'
 import './navbar.scss'
 import { toTime, toTimeDiff } from '~/util/lib'
 import { useAppSelector } from '~/store/app'
+import { Stack } from 'react-bootstrap'
 
 export function RundownNavbar({ rundown }: { rundown: Rundown }) {
 	const parts = useAppSelector((state) =>
@@ -37,14 +38,20 @@ export function RundownNavbar({ rundown }: { rundown: Rundown }) {
 	return (
 		<Navbar expand="lg" className="rundown-navbar">
 			<Container fluid className="d-flex justify-content-between">
-				<div className="d-grid timing">
-					<div className="label">Expected start:</div>
-					<div>{start}</div>
-					<div className="label">Expected duration:</div>
-					<div>{duration}</div>
-					<div className="label">Diff:</div>
-					<div>{diff}</div>
-				</div>
+				<Stack className="timing" direction="horizontal" gap={3}>
+					<Stack>
+						<div className="label">Expected start:</div>
+						<div>{start}</div>
+					</Stack>
+					<Stack>
+						<div className="label">Expected duration:</div>
+						<div>{duration}</div>
+					</Stack>
+					<Stack>
+						<div className="label">Diff:</div>
+						<div>{diff}</div>
+					</Stack>
+				</Stack>
 
 				<Nav.Link as={Link} to={`/rundown/${rundown.id}`}>
 					{rundown.name}

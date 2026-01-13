@@ -1,7 +1,6 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { EditorNavbar } from '~/components/navbar/navbar'
-import { RundownBreadcrumbs } from '~/components/rundown/breadcrumbs'
 import { RundownNavbar } from '~/components/rundown/navbar'
 import { RundownSidebar } from '~/components/rundown/sidebar'
 import { useAppDispatch, useAppSelector } from '~/store/app'
@@ -71,8 +70,6 @@ function RouteComponent() {
 					<Outlet />
 				</MyErrorBoundary>
 			</div>
-
-			<RundownBreadcrumbs rundownId={rundown.id} rundownName={rundown.name} />
 		</div>
 	)
 }
@@ -87,6 +84,6 @@ const rootStyle: React.CSSProperties = {
 const layoutStyle: React.CSSProperties = {
 	display: 'grid',
 	gridAutoFlow: 'column',
-	gridTemplateColumns: '1fr 3fr',
+	gridTemplateColumns: '2fr 5fr',
 	overflowX: 'hidden'
 }

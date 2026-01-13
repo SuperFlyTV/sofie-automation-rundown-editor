@@ -135,7 +135,7 @@ export const mutations = {
 				let targetRundownId = payload.rundownId
 
 				try {
-					// If a segmentId was passed, read its metadata for the new part
+					// If a rundownId was passed, read its metadata for the new segment
 					if (payload.rundownId !== sourceSegment.rundownId) {
 						const { result: targetRundown, error: rundownError } = await rundownMutations.readOne(
 							payload.rundownId
@@ -152,7 +152,8 @@ export const mutations = {
 						rundownId: targetRundownId,
 						name: `${sourceSegment.name}${!payload.preserveName ? ' Copy' : ''}`,
 						id: undefined,
-						isTemplate: false
+						isTemplate: false,
+						...(payload.rank !== undefined ? { rank: payload.rank } : {})
 					})
 
 					if (!newSegment) {

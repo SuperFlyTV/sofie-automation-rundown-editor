@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { type ButtonProps } from 'react-bootstrap'
+import { Stack, type ButtonProps } from 'react-bootstrap'
 import type { ReactNode } from 'react'
 import { IconButton } from '../iconButton'
 
@@ -18,9 +18,10 @@ export function HoverIconButton({
 	const [hovered, setHovered] = useState(false)
 
 	return (
-		<div
+		<Stack
 			className={className}
-			style={{ position: 'relative', width: '1.5em', ...style }}
+			direction="horizontal"
+			style={{ width: '1.5em', justifyContent: 'center', ...style }}
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
 		>
@@ -29,6 +30,6 @@ export function HoverIconButton({
 				icon={hovered ? hoverIcon : defaultIcon}
 				style={{ position: 'relative', top: '-.1em', padding: 0 }}
 			/>
-		</div>
+		</Stack>
 	)
 }

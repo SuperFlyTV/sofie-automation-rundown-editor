@@ -304,7 +304,8 @@ export type MutationPieceTypeManifestDelete = Pick<PieceTypeManifest, 'id'>
 
 export type MutationRundownCreate = SetOptional<Rundown, 'id'>
 
-export type MutationSegmentCopy = Pick<Segment, 'id' | 'rundownId'> & MutationCopy
+export type MutationSegmentCopy = Pick<SetOptional<Segment, 'rank'>, 'id' | 'rundownId' | 'rank'> &
+	MutationCopy
 
 export type MutationSegmentCopyResult = { segment: Segment; parts: Part[]; pieces: Piece[] }
 

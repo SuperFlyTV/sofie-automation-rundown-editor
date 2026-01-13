@@ -10,14 +10,17 @@ interface Props {
 	targetRundownId: string
 	onClose: () => void
 	navigate: UseNavigateResult<string>
+	rank: number
 }
 
-export default function SegmentItem({ segment, targetRundownId, onClose, navigate }: Props) {
+export default function SegmentItem({ segment, targetRundownId, onClose, navigate, rank }: Props) {
 	const dispatch = useAppDispatch()
 	const toasts = useToasts()
 
 	const handleCopySegment = (sourceSegment: Segment) => {
-		dispatch(copySegment({ id: sourceSegment.id, rundownId: targetRundownId, preserveName: true }))
+		dispatch(
+			copySegment({ id: sourceSegment.id, rundownId: targetRundownId, preserveName: true, rank })
+		)
 			.unwrap()
 			.then((newSegmentResult) => {
 				onClose()

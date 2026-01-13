@@ -13,6 +13,7 @@ interface Props {
 	targetRundownId: string
 	onClose: () => void
 	navigate: UseNavigateResult<string>
+	rank: number
 }
 
 export default function TemplateRundownCard({
@@ -23,7 +24,8 @@ export default function TemplateRundownCard({
 	onClone,
 	targetRundownId,
 	onClose,
-	navigate
+	navigate,
+	rank
 }: Props) {
 	const hasSegments = segments.length > 0
 
@@ -71,6 +73,7 @@ export default function TemplateRundownCard({
 									targetRundownId={targetRundownId}
 									onClose={onClose}
 									navigate={navigate}
+									rank={rank}
 								/>
 							))}
 					</ListGroup>

@@ -10,15 +10,15 @@ import TemplateRundownCard from './templateRundownCard'
 import { useToasts } from '~/components/toasts/useToasts'
 
 interface ImportSegmentModalProps {
-	show: boolean
 	onClose: () => void
 	targetRundownId: string
+	rank?: number
 }
 
 export default function ImportSegmentModal({
-	show,
 	onClose,
-	targetRundownId
+	targetRundownId,
+	rank
 }: ImportSegmentModalProps) {
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
@@ -50,7 +50,7 @@ export default function ImportSegmentModal({
 	)
 
 	useEffect(() => {
-		if (show) {
+		if (rank !== undefined) {
 			dispatch(loadTemplateSegments())
 				.unwrap()
 				.catch(() =>
@@ -60,7 +60,7 @@ export default function ImportSegmentModal({
 					})
 				)
 		}
-	}, [show, dispatch, toasts])
+	}, [rank, dispatch, toasts])
 
 	const toggleTemplate = (id: string, hasSegments: boolean) => {
 		if (!hasSegments) return
@@ -90,7 +90,7 @@ export default function ImportSegmentModal({
 	}
 
 	return (
-		<Modal show={show} onHide={onClose} size="lg">
+		<Modal show={rank !== undefined} onHide={onClose} size="lg">
 			<Modal.Header closeButton>
 				<Modal.Title>Import Segment</Modal.Title>
 			</Modal.Header>
@@ -114,6 +114,7 @@ export default function ImportSegmentModal({
 								targetRundownId={targetRundownId}
 								onClose={onClose}
 								navigate={navigate}
+								rank={rank ?? 0}
 							/>
 						))
 				) : (
