@@ -24,3 +24,13 @@ export const toTimeDiff = (seconds: number) => {
 
 	return `${prefix}${h > 0 ? pad(h) + ':' : ''}${pad(m)}:${pad(s)}`
 }
+export function computeInsertRank<T extends { id: string; rank: number }>(
+	items: T[],
+	currentId: string
+): number {
+	const sorted = [...items].sort((a, b) => a.rank - b.rank)
+	const index = sorted.findIndex((i) => i.id === currentId)
+	const next = sorted[index + 1]
+
+	return next ? (sorted[index].rank + next.rank) / 2 : sorted[index].rank + 1
+}

@@ -15,6 +15,7 @@ import { HoverIconButton } from '~/components/rundownList/hoverIconButton'
 import { SegmentButtons } from './segmentButtons'
 import { DeleteSegmentButton } from '../deleteSegmentButton'
 import type { Dispatch, SetStateAction } from 'react'
+import { computeInsertRank } from '~/util/lib'
 
 const selectAllParts = (state: RootState) => state.parts.parts
 
@@ -27,12 +28,14 @@ export function SidebarSegment({
 	segment,
 	isOpen,
 	onToggleOpen,
-	setShowImportModal
+	setShowImportModal,
+	insertRank
 }: {
 	segment: Segment
 	isOpen: boolean
 	onToggleOpen: () => void
 	setShowImportModal: Dispatch<SetStateAction<number | undefined>>
+	insertRank: number
 }) {
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
@@ -40,16 +43,19 @@ export function SidebarSegment({
 
 	const parts = useAppSelector((s) => selectPartsBySegmentId(s, segment.id))
 	const sortedParts = [...parts].sort((a, b) => a.rank - b.rank)
+	const partInsertRankById = Object.fromEntries(
+		sortedParts.map((part) => [part.id, computeInsertRank(sortedParts, part.id)])
+	)
 
 	const segmentDuration = sortedParts.reduce((acc, part) => acc + (part.payload?.duration ?? 0), 0)
 
-	const handleAddPart = (part?: Part) =>
+	const handleAddPart = (rank: number) =>
 		dispatch(
 			addNewPart({
 				rundownId: segment.rundownId,
 				playlistId: segment.playlistId,
 				segmentId: segment.id,
-				rank: part?.rank
+				rank
 			})
 		)
 			.unwrap()
@@ -176,12 +182,17 @@ export function SidebarSegment({
 						id={segment.id}
 						reorder={handleReorderPart}
 						Component={({ data }) => (
-							<SidebarPart part={data} segment={segment} handleAddPart={handleAddPart} />
+							<SidebarPart
+								part={data}
+								segment={segment}
+								handleAddPart={handleAddPart}
+								insertRank={partInsertRankById[data.id]}
+							/>
 						)}
 					/>
 				) : (
 					<Stack className="add-button-container">
-						<button className="add-button" onClick={() => handleAddPart()}>
+						<button className="add-button" onClick={() => handleAddPart(0)}>
 							<BsPlus className="icon-lg" aria-hidden />
 							Add Part
 						</button>
@@ -191,7 +202,7 @@ export function SidebarSegment({
 			<SegmentButtons
 				rundownId={segment.rundownId}
 				playlistId={segment.playlistId}
-				rank={segment.rank}
+				rank={insertRank}
 				setShowImportModal={setShowImportModal}
 			/>
 		</div>

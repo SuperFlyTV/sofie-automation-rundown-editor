@@ -10,6 +10,7 @@ import ImportSegmentModal from './importSegmentModal/importSegmentModal'
 import { SidebarSegment } from './sidebar/segment'
 import { useToasts } from '../toasts/useToasts'
 import { SegmentButtons } from './sidebar/segmentButtons'
+import { computeInsertRank } from '~/util/lib'
 
 export function RundownSidebar({
 	rundownId,
@@ -25,6 +26,9 @@ export function RundownSidebar({
 
 	const segments = useAppSelector((state) => state.segments.segments)
 	const sortedSegments = [...segments].sort((a, b) => a.rank - b.rank)
+	const insertRankBySegmentId = Object.fromEntries(
+		sortedSegments.map((segment) => [segment.id, computeInsertRank(sortedSegments, segment.id)])
+	)
 
 	const [openSegments, setOpenSegments] = useState<Record<string, boolean>>({})
 
@@ -77,6 +81,7 @@ export function RundownSidebar({
 							segment={segment}
 							isOpen={isSegmentOpen(segment.id)}
 							onToggleOpen={() => toggleSegmentOpen(segment.id)}
+							insertRank={insertRankBySegmentId[segment.id]}
 							setShowImportModal={setShowImportModal}
 						/>
 					</>

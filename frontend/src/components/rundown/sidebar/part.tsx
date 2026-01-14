@@ -12,11 +12,13 @@ import { HoverIconButton } from '~/components/rundownList/hoverIconButton'
 export function SidebarPart({
 	part,
 	segment,
-	handleAddPart
+	handleAddPart,
+	insertRank
 }: {
 	part: Part
 	segment: Segment
-	handleAddPart: (part: Part) => Promise<string | void>
+	handleAddPart: (rank: number) => Promise<string | void>
+	insertRank: number
 }) {
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
@@ -72,7 +74,7 @@ export function SidebarPart({
 				/>
 			</div>
 			<div className="part-button add-button-container">
-				<button className="part-button add-button" onClick={() => handleAddPart(part)}>
+				<button className="part-button add-button" onClick={() => handleAddPart(insertRank)}>
 					<BsPlus className="icon-lg" aria-hidden />
 					Add Part
 				</button>
