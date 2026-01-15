@@ -14,7 +14,7 @@ function RouteComponent() {
 	if (!rundown) throw redirect({ to: '/' })
 
 	return (
-		<Stack>
+		<Stack className="rundown-main-content">
 			<div className="p-4">
 				<RundownPropertiesForm rundown={rundown} />
 			</div>

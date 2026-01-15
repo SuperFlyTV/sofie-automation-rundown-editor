@@ -61,3 +61,14 @@ body {
 .sync-icon-hover {
 	display: none;
 }
+
+.rundown-import-action {
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.15s ease;
+}
+
+.rundown-header:hover .rundown-import-action {
+	opacity: 1;
+	pointer-events: auto;
+}

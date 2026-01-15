@@ -45,7 +45,7 @@ export function SegmentButtons({
 				</button>
 				<button className="segment-button add-button" onClick={() => setShowImportModal(rank)}>
 					<BsBoxArrowInUp aria-hidden style={{ marginRight: '.2em' }} />
-					Import Segment
+					Import Segments
 				</button>
 			</Stack>
 		</>

@@ -18,7 +18,7 @@ function RouteComponent() {
 
 	const rundown = useAppSelector((state) => state.rundowns.find((r) => r.id === rundownId))
 	return (
-		<Stack>
+		<Stack className="rundown-main-content">
 			<RundownBreadcrumbs rundownId={rundownId} />
 			<div className="p-4" style={{ backgroundColor: 'rgb(30, 30, 30)', height: '100%' }}>
 				<SegmentPropertiesForm segment={segment} rundownIsTemplate={rundown?.isTemplate ?? false} />

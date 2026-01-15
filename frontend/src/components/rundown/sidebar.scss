@@ -1,6 +1,15 @@
+.rundown-main-content {
+	flex-grow: 8;
+}
+
 .rundown-sidebar {
 	background-color: rgba(0, 0, 0, 0.4);
 	padding: 0 0.3em;
+	height: 100%;
+	overflow-y: auto;
+	flex-grow: 1;
+	min-width: 18em;
+	max-width: 28em;
 	a {
 		text-decoration: none;
 

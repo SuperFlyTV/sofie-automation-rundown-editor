@@ -67,10 +67,7 @@ export function RundownSidebar({
 	}
 
 	return (
-		<div
-			className="rundown-sidebar"
-			style={{ marginTop: '2px', overflowY: 'auto', overflowX: 'hidden' }}
-		>
+		<div className="rundown-sidebar" style={{ overflowY: 'auto', overflowX: 'hidden' }}>
 			<DraggableContainer
 				items={sortedSegments}
 				itemType={DragTypes.SEGMENT}

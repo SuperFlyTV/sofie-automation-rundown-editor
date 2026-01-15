@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import { Stack } from 'react-bootstrap'
 import { EditorNavbar } from '~/components/navbar/navbar'
 import { RundownNavbar } from '~/components/rundown/navbar'
 import { RundownSidebar } from '~/components/rundown/sidebar'
@@ -63,13 +64,19 @@ function RouteComponent() {
 		<div style={rootStyle}>
 			<RundownNavbar rundown={rundown} />
 
-			<div style={layoutStyle}>
+			<Stack
+				direction="horizontal"
+				style={{
+					height: '100%',
+					overflowX: 'hidden'
+				}}
+			>
 				<RundownSidebar rundownId={rundown.id} playlistId={rundown.playlistId} />
 
 				<MyErrorBoundary>
 					<Outlet />
 				</MyErrorBoundary>
-			</div>
+			</Stack>
 		</div>
 	)
 }
@@ -78,12 +85,5 @@ const rootStyle: React.CSSProperties = {
 	display: 'grid',
 	height: '100%',
 	gridTemplateRows: 'auto 1fr auto',
-	overflowX: 'hidden'
-}
-
-const layoutStyle: React.CSSProperties = {
-	display: 'grid',
-	gridAutoFlow: 'column',
-	gridTemplateColumns: '2fr 5fr',
 	overflowX: 'hidden'
 }

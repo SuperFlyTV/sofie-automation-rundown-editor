@@ -1,5 +1,6 @@
 import type { UseNavigateResult } from '@tanstack/react-router'
 import { ListGroup, Stack, Button } from 'react-bootstrap'
+import { BsBoxArrowInUp } from 'react-icons/bs'
 import { useToasts } from '~/components/toasts/useToasts'
 import { useAppDispatch } from '~/store/app'
 import { copySegment } from '~/store/segments'
@@ -36,16 +37,16 @@ export default function SegmentItem({ segment, targetRundownId, onClose, navigat
 	}
 
 	return (
-		<ListGroup.Item className="copy-item">
+		<ListGroup.Item className="copy-item" style={{ background: 'none' }}>
 			<Stack direction="horizontal" className="justify-content-between align-items-center">
 				<div>{segment.name}</div>
 				<Button
 					size="sm"
-					variant="outline-primary"
-					onClick={() => handleCopySegment(segment)}
+					variant="outline-white"
 					className="ms-auto copy-icon-button"
+					onClick={() => handleCopySegment(segment)}
 				>
-					Import
+					<BsBoxArrowInUp aria-hidden className="icon-md" /> Import
 				</Button>
 			</Stack>
 		</ListGroup.Item>

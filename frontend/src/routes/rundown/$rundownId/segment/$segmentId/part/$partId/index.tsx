@@ -27,7 +27,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<Stack>
+		<Stack className="rundown-main-content">
 			<RundownBreadcrumbs rundownId={rundownId} />
 			<Stack
 				direction="horizontal"
