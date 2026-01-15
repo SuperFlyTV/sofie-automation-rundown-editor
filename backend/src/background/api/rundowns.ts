@@ -108,7 +108,7 @@ export const mutations = {
 							preserveName: false,
 							fromTemplate: sourceRundown.isTemplate
 						}),
-						isTemplate: false,
+						isTemplate: sourceRundown.isTemplate && (payload.preserveTemplate ?? false),
 						id: undefined
 					})
 

@@ -1,24 +1,23 @@
 import { useEffect, useState } from 'react'
-import { Modal, Spinner, Button, ListGroup } from 'react-bootstrap'
+import { Modal, Spinner, Button } from 'react-bootstrap'
 import { useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import { loadTemplateSegments } from '~/store/templateSegments'
 import { cloneSegmentsFromRundownToRundown } from '~/store/segments'
 import type { Rundown } from '~backend/background/interfaces'
-import { useToasts } from '~/components/toasts/toasts'
-import RundownItem from './rundownItem'
 import TemplateRundownCard from './templateRundownCard'
+import { useToasts } from '~/components/toasts/useToasts'
 
 interface ImportSegmentModalProps {
-	show: boolean
 	onClose: () => void
 	targetRundownId: string
+	rank?: number
 }
 
 export default function ImportSegmentModal({
-	show,
 	onClose,
-	targetRundownId
+	targetRundownId,
+	rank
 }: ImportSegmentModalProps) {
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
@@ -50,7 +49,7 @@ export default function ImportSegmentModal({
 	)
 
 	useEffect(() => {
-		if (show) {
+		if (rank !== undefined) {
 			dispatch(loadTemplateSegments())
 				.unwrap()
 				.catch(() =>
@@ -60,7 +59,7 @@ export default function ImportSegmentModal({
 					})
 				)
 		}
-	}, [show, dispatch, toasts])
+	}, [rank, dispatch, toasts])
 
 	const toggleTemplate = (id: string, hasSegments: boolean) => {
 		if (!hasSegments) return
@@ -74,7 +73,8 @@ export default function ImportSegmentModal({
 		dispatch(
 			cloneSegmentsFromRundownToRundown({
 				fromRundownId: sourceRundown.id,
-				toRundownId: targetRundownId
+				toRundownId: targetRundownId,
+				insertRank: rank
 			})
 		)
 			.unwrap()
@@ -90,12 +90,11 @@ export default function ImportSegmentModal({
 	}
 
 	return (
-		<Modal show={show} onHide={onClose} size="lg">
-			<Modal.Header closeButton>
-				<Modal.Title>Import Segment</Modal.Title>
+		<Modal show={rank !== undefined} onHide={onClose} size="lg">
+			<Modal.Header closeButton style={{ backgroundColor: '#1a1d20ff' }}>
+				<Modal.Title>Import Segments</Modal.Title>
 			</Modal.Header>
-			<Modal.Body>
-				<h6>Templates:</h6>
+			<Modal.Body style={{ backgroundColor: '#1a1d20ff' }}>
 				{templateStatus === 'pending' ? (
 					<div className="d-flex justify-content-center py-3">
 						<Spinner animation="border" />
@@ -114,30 +113,14 @@ export default function ImportSegmentModal({
 								targetRundownId={targetRundownId}
 								onClose={onClose}
 								navigate={navigate}
+								rank={rank ?? 0}
 							/>
 						))
 				) : (
 					<p className="text-muted fst-italic">No template segments or rundowns available</p>
 				)}
-
-				<h6>Rundowns:</h6>
-				<ListGroup>
-					{rundowns.filter((rd) => !rd.isTemplate).length > 0 ? (
-						rundowns
-							.filter((rd) => !rd.isTemplate)
-							.map((rd) => (
-								<RundownItem
-									key={rd.id}
-									rundown={rd}
-									onClone={() => handleCloneRundownSegments(rd)}
-								/>
-							))
-					) : (
-						<p className="text-muted fst-italic">No rundowns available</p>
-					)}
-				</ListGroup>
 			</Modal.Body>
-			<Modal.Footer>
+			<Modal.Footer style={{ backgroundColor: '#1a1d20ff' }}>
 				<Button variant="secondary" onClick={onClose} disabled={loading}>
 					Cancel
 				</Button>

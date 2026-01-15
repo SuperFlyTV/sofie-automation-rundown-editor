@@ -135,7 +135,7 @@ export const mutations = {
 				let targetRundownId = payload.rundownId
 
 				try {
-					// If a segmentId was passed, read its metadata for the new part
+					// If a rundownId was passed, read its metadata for the new segment
 					if (payload.rundownId !== sourceSegment.rundownId) {
 						const { result: targetRundown, error: rundownError } = await rundownMutations.readOne(
 							payload.rundownId
@@ -152,7 +152,8 @@ export const mutations = {
 						rundownId: targetRundownId,
 						name: `${sourceSegment.name}${!payload.preserveName ? ' Copy' : ''}`,
 						id: undefined,
-						isTemplate: false
+						isTemplate: false,
+						...(payload.rank !== undefined ? { rank: payload.rank } : {})
 					})
 
 					if (!newSegment) {
@@ -255,14 +256,15 @@ export const mutations = {
 	},
 	async cloneFromRundownToRundown({
 		fromRundownId,
-		toRundownId
+		toRundownId,
+		insertRank
 	}: MutationSegmentCloneFromRundownToRundown): Promise<{ result?: Segment[]; error?: Error }> {
 		try {
 			const { result: fromRundown } = await rundownMutations.readOne(fromRundownId)
 			const { result: toRundown } = await rundownMutations.readOne(toRundownId)
 
 			if (!fromRundown || !toRundown) {
-				throw new Error('Either the source or target Part was not found')
+				throw new Error('Either the source or target rundown was not found')
 			}
 
 			const { result: sourceSegmentsResult } = await mutations.read({ rundownId: fromRundownId })
@@ -271,31 +273,66 @@ export const mutations = {
 				: sourceSegmentsResult
 					? [sourceSegmentsResult]
 					: []
-			if (sourceSegments) {
-				return {
-					result: (
-						await Promise.all(
-							sourceSegments.map(async (segment) => {
-								return await mutations.createSegmentCopy({
-									id: segment.id,
-									rundownId: toRundown.id,
-									preserveName: true
-								})
-							})
-						)
-					).map((r) => {
-						if (r.error) throw r.error
-						return r.result?.segment as Segment
-					})
-				}
+
+			if (sourceSegments.length === 0) {
+				return { result: [] }
+			}
+
+			const sortedSourceSegments = [...sourceSegments].sort((a, b) => a.rank - b.rank)
+
+			// Fetch target segments to determine insertion bounds
+			const { result: targetSegmentsResult } = await mutations.read({ rundownId: toRundownId })
+			const targetSegments = Array.isArray(targetSegmentsResult)
+				? targetSegmentsResult
+				: targetSegmentsResult
+					? [targetSegmentsResult]
+					: []
+
+			const sortedTargetSegments = [...targetSegments].sort((a, b) => a.rank - b.rank)
+
+			let baseRank: number
+			let nextRank: number | undefined
+
+			if (typeof insertRank === 'number') {
+				baseRank = insertRank
+				nextRank = sortedTargetSegments.find((s) => s.rank > insertRank)?.rank
 			} else {
-				throw new Error(`Couldn't find source segments`)
+				const lastRank =
+					sortedTargetSegments.length > 0
+						? sortedTargetSegments[sortedTargetSegments.length - 1].rank
+						: 0
+
+				baseRank = lastRank
+				nextRank = undefined
+			}
+
+			const count = sortedSourceSegments.length
+
+			const step = typeof nextRank === 'number' ? (nextRank - baseRank) / (count + 1) : 1
+
+			const createdSegments = await Promise.all(
+				sortedSourceSegments.map((segment, index) =>
+					mutations.createSegmentCopy({
+						id: segment.id,
+						rundownId: toRundown.id,
+						preserveName: true,
+						rank: baseRank + step * (index + 1)
+					})
+				)
+			)
+
+			return {
+				result: createdSegments.map((r) => {
+					if (r.error) throw r.error
+					return r.result?.segment as Segment
+				})
 			}
 		} catch (e) {
 			console.error(e)
 			return { error: e as Error }
 		}
 	},
+
 	async read(
 		payload: Partial<MutationSegmentRead>
 	): Promise<{ result?: Segment | Segment[]; error?: Error }> {

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Col, Row } from 'react-bootstrap'
+import { Stack } from 'react-bootstrap'
+import { RundownBreadcrumbs } from '~/components/rundown/breadcrumbs'
 import { PartPropertiesForm } from '~/components/rundown/partPropertiesForm'
 import { PiecesList } from '~/components/rundown/piecesList'
 import { useAppSelector } from '~/store/app'
@@ -26,14 +27,32 @@ function RouteComponent() {
 	}
 
 	return (
-		<Row key={`form_${partId}`}>
-			<Col xs={6} style={{ backgroundColor: 'rgb(30, 30, 30)' }} className="p-4">
-				<PartPropertiesForm key={`partForm_${partId}`} part={part} />
-			</Col>
-
-			<Col xs={6} style={{ backgroundColor: '#000000' }} className="p-4">
-				<PiecesList key={`piecesList_${partId}`} part={part} />
-			</Col>
-		</Row>
+		<Stack className="rundown-main-content">
+			<RundownBreadcrumbs rundownId={rundownId} />
+			<div className="rundown-main-content-properties">
+				<Stack
+					direction="horizontal"
+					key={`form_${partId}`}
+					style={{ overflowY: 'auto', alignItems: 'stretch' }}
+				>
+					<Stack
+						style={{
+							backgroundColor: 'rgb(30, 30, 30)',
+							flexGrow: 2,
+							minHeight: '100%'
+						}}
+						className="p-4"
+					>
+						<PartPropertiesForm key={`partForm_${partId}`} part={part} />
+					</Stack>
+					<Stack
+						style={{ backgroundColor: '#000000', flexGrow: 1, minHeight: '100%' }}
+						className="p-4"
+					>
+						<PiecesList key={`piecesList_${partId}`} part={part} />
+					</Stack>
+				</Stack>
+			</div>
+		</Stack>
 	)
 }

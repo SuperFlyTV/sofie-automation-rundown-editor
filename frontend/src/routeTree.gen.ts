@@ -8,99 +8,167 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as RootRouteRouteImport } from './routes/_root/route'
+import { Route as RootIndexRouteImport } from './routes/_root/index'
+import { Route as RundownRundownIdRouteImport } from './routes/rundown/$rundownId'
+import { Route as RootSettingsRouteImport } from './routes/_root/settings'
+import { Route as RundownRundownIdIndexRouteImport } from './routes/rundown/$rundownId/index'
+import { Route as RootSettingsIndexRouteImport } from './routes/_root/settings/index'
+import { Route as RootSettingsRundownRouteImport } from './routes/_root/settings/rundown'
+import { Route as RootSettingsPieceTypesRouteImport } from './routes/_root/settings/piece-types'
+import { Route as RootSettingsConnectionRouteImport } from './routes/_root/settings/connection'
+import { Route as RundownRundownIdSegmentSegmentIdIndexRouteImport } from './routes/rundown/$rundownId/segment/$segmentId/index'
+import { Route as RundownRundownIdSegmentSegmentIdPartPartIdIndexRouteImport } from './routes/rundown/$rundownId/segment/$segmentId/part/$partId/index'
+import { Route as RundownRundownIdSegmentSegmentIdPartPartIdPiecePieceIdRouteImport } from './routes/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId'
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as RootRouteImport } from './routes/_root/route'
-import { Route as RootIndexImport } from './routes/_root/index'
-import { Route as RundownRundownIdImport } from './routes/rundown/$rundownId'
-import { Route as RootSettingsImport } from './routes/_root/settings'
-import { Route as RundownRundownIdIndexImport } from './routes/rundown/$rundownId/index'
-import { Route as RootSettingsIndexImport } from './routes/_root/settings/index'
-import { Route as RootSettingsRundownImport } from './routes/_root/settings/rundown'
-import { Route as RootSettingsPieceTypesImport } from './routes/_root/settings/piece-types'
-import { Route as RootSettingsConnectionImport } from './routes/_root/settings/connection'
-import { Route as RundownRundownIdSegmentSegmentIdIndexImport } from './routes/rundown/$rundownId/segment/$segmentId/index'
-import { Route as RundownRundownIdSegmentSegmentIdPartPartIdIndexImport } from './routes/rundown/$rundownId/segment/$segmentId/part/$partId/index'
-import { Route as RundownRundownIdSegmentSegmentIdPartPartIdPiecePieceIdImport } from './routes/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId'
-
-// Create/Update Routes
-
-const RootRouteRoute = RootRouteImport.update({
+const RootRouteRoute = RootRouteRouteImport.update({
   id: '/_root',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const RootIndexRoute = RootIndexImport.update({
+const RootIndexRoute = RootIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => RootRouteRoute,
 } as any)
-
-const RundownRundownIdRoute = RundownRundownIdImport.update({
+const RundownRundownIdRoute = RundownRundownIdRouteImport.update({
   id: '/rundown/$rundownId',
   path: '/rundown/$rundownId',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const RootSettingsRoute = RootSettingsImport.update({
+const RootSettingsRoute = RootSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => RootRouteRoute,
 } as any)
-
-const RundownRundownIdIndexRoute = RundownRundownIdIndexImport.update({
+const RundownRundownIdIndexRoute = RundownRundownIdIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => RundownRundownIdRoute,
 } as any)
-
-const RootSettingsIndexRoute = RootSettingsIndexImport.update({
+const RootSettingsIndexRoute = RootSettingsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => RootSettingsRoute,
 } as any)
-
-const RootSettingsRundownRoute = RootSettingsRundownImport.update({
+const RootSettingsRundownRoute = RootSettingsRundownRouteImport.update({
   id: '/rundown',
   path: '/rundown',
   getParentRoute: () => RootSettingsRoute,
 } as any)
-
-const RootSettingsPieceTypesRoute = RootSettingsPieceTypesImport.update({
+const RootSettingsPieceTypesRoute = RootSettingsPieceTypesRouteImport.update({
   id: '/piece-types',
   path: '/piece-types',
   getParentRoute: () => RootSettingsRoute,
 } as any)
-
-const RootSettingsConnectionRoute = RootSettingsConnectionImport.update({
+const RootSettingsConnectionRoute = RootSettingsConnectionRouteImport.update({
   id: '/connection',
   path: '/connection',
   getParentRoute: () => RootSettingsRoute,
 } as any)
-
 const RundownRundownIdSegmentSegmentIdIndexRoute =
-  RundownRundownIdSegmentSegmentIdIndexImport.update({
+  RundownRundownIdSegmentSegmentIdIndexRouteImport.update({
     id: '/segment/$segmentId/',
     path: '/segment/$segmentId/',
     getParentRoute: () => RundownRundownIdRoute,
   } as any)
-
 const RundownRundownIdSegmentSegmentIdPartPartIdIndexRoute =
-  RundownRundownIdSegmentSegmentIdPartPartIdIndexImport.update({
+  RundownRundownIdSegmentSegmentIdPartPartIdIndexRouteImport.update({
     id: '/segment/$segmentId/part/$partId/',
     path: '/segment/$segmentId/part/$partId/',
     getParentRoute: () => RundownRundownIdRoute,
   } as any)
-
 const RundownRundownIdSegmentSegmentIdPartPartIdPiecePieceIdRoute =
-  RundownRundownIdSegmentSegmentIdPartPartIdPiecePieceIdImport.update({
+  RundownRundownIdSegmentSegmentIdPartPartIdPiecePieceIdRouteImport.update({
     id: '/segment/$segmentId/part/$partId/piece/$pieceId',
     path: '/segment/$segmentId/part/$partId/piece/$pieceId',
     getParentRoute: () => RundownRundownIdRoute,
   } as any)
 
-// Populate the FileRoutesByPath interface
+export interface FileRoutesByFullPath {
+  '/settings': typeof RootSettingsRouteWithChildren
+  '/rundown/$rundownId': typeof RundownRundownIdRouteWithChildren
+  '/': typeof RootIndexRoute
+  '/settings/connection': typeof RootSettingsConnectionRoute
+  '/settings/piece-types': typeof RootSettingsPieceTypesRoute
+  '/settings/rundown': typeof RootSettingsRundownRoute
+  '/settings/': typeof RootSettingsIndexRoute
+  '/rundown/$rundownId/': typeof RundownRundownIdIndexRoute
+  '/rundown/$rundownId/segment/$segmentId': typeof RundownRundownIdSegmentSegmentIdIndexRoute
+  '/rundown/$rundownId/segment/$segmentId/part/$partId': typeof RundownRundownIdSegmentSegmentIdPartPartIdIndexRoute
+  '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId': typeof RundownRundownIdSegmentSegmentIdPartPartIdPiecePieceIdRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof RootIndexRoute
+  '/settings/connection': typeof RootSettingsConnectionRoute
+  '/settings/piece-types': typeof RootSettingsPieceTypesRoute
+  '/settings/rundown': typeof RootSettingsRundownRoute
+  '/settings': typeof RootSettingsIndexRoute
+  '/rundown/$rundownId': typeof RundownRundownIdIndexRoute
+  '/rundown/$rundownId/segment/$segmentId': typeof RundownRundownIdSegmentSegmentIdIndexRoute
+  '/rundown/$rundownId/segment/$segmentId/part/$partId': typeof RundownRundownIdSegmentSegmentIdPartPartIdIndexRoute
+  '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId': typeof RundownRundownIdSegmentSegmentIdPartPartIdPiecePieceIdRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/_root': typeof RootRouteRouteWithChildren
+  '/_root/settings': typeof RootSettingsRouteWithChildren
+  '/rundown/$rundownId': typeof RundownRundownIdRouteWithChildren
+  '/_root/': typeof RootIndexRoute
+  '/_root/settings/connection': typeof RootSettingsConnectionRoute
+  '/_root/settings/piece-types': typeof RootSettingsPieceTypesRoute
+  '/_root/settings/rundown': typeof RootSettingsRundownRoute
+  '/_root/settings/': typeof RootSettingsIndexRoute
+  '/rundown/$rundownId/': typeof RundownRundownIdIndexRoute
+  '/rundown/$rundownId/segment/$segmentId/': typeof RundownRundownIdSegmentSegmentIdIndexRoute
+  '/rundown/$rundownId/segment/$segmentId/part/$partId/': typeof RundownRundownIdSegmentSegmentIdPartPartIdIndexRoute
+  '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId': typeof RundownRundownIdSegmentSegmentIdPartPartIdPiecePieceIdRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | '/settings'
+    | '/rundown/$rundownId'
+    | '/'
+    | '/settings/connection'
+    | '/settings/piece-types'
+    | '/settings/rundown'
+    | '/settings/'
+    | '/rundown/$rundownId/'
+    | '/rundown/$rundownId/segment/$segmentId'
+    | '/rundown/$rundownId/segment/$segmentId/part/$partId'
+    | '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/settings/connection'
+    | '/settings/piece-types'
+    | '/settings/rundown'
+    | '/settings'
+    | '/rundown/$rundownId'
+    | '/rundown/$rundownId/segment/$segmentId'
+    | '/rundown/$rundownId/segment/$segmentId/part/$partId'
+    | '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId'
+  id:
+    | '__root__'
+    | '/_root'
+    | '/_root/settings'
+    | '/rundown/$rundownId'
+    | '/_root/'
+    | '/_root/settings/connection'
+    | '/_root/settings/piece-types'
+    | '/_root/settings/rundown'
+    | '/_root/settings/'
+    | '/rundown/$rundownId/'
+    | '/rundown/$rundownId/segment/$segmentId/'
+    | '/rundown/$rundownId/segment/$segmentId/part/$partId/'
+    | '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  RootRouteRoute: typeof RootRouteRouteWithChildren
+  RundownRundownIdRoute: typeof RundownRundownIdRouteWithChildren
+}
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
@@ -108,90 +176,88 @@ declare module '@tanstack/react-router' {
       id: '/_root'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof RootRouteImport
-      parentRoute: typeof rootRoute
-    }
-    '/_root/settings': {
-      id: '/_root/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof RootSettingsImport
-      parentRoute: typeof RootRouteImport
-    }
-    '/rundown/$rundownId': {
-      id: '/rundown/$rundownId'
-      path: '/rundown/$rundownId'
-      fullPath: '/rundown/$rundownId'
-      preLoaderRoute: typeof RundownRundownIdImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof RootRouteRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_root/': {
       id: '/_root/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof RootIndexImport
-      parentRoute: typeof RootRouteImport
+      preLoaderRoute: typeof RootIndexRouteImport
+      parentRoute: typeof RootRouteRoute
     }
-    '/_root/settings/connection': {
-      id: '/_root/settings/connection'
-      path: '/connection'
-      fullPath: '/settings/connection'
-      preLoaderRoute: typeof RootSettingsConnectionImport
-      parentRoute: typeof RootSettingsImport
+    '/rundown/$rundownId': {
+      id: '/rundown/$rundownId'
+      path: '/rundown/$rundownId'
+      fullPath: '/rundown/$rundownId'
+      preLoaderRoute: typeof RundownRundownIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_root/settings/piece-types': {
-      id: '/_root/settings/piece-types'
-      path: '/piece-types'
-      fullPath: '/settings/piece-types'
-      preLoaderRoute: typeof RootSettingsPieceTypesImport
-      parentRoute: typeof RootSettingsImport
-    }
-    '/_root/settings/rundown': {
-      id: '/_root/settings/rundown'
-      path: '/rundown'
-      fullPath: '/settings/rundown'
-      preLoaderRoute: typeof RootSettingsRundownImport
-      parentRoute: typeof RootSettingsImport
-    }
-    '/_root/settings/': {
-      id: '/_root/settings/'
-      path: '/'
-      fullPath: '/settings/'
-      preLoaderRoute: typeof RootSettingsIndexImport
-      parentRoute: typeof RootSettingsImport
+    '/_root/settings': {
+      id: '/_root/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof RootSettingsRouteImport
+      parentRoute: typeof RootRouteRoute
     }
     '/rundown/$rundownId/': {
       id: '/rundown/$rundownId/'
       path: '/'
       fullPath: '/rundown/$rundownId/'
-      preLoaderRoute: typeof RundownRundownIdIndexImport
-      parentRoute: typeof RundownRundownIdImport
+      preLoaderRoute: typeof RundownRundownIdIndexRouteImport
+      parentRoute: typeof RundownRundownIdRoute
+    }
+    '/_root/settings/': {
+      id: '/_root/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof RootSettingsIndexRouteImport
+      parentRoute: typeof RootSettingsRoute
+    }
+    '/_root/settings/rundown': {
+      id: '/_root/settings/rundown'
+      path: '/rundown'
+      fullPath: '/settings/rundown'
+      preLoaderRoute: typeof RootSettingsRundownRouteImport
+      parentRoute: typeof RootSettingsRoute
+    }
+    '/_root/settings/piece-types': {
+      id: '/_root/settings/piece-types'
+      path: '/piece-types'
+      fullPath: '/settings/piece-types'
+      preLoaderRoute: typeof RootSettingsPieceTypesRouteImport
+      parentRoute: typeof RootSettingsRoute
+    }
+    '/_root/settings/connection': {
+      id: '/_root/settings/connection'
+      path: '/connection'
+      fullPath: '/settings/connection'
+      preLoaderRoute: typeof RootSettingsConnectionRouteImport
+      parentRoute: typeof RootSettingsRoute
     }
     '/rundown/$rundownId/segment/$segmentId/': {
       id: '/rundown/$rundownId/segment/$segmentId/'
       path: '/segment/$segmentId'
       fullPath: '/rundown/$rundownId/segment/$segmentId'
-      preLoaderRoute: typeof RundownRundownIdSegmentSegmentIdIndexImport
-      parentRoute: typeof RundownRundownIdImport
+      preLoaderRoute: typeof RundownRundownIdSegmentSegmentIdIndexRouteImport
+      parentRoute: typeof RundownRundownIdRoute
     }
     '/rundown/$rundownId/segment/$segmentId/part/$partId/': {
       id: '/rundown/$rundownId/segment/$segmentId/part/$partId/'
       path: '/segment/$segmentId/part/$partId'
       fullPath: '/rundown/$rundownId/segment/$segmentId/part/$partId'
-      preLoaderRoute: typeof RundownRundownIdSegmentSegmentIdPartPartIdIndexImport
-      parentRoute: typeof RundownRundownIdImport
+      preLoaderRoute: typeof RundownRundownIdSegmentSegmentIdPartPartIdIndexRouteImport
+      parentRoute: typeof RundownRundownIdRoute
     }
     '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId': {
       id: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId'
       path: '/segment/$segmentId/part/$partId/piece/$pieceId'
       fullPath: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId'
-      preLoaderRoute: typeof RundownRundownIdSegmentSegmentIdPartPartIdPiecePieceIdImport
-      parentRoute: typeof RundownRundownIdImport
+      preLoaderRoute: typeof RundownRundownIdSegmentSegmentIdPartPartIdPiecePieceIdRouteImport
+      parentRoute: typeof RundownRundownIdRoute
     }
   }
 }
-
-// Create and export the route tree
 
 interface RootSettingsRouteChildren {
   RootSettingsConnectionRoute: typeof RootSettingsConnectionRoute
@@ -245,178 +311,10 @@ const RundownRundownIdRouteChildren: RundownRundownIdRouteChildren = {
 const RundownRundownIdRouteWithChildren =
   RundownRundownIdRoute._addFileChildren(RundownRundownIdRouteChildren)
 
-export interface FileRoutesByFullPath {
-  '': typeof RootRouteRouteWithChildren
-  '/settings': typeof RootSettingsRouteWithChildren
-  '/rundown/$rundownId': typeof RundownRundownIdRouteWithChildren
-  '/': typeof RootIndexRoute
-  '/settings/connection': typeof RootSettingsConnectionRoute
-  '/settings/piece-types': typeof RootSettingsPieceTypesRoute
-  '/settings/rundown': typeof RootSettingsRundownRoute
-  '/settings/': typeof RootSettingsIndexRoute
-  '/rundown/$rundownId/': typeof RundownRundownIdIndexRoute
-  '/rundown/$rundownId/segment/$segmentId': typeof RundownRundownIdSegmentSegmentIdIndexRoute
-  '/rundown/$rundownId/segment/$segmentId/part/$partId': typeof RundownRundownIdSegmentSegmentIdPartPartIdIndexRoute
-  '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId': typeof RundownRundownIdSegmentSegmentIdPartPartIdPiecePieceIdRoute
-}
-
-export interface FileRoutesByTo {
-  '/': typeof RootIndexRoute
-  '/settings/connection': typeof RootSettingsConnectionRoute
-  '/settings/piece-types': typeof RootSettingsPieceTypesRoute
-  '/settings/rundown': typeof RootSettingsRundownRoute
-  '/settings': typeof RootSettingsIndexRoute
-  '/rundown/$rundownId': typeof RundownRundownIdIndexRoute
-  '/rundown/$rundownId/segment/$segmentId': typeof RundownRundownIdSegmentSegmentIdIndexRoute
-  '/rundown/$rundownId/segment/$segmentId/part/$partId': typeof RundownRundownIdSegmentSegmentIdPartPartIdIndexRoute
-  '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId': typeof RundownRundownIdSegmentSegmentIdPartPartIdPiecePieceIdRoute
-}
-
-export interface FileRoutesById {
-  __root__: typeof rootRoute
-  '/_root': typeof RootRouteRouteWithChildren
-  '/_root/settings': typeof RootSettingsRouteWithChildren
-  '/rundown/$rundownId': typeof RundownRundownIdRouteWithChildren
-  '/_root/': typeof RootIndexRoute
-  '/_root/settings/connection': typeof RootSettingsConnectionRoute
-  '/_root/settings/piece-types': typeof RootSettingsPieceTypesRoute
-  '/_root/settings/rundown': typeof RootSettingsRundownRoute
-  '/_root/settings/': typeof RootSettingsIndexRoute
-  '/rundown/$rundownId/': typeof RundownRundownIdIndexRoute
-  '/rundown/$rundownId/segment/$segmentId/': typeof RundownRundownIdSegmentSegmentIdIndexRoute
-  '/rundown/$rundownId/segment/$segmentId/part/$partId/': typeof RundownRundownIdSegmentSegmentIdPartPartIdIndexRoute
-  '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId': typeof RundownRundownIdSegmentSegmentIdPartPartIdPiecePieceIdRoute
-}
-
-export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | ''
-    | '/settings'
-    | '/rundown/$rundownId'
-    | '/'
-    | '/settings/connection'
-    | '/settings/piece-types'
-    | '/settings/rundown'
-    | '/settings/'
-    | '/rundown/$rundownId/'
-    | '/rundown/$rundownId/segment/$segmentId'
-    | '/rundown/$rundownId/segment/$segmentId/part/$partId'
-    | '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/settings/connection'
-    | '/settings/piece-types'
-    | '/settings/rundown'
-    | '/settings'
-    | '/rundown/$rundownId'
-    | '/rundown/$rundownId/segment/$segmentId'
-    | '/rundown/$rundownId/segment/$segmentId/part/$partId'
-    | '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId'
-  id:
-    | '__root__'
-    | '/_root'
-    | '/_root/settings'
-    | '/rundown/$rundownId'
-    | '/_root/'
-    | '/_root/settings/connection'
-    | '/_root/settings/piece-types'
-    | '/_root/settings/rundown'
-    | '/_root/settings/'
-    | '/rundown/$rundownId/'
-    | '/rundown/$rundownId/segment/$segmentId/'
-    | '/rundown/$rundownId/segment/$segmentId/part/$partId/'
-    | '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId'
-  fileRoutesById: FileRoutesById
-}
-
-export interface RootRouteChildren {
-  RootRouteRoute: typeof RootRouteRouteWithChildren
-  RundownRundownIdRoute: typeof RundownRundownIdRouteWithChildren
-}
-
 const rootRouteChildren: RootRouteChildren = {
   RootRouteRoute: RootRouteRouteWithChildren,
   RundownRundownIdRoute: RundownRundownIdRouteWithChildren,
 }
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/_root",
-        "/rundown/$rundownId"
-      ]
-    },
-    "/_root": {
-      "filePath": "_root/route.tsx",
-      "children": [
-        "/_root/settings",
-        "/_root/"
-      ]
-    },
-    "/_root/settings": {
-      "filePath": "_root/settings.tsx",
-      "parent": "/_root",
-      "children": [
-        "/_root/settings/connection",
-        "/_root/settings/piece-types",
-        "/_root/settings/rundown",
-        "/_root/settings/"
-      ]
-    },
-    "/rundown/$rundownId": {
-      "filePath": "rundown/$rundownId.tsx",
-      "children": [
-        "/rundown/$rundownId/",
-        "/rundown/$rundownId/segment/$segmentId/",
-        "/rundown/$rundownId/segment/$segmentId/part/$partId/",
-        "/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId"
-      ]
-    },
-    "/_root/": {
-      "filePath": "_root/index.tsx",
-      "parent": "/_root"
-    },
-    "/_root/settings/connection": {
-      "filePath": "_root/settings/connection.tsx",
-      "parent": "/_root/settings"
-    },
-    "/_root/settings/piece-types": {
-      "filePath": "_root/settings/piece-types.tsx",
-      "parent": "/_root/settings"
-    },
-    "/_root/settings/rundown": {
-      "filePath": "_root/settings/rundown.tsx",
-      "parent": "/_root/settings"
-    },
-    "/_root/settings/": {
-      "filePath": "_root/settings/index.tsx",
-      "parent": "/_root/settings"
-    },
-    "/rundown/$rundownId/": {
-      "filePath": "rundown/$rundownId/index.tsx",
-      "parent": "/rundown/$rundownId"
-    },
-    "/rundown/$rundownId/segment/$segmentId/": {
-      "filePath": "rundown/$rundownId/segment/$segmentId/index.tsx",
-      "parent": "/rundown/$rundownId"
-    },
-    "/rundown/$rundownId/segment/$segmentId/part/$partId/": {
-      "filePath": "rundown/$rundownId/segment/$segmentId/part/$partId/index.tsx",
-      "parent": "/rundown/$rundownId"
-    },
-    "/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId": {
-      "filePath": "rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId.tsx",
-      "parent": "/rundown/$rundownId"
-    }
-  }
-}
-ROUTE_MANIFEST_END */

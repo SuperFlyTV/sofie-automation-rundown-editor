@@ -1,47 +1,242 @@
+.rundown-main-content {
+	flex-grow: 1;
+	overflow: hidden;
+	.rundown-main-content-properties {
+		height: 100%;
+		overflow-y: auto;
+		> .hstack {
+			min-height: 100%;
+		}
+		> .hstack > div {
+			align-items: stretch;
+		}
+	}
+}
+
 .rundown-sidebar {
+	background-color: rgba(0, 0, 0, 0.4);
+	padding: 0 0.3em;
+	height: 100%;
+	overflow-y: auto;
+	width: 20%;
+	min-width: 18em;
+	max-width: 28em;
 	a {
 		text-decoration: none;
 
-		&.active button {
+		&.active > div {
 			border: 1px solid #009dff;
 		}
-	}
 
-	button {
-		padding: 0.2em;
-		text-decoration: none;
+		> div {
+			padding: 0 2px;
+			text-decoration: none;
 
-		display: block;
-		border: none;
-		width: 100%;
-		text-align: left;
+			border: none;
+			width: 100%;
+			text-align: left;
+		}
 	}
 
 	.item-duration {
 		font-size: 0.7em;
-		color: #b2b2b2;
-		margin-left: 0.5em;
+		padding-left: 0.5em;
+		top: 1.9em;
+		font-family: monospace;
 	}
 
 	.floated {
 		text-decoration: line-through;
 	}
 
-	.segment-button {
-		background-color: #4b4b4b;
-		font-size: 1.2em;
-		line-height: 2em;
-		color: white;
-	}
-
-	.part-button {
-		background-color: #353535;
-		font-size: 1em;
-		line-height: 1.5em;
-		color: white;
-	}
-
 	.add-button {
 		color: #777;
+	}
+	.segment-toggle {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1rem;
+		height: 1rem;
+		cursor: pointer;
+		user-select: none;
+		font-size: 0.8rem;
+		transition: transform 0.2s ease;
+	}
+
+	.item-title {
+		flex: 1;
+		position: relative;
+		top: -0.4em;
+	}
+
+	.copy-item {
+		border-radius: 0.15em;
+	}
+
+	.segment-header-content {
+		display: flex;
+		align-items: center;
+		padding: 0.4em 0.3em;
+		width: max-content;
+	}
+
+	.segment-button {
+		padding-right: 0.2em;
+		margin-bottom: 0.1em;
+	}
+	.segment-buttons {
+		z-index: 6;
+		display: flex;
+		justify-content: space-evenly;
+		font-size: 1em;
+		margin: 2em 0;
+	}
+
+	.segment-button.add-button {
+		all: unset;
+		background: #141619;
+		border: 0.2em solid #141619;
+		border-radius: 2em;
+		padding-right: 0.7em;
+		padding-left: 0.2em;
+		cursor: pointer;
+		font-size: 0.8em;
+	}
+
+	.icon-lg {
+		position: relative;
+		top: -0.05em;
+	}
+
+	.sidebar-segment {
+		border-bottom: 1px solid #4a4b4c;
+		padding: 0.5em 0 0.78em;
+
+		.item-duration {
+			font-size: 0.7em;
+			padding-left: 0.5em;
+			top: 2.7em;
+			font-family: monospace;
+		}
+
+		&.closed {
+			.segment-toggle {
+				transform: rotate(-90deg);
+			}
+		}
+
+		.segment-content {
+			overflow: hidden;
+			transition:
+				max-height 0.2s ease,
+				opacity 0.15s ease;
+		}
+
+		&.closed .segment-content {
+			display: none;
+			pointer-events: none;
+		}
+
+		&.open .segment-content {
+			display: block;
+			opacity: 1;
+		}
+
+		.segment-content div :last-child .add-button-container {
+			height: 1.5em;
+		}
+		.segment-content > div:last-child {
+			margin-bottom: 0.75em;
+		}
+		.add-button-container {
+			padding-right: 1rem;
+			width: 100%;
+			height: 0.25em;
+			top: 2.7em;
+			z-index: 5;
+			.add-button {
+				all: unset;
+				z-index: 6;
+				cursor: pointer;
+				text-align: center;
+				font-size: 0.8em;
+				border-radius: 2em;
+				padding-right: 0.7em;
+				padding-left: 0.2em;
+				transition: opacity 0.5s ease-out;
+			}
+		}
+		.sidebar-part-wrapper {
+			position: relative;
+			margin-left: 1em;
+
+			.item-duration {
+				top: 1.7em;
+			}
+
+			.add-button-container {
+				width: 100%;
+				position: absolute;
+				height: 0.25em;
+				top: 2.45em;
+				z-index: 5;
+				.add-button {
+					all: unset;
+					position: absolute;
+					top: -1.05em;
+					right: 4.5em;
+					z-index: 6;
+					cursor: pointer;
+					text-align: center;
+					font-size: 0.7em;
+					background: #141619;
+					border: 0.27em solid #141619;
+					border-radius: 2em;
+					padding-right: 0.7em;
+					padding-left: 0.2em;
+					transition: opacity 0.5s ease-out;
+					opacity: 0;
+				}
+				&:hover .add-button,
+				.add-button:hover {
+					transition: opacity 0.2s ease-out;
+					opacity: 1;
+				}
+			}
+		}
+		.segment-buttons {
+			position: absolute;
+			bottom: -2.6em;
+			z-index: 6;
+			display: flex;
+			justify-content: space-evenly;
+			width: 100%;
+			font-size: 0.9em;
+
+			.segment-button {
+				font-size: 0.8em;
+				border: 0.2em solid #141619;
+				border-radius: 2em;
+				padding-right: 0.7em;
+				transition: opacity 0.5s ease-out;
+
+				cursor: pointer;
+				opacity: 0;
+			}
+			&:hover .segment-button,
+			.segment-button:hover {
+				transition: opacity 0.2s ease-out;
+				opacity: 1;
+			}
+		}
+
+		.icon-lg {
+			position: relative;
+			top: -0.05em;
+		}
+	}
+	div :last-child .segment-buttons {
+		display: none;
 	}
 }

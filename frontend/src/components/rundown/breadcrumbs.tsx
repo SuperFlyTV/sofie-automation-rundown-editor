@@ -5,14 +5,9 @@ import { Link, useRouterState } from '@tanstack/react-router'
 import type React from 'react'
 import { NavbarText } from 'react-bootstrap'
 import { useAppSelector } from '~/store/app'
+import type { CSSProperties } from 'react'
 
-export function RundownBreadcrumbs({
-	rundownId,
-	rundownName
-}: {
-	rundownId: string
-	rundownName: string
-}) {
+export function RundownBreadcrumbs({ rundownId }: { rundownId: string }) {
 	const matches = useRouterState({ select: (s) => s.matches })
 
 	// console.log('matches', matches)
@@ -39,10 +34,20 @@ export function RundownBreadcrumbs({
 		(state) => state.pieces.pieces.find((p) => p.id === pieceId)?.name
 	)
 
+	const linkStyle: CSSProperties = {
+		textDecoration: 'underline',
+		textUnderlineOffset: '2px',
+		cursor: 'pointer'
+	}
+
 	if (segmentId) {
 		links.push(
-			<NavbarText key={`${segmentId}_/`}>/</NavbarText>,
-			<Nav.Link as={Link} to={`/rundown/${rundownId}/segment/${segmentId}`} key={segmentId}>
+			<Nav.Link
+				key={segmentId}
+				as={Link}
+				to={`/rundown/${rundownId}/segment/${segmentId}`}
+				style={linkStyle}
+			>
 				{segmentName || segmentId}
 			</Nav.Link>
 		)
@@ -50,11 +55,12 @@ export function RundownBreadcrumbs({
 
 	if (segmentId && partId) {
 		links.push(
-			<NavbarText key={`${partId}_/`}>/</NavbarText>,
+			<NavbarText key={`${partId}-sep`}>/</NavbarText>,
 			<Nav.Link
+				key={partId}
 				as={Link}
 				to={`/rundown/${rundownId}/segment/${segmentId}/part/${partId}`}
-				key={partId}
+				style={linkStyle}
 			>
 				{partName || partId}
 			</Nav.Link>
@@ -63,11 +69,12 @@ export function RundownBreadcrumbs({
 
 	if (segmentId && partId && pieceId) {
 		links.push(
-			<NavbarText key={`${pieceId}_/`}>/</NavbarText>,
+			<NavbarText key={`${pieceId}-sep`}>/</NavbarText>,
 			<Nav.Link
+				key={pieceId}
 				as={Link}
 				to={`/rundown/${rundownId}/segment/${segmentId}/part/${partId}/piece/${pieceId}`}
-				key={pieceId}
+				style={linkStyle}
 			>
 				{pieceName || pieceId}
 			</Nav.Link>
@@ -75,12 +82,13 @@ export function RundownBreadcrumbs({
 	}
 
 	return (
-		<Navbar expand="lg" style={{ background: '#888888' }}>
+		<Navbar
+			className="text-white"
+			style={{ height: '2.5em', fontSize: '.75em', backgroundColor: '#2E2E2E' }}
+		>
 			<Container fluid>
-				<Nav className="me-auto">
-					<Nav.Link as={Link} to={`/rundown/${rundownId}`}>
-						{rundownName}
-					</Nav.Link>
+				<Nav className="">
+					<NavbarText key={`${partId}-sep`}>/</NavbarText>
 					{links}
 				</Nav>
 			</Container>

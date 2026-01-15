@@ -17,8 +17,8 @@ import {
 	removePiecesManifest,
 	updatePiecesManifest
 } from '~/store/piecesManifest'
-import { useToasts } from '../toasts/toasts'
 import { ipcAPI } from '~/lib/IPC'
+import { useToasts } from '../toasts/useToasts'
 
 export function PieceTypesForm({ piecesManifest }: { piecesManifest: PiecesManifest }) {
 	const dispatch = useAppDispatch()

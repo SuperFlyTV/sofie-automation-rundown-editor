@@ -12,6 +12,7 @@ import { loadSegments } from './segments'
 
 export interface NewRundownPayload {
 	playlistId: string | null
+	isTemplate?: boolean
 }
 export interface UpdateRundownPayload {
 	rundown: Rundown
@@ -24,10 +25,10 @@ export const addNewRundown = createAppAsyncThunk(
 	'rundowns/addNewRundown',
 	async (initialRundown: NewRundownPayload) => {
 		return ipcAPI.addNewRundown({
-			name: 'New rundown',
+			name: 'New ' + (initialRundown.isTemplate ? 'Template' : 'Rundown'),
 			sync: false,
 			playlistId: initialRundown.playlistId,
-			isTemplate: false
+			isTemplate: initialRundown.isTemplate ? true : false
 		})
 	}
 )
@@ -61,7 +62,11 @@ export const removeRundown = createAppAsyncThunk(
 export const importRundown = createAppAsyncThunk(
 	'rundowns/importRundown',
 	async (rundown: SerializedRundown) => {
-		const createdRundown = await ipcAPI.addNewRundown({ ...rundown.rundown, sync: false })
+		const createdRundown = await ipcAPI.addNewRundown({
+			...rundown.rundown,
+			sync: false,
+			isTemplate: rundown.isTemplate ?? false
+		})
 
 		// Note: we don't need to update the stores, that will happen when opening the rundown
 

@@ -1,37 +1,11 @@
-import { nanoid } from '@reduxjs/toolkit'
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
+import { Toast, ToastContainer } from 'react-bootstrap'
 import {
-	createContext,
-	forwardRef,
-	useContext,
-	useImperativeHandle,
-	useMemo,
-	useRef,
-	useState,
-	type JSX,
-	type RefObject
-} from 'react'
-import { Toast, ToastContainer, type ToastBodyProps, type ToastHeaderProps } from 'react-bootstrap'
-import type { Variant } from 'react-bootstrap/esm/types'
-
-export type ToastIdType = string
-
-export interface ToastOptions {
-	headerContent: string
-	bodyContent: string | JSX.Element
-	toastHeaderProps?: ToastHeaderProps
-	toastBodyProps?: ToastBodyProps
-	autohide?: number // Default: 5000
-	color?: Variant
-}
-
-export type ToastOptionsWithId = ToastOptions & { id: ToastIdType }
-
-interface ToastsHandle {
-	show: (toastOptionsWithId: ToastOptionsWithId) => void
-	hide: (id: ToastIdType) => void
-}
-
-const ToastsContext = createContext<RefObject<ToastsHandle | null> | undefined>(undefined)
+	ToastsContext,
+	type ToastIdType,
+	type ToastOptionsWithId,
+	type ToastsHandle
+} from './useToasts'
 
 const Toasts = forwardRef<ToastsHandle>((_props, ref) => {
 	const [toasts, setToasts] = useState<ToastOptionsWithId[]>([])
@@ -89,38 +63,4 @@ export const ToastsProvider = ({ children }: React.PropsWithChildren) => {
 			<Toasts ref={toastsRef} />
 		</ToastsContext.Provider>
 	)
-}
-
-export function useToasts() {
-	const ctx = useContext(ToastsContext)
-	if (ctx === undefined) {
-		throw Error(
-			'`useToasts` must be used inside of a `ToastsProvider`, ' +
-				'otherwise it will not function correctly.'
-		)
-	}
-
-	const api = useMemo(() => {
-		const show = (toastOptions: ToastOptions): ToastIdType => {
-			const id = nanoid()
-
-			ctx.current?.show({
-				autohide: 5000,
-				...toastOptions,
-				id
-			})
-
-			return id
-		}
-		const hide = (id: ToastIdType) => {
-			ctx.current?.hide(id)
-		}
-
-		return {
-			show,
-			hide
-		}
-	}, [ctx])
-
-	return api
 }

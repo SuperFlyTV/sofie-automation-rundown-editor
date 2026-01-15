@@ -252,16 +252,37 @@ export const mutations = {
 	async move(
 		sourcePart: Part,
 		targetPart: Part,
-		sourceIndex: number,
 		targetIndex: number
 	): Promise<{ result?: Part; error?: Error }> {
 		try {
+			const { result: targetPartsResult } = await mutations.read({
+				segmentId: targetPart.segmentId
+			})
+
+			const targetParts = Array.isArray(targetPartsResult)
+				? targetPartsResult
+				: targetPartsResult
+					? [targetPartsResult]
+					: []
+
+			const sortedTargetParts = [...targetParts].sort((a, b) => a.rank - b.rank)
+
+			const prev = sortedTargetParts[targetIndex - 1]
+			const next = sortedTargetParts[targetIndex]
+
+			let rank: number
+
+			if (prev && next) rank = (prev.rank + next.rank) / 2
+			else if (prev) rank = prev.rank + 1
+			else if (next) rank = next.rank / 2
+			else rank = 1
+
 			const addNewPart = await mutations.create({
 				...sourcePart,
 				rundownId: targetPart.rundownId,
 				playlistId: targetPart.playlistId,
 				segmentId: targetPart.segmentId,
-				rank: undefined,
+				rank,
 				id: uuid(),
 				payload: {
 					script: sourcePart.payload.script,
@@ -269,24 +290,17 @@ export const mutations = {
 					duration: sourcePart.payload.duration
 				}
 			})
+
 			if (!addNewPart.result) {
-				console.error(addNewPart.error)
 				throw new Error('Could not create new part while cloning.')
 			}
-			const clonePieces = await piecesMutations.cloneFromPartToPart({
+
+			await piecesMutations.cloneFromPartToPart({
 				fromPartId: sourcePart.id,
 				toPartId: addNewPart.result.id
 			})
-			const reorderParts = await mutations.reorder({
-				element: addNewPart.result,
-				sourceIndex,
-				targetIndex
-			})
-			const removePart = await mutations.delete({ id: sourcePart.id })
 
-			if (clonePieces.error && reorderParts.error && removePart.error) {
-				throw new Error('Cloning the part failed')
-			}
+			await mutations.delete({ id: sourcePart.id })
 
 			return mutations.readOne(addNewPart.result.id)
 		} catch (e) {
@@ -619,19 +633,14 @@ async function handlePartMove(payload: MutationPartMove) {
 	let returnedResult: Part | undefined
 
 	try {
-		const { sourcePart, targetPart, sourceIndex, targetIndex } = payload
+		const { sourcePart, targetPart, targetIndex } = payload
 		const { result: document, error: sourceError } = await mutations.readOne(sourcePart.id)
 		if (sourceError) throw sourceError
 		const { result: target, error: targetError } = await mutations.readOne(targetPart.id)
 		if (targetError) throw targetError
 
 		if (document && target) {
-			const { result, error } = await mutations.move(
-				sourcePart,
-				targetPart,
-				sourceIndex,
-				targetIndex
-			)
+			const { result, error } = await mutations.move(sourcePart, targetPart, targetIndex)
 			if (error) throw error
 
 			const { result: sourceSegment } = await segmentsMutations.readOne(document.segmentId)

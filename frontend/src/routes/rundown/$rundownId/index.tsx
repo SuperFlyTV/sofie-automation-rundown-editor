@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { Stack } from 'react-bootstrap'
 import { RundownPropertiesForm } from '~/components/rundown/rundownPropertiesForm'
 import { useAppSelector } from '~/store/app'
 
@@ -13,8 +14,10 @@ function RouteComponent() {
 	if (!rundown) throw redirect({ to: '/' })
 
 	return (
-		<div className="p-4">
-			<RundownPropertiesForm rundown={rundown} />
-		</div>
+		<Stack className="rundown-main-content">
+			<div className="p-4">
+				<RundownPropertiesForm rundown={rundown} />
+			</div>
+		</Stack>
 	)
 }

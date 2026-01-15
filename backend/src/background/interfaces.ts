@@ -186,7 +186,7 @@ export enum IpcOperationType {
 
 export interface MutationCopy {
 	preserveName?: boolean
-	fromTemplate?: boolean
+	preserveTemplate?: boolean
 }
 
 export interface IpcOperation {
@@ -282,7 +282,6 @@ export type MutationPartCloneFromSegmentToSegment = {
 export type MutationPartMove = {
 	sourcePart: Part
 	targetPart: Part
-	sourceIndex: number
 	targetIndex: number
 }
 
@@ -304,13 +303,15 @@ export type MutationPieceTypeManifestDelete = Pick<PieceTypeManifest, 'id'>
 
 export type MutationRundownCreate = SetOptional<Rundown, 'id'>
 
-export type MutationSegmentCopy = Pick<Segment, 'id' | 'rundownId'> & MutationCopy
+export type MutationSegmentCopy = Pick<SetOptional<Segment, 'rank'>, 'id' | 'rundownId' | 'rank'> &
+	MutationCopy
 
 export type MutationSegmentCopyResult = { segment: Segment; parts: Part[]; pieces: Piece[] }
 
 export type MutationSegmentCloneFromRundownToRundown = {
 	fromRundownId: string
 	toRundownId: string
+	insertRank?: number
 }
 
 export type MutationRundownRead = Pick<Rundown, 'id'>
@@ -358,6 +359,7 @@ export interface SerializedRundown {
 	segments: Segment[]
 	parts: Part[]
 	pieces: Piece[]
+	isTemplate?: boolean
 }
 
 export interface OpenFromFileArgs {
