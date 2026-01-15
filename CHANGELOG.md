@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.6.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.5.0...v2.6.0) (2026-01-15)
+
+
+### Features
+
+* add CORE_HOST and CORE_PORT environment variables support ([e4e0bbb](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/e4e0bbb44d19c581de3b5704f3073b810e0a0912))
+* add CORE_HOST and CORE_PORT environment variables support ([66b71d0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/66b71d0c2c2ad98ae6be7a735283d3d29776b18d))
+* create data-folder on first run. ([6bb34e6](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/6bb34e65ca0dc5df09abefc89a51339ff737469d))
+* templates ui improvements ([#90](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/issues/90)) ([1747f02](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/1747f02bce5f099e7994f562bef491e9d0d221f7))
+
+
+### Bug Fixes
+
+* remove unused config schema fields ([4781ecb](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/4781ecb2818966a51143bfeceef4f36eca14c5a6))
+
 ## [2.5.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.4.0...v2.5.0) (2025-11-12)
 
 
