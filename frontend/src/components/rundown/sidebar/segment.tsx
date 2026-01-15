@@ -78,7 +78,7 @@ export function SidebarSegment({
 		targetIndex: number
 	) => {
 		if (targetPart.segmentId !== sourcePart.segmentId) {
-			return dispatch(movePart({ targetPart, sourcePart, sourceIndex, targetIndex }))
+			return dispatch(movePart({ targetPart, sourcePart, targetIndex }))
 				.unwrap()
 				.then(async (newPart) => {
 					await navigate({
@@ -92,8 +92,6 @@ export function SidebarSegment({
 						bodyContent: 'Encountered an unexpected error'
 					})
 				})
-
-			// remove part from old segment
 		} else {
 			return dispatch(reorderParts({ element: sourcePart, sourceIndex, targetIndex }))
 				.unwrap()

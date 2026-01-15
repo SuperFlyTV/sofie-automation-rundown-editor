@@ -282,7 +282,6 @@ export type MutationPartCloneFromSegmentToSegment = {
 export type MutationPartMove = {
 	sourcePart: Part
 	targetPart: Part
-	sourceIndex: number
 	targetIndex: number
 }
 
@@ -312,6 +311,7 @@ export type MutationSegmentCopyResult = { segment: Segment; parts: Part[]; piece
 export type MutationSegmentCloneFromRundownToRundown = {
 	fromRundownId: string
 	toRundownId: string
+	insertRank?: number
 }
 
 export type MutationRundownRead = Pick<Rundown, 'id'>

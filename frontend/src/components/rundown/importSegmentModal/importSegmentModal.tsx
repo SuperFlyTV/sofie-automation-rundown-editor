@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Modal, Spinner, Button, ListGroup } from 'react-bootstrap'
+import { Modal, Spinner, Button } from 'react-bootstrap'
 import { useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import { loadTemplateSegments } from '~/store/templateSegments'
 import { cloneSegmentsFromRundownToRundown } from '~/store/segments'
 import type { Rundown } from '~backend/background/interfaces'
-import RundownItem from './rundownItem'
 import TemplateRundownCard from './templateRundownCard'
 import { useToasts } from '~/components/toasts/useToasts'
 
@@ -74,7 +73,8 @@ export default function ImportSegmentModal({
 		dispatch(
 			cloneSegmentsFromRundownToRundown({
 				fromRundownId: sourceRundown.id,
-				toRundownId: targetRundownId
+				toRundownId: targetRundownId,
+				insertRank: rank
 			})
 		)
 			.unwrap()
@@ -120,23 +120,6 @@ export default function ImportSegmentModal({
 				) : (
 					<p className="text-muted fst-italic">No template segments or rundowns available</p>
 				)}
-
-				<h6>Rundowns:</h6>
-				<ListGroup>
-					{rundowns.filter((rd) => !rd.isTemplate).length > 0 ? (
-						rundowns
-							.filter((rd) => !rd.isTemplate)
-							.map((rd) => (
-								<RundownItem
-									key={rd.id}
-									rundown={rd}
-									onClone={() => handleCloneRundownSegments(rd)}
-								/>
-							))
-					) : (
-						<p className="text-muted fst-italic">No rundowns available</p>
-					)}
-				</ListGroup>
 			</Modal.Body>
 			<Modal.Footer>
 				<Button variant="secondary" onClick={onClose} disabled={loading}>
