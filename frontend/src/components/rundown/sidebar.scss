@@ -1,5 +1,16 @@
 .rundown-main-content {
-	flex-grow: 8;
+	flex-grow: 1;
+	overflow: hidden;
+	.rundown-main-content-properties {
+		height: 100%;
+		overflow-y: auto;
+		> .hstack {
+			min-height: 100%;
+		}
+		> .hstack > div {
+			align-items: stretch;
+		}
+	}
 }
 
 .rundown-sidebar {
@@ -7,7 +18,7 @@
 	padding: 0 0.3em;
 	height: 100%;
 	overflow-y: auto;
-	flex-grow: 1;
+	width: 20%;
 	min-width: 18em;
 	max-width: 28em;
 	a {
