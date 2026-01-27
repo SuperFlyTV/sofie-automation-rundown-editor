@@ -3,11 +3,12 @@ import {
 	IpcOperationType,
 	ApplicationSettings,
 	MutationApplicationSettingsCreate,
-	MutationApplicationSettingsUpdate
+	MutationApplicationSettingsUpdate,
+	TypeManifestEntity
 } from '../interfaces'
 import { db } from '../db'
-import { PARTS_MANIFEST, PIECES_MANIFEST } from '../manifest'
-import { mutations as pieceTypeManifestMutations } from './pieceManifests'
+import { defaultRundownManifest, PARTS_MANIFEST, PIECES_MANIFEST } from '../manifest'
+import { mutations as typeManifestMutations } from './typeManifests'
 import { Server, Socket } from 'socket.io'
 
 export const mutations = {
@@ -26,8 +27,6 @@ export const mutations = {
 
 			const result = stmt.run(JSON.stringify(document))
 			if (result.changes === 0) throw new Error('No rows were inserted')
-
-			console.log(result)
 
 			return this.read()
 		} catch (e) {
@@ -65,6 +64,12 @@ export const mutations = {
 	): Promise<{ result?: ApplicationSettings; error?: Error }> {
 		const update = {
 			...payload
+		}
+		if (update.rundownMetadata) {
+			await typeManifestMutations.update({
+				id: 'rundown',
+				update: { ...defaultRundownManifest, payload: update.rundownMetadata }
+			})
 		}
 
 		try {
@@ -126,7 +131,7 @@ export function registerSettingsHandlers(socket: Socket, _io: Server) {
 
 const DEFAULT_SETTINGS: ApplicationSettings = {
 	partTypes: PARTS_MANIFEST,
-	rundownMetadata: [],
+	rundownMetadata: defaultRundownManifest.payload,
 	coreUrl: '127.0.0.1',
 	corePort: 3000
 }
@@ -138,19 +143,25 @@ export async function initializeDefaults() {
 		}
 	})
 
-	// Reset piece type manifests using the pieceManifests module
+	// Reset type manifests using the typeManifests module
 	// First, get all existing manifests
-	const existingManifests = await pieceTypeManifestMutations.read({})
+	const existingManifests = await typeManifestMutations.read({})
 
-	// Delete them all
 	if (existingManifests && Array.isArray(existingManifests)) {
+		// Delete them all
 		for (const manifest of existingManifests) {
-			await pieceTypeManifestMutations.delete({ id: manifest.id })
+			await typeManifestMutations.delete({ id: manifest.id })
 		}
-	}
+		// Insert the defaults
+		await typeManifestMutations.create({
+			id: 'rundown',
+			entityType: TypeManifestEntity.Rundown,
+			// Only store the payload array for now; keep other fields in settings
+			payload: defaultRundownManifest.payload
+		})
 
-	// Insert the defaults
-	for (const pieceType of PIECES_MANIFEST) {
-		await pieceTypeManifestMutations.create(pieceType)
+		for (const pieceType of PIECES_MANIFEST) {
+			await typeManifestMutations.create(pieceType)
+		}
 	}
 }

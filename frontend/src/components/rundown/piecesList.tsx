@@ -58,7 +58,7 @@ function PieceRow({ piece }: { piece: Piece }) {
 	const toasts = useToasts()
 
 	const manifest = useAppSelector((state) =>
-		state.piecesManifest.manifest?.find((p) => p.id === piece.pieceType)
+		state.typeManifests.manifest?.find((p) => p.id === piece.pieceType)
 	)
 
 	const pieceRowClick = () => {
@@ -134,7 +134,7 @@ function NewPieceButton({
 	const dispatch = useAppDispatch()
 	const toasts = useToasts()
 
-	const piecesManifest = useAppSelector((state) => state.piecesManifest.manifest)
+	const piecesManifest = useAppSelector((state) => state.typeManifests.manifest)
 
 	const [show, setShow] = useState(false)
 	const handleDeleteClose = () => setShow(false)

@@ -8,7 +8,7 @@ export const Route = createFileRoute('/_root/settings/piece-types')({
 })
 
 function RouteComponent() {
-	const piecesManifest = useAppSelector((state) => state.piecesManifest)
+	const piecesManifest = useAppSelector((state) => state.typeManifests)
 
 	return (
 		<>

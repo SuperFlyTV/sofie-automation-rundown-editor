@@ -2,7 +2,7 @@ import express from 'express'
 import http from 'http'
 import { Server, Socket } from 'socket.io'
 import { registerSettingsHandlers } from './background/api/settings'
-import { registerPieceManifestsHandlers } from './background/api/pieceManifests'
+import { registerTypeManifestsHandlers } from './background/api/typeManifests'
 import { registerSegmentsHandlers } from './background/api/segments'
 import { registerPlaylistsHandlers } from './background/api/playlists'
 import { registerRundownsHandlers } from './background/api/rundowns'
@@ -24,7 +24,7 @@ export async function initSocketServer(port: number = 3010) {
 		const handlers: SocketIOHandler[] = [
 			registerCoreConnectionInfoHandlers,
 			registerSettingsHandlers,
-			registerPieceManifestsHandlers,
+			registerTypeManifestsHandlers,
 			registerSegmentsHandlers,
 			registerPlaylistsHandlers,
 			registerRundownsHandlers,

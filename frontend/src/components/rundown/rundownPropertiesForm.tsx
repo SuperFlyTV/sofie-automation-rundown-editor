@@ -13,13 +13,12 @@ export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 	const store = useAppStore()
 	const toasts = useToasts()
 
+	// TODO: use the new typeManifest store for this
 	const metadataFields = useAppSelector((state) => state.settings.settings?.rundownMetadata)
 
 	const form = useForm({
 		defaultValues: rundown,
 		onSubmit: async (values) => {
-			console.log('submit', values)
-
 			await dispatch(updateRundown({ rundown: values.value })).unwrap()
 
 			// Mark as pristine
@@ -175,8 +174,8 @@ export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 				{metadataFields?.map((fieldInfo) => {
 					return (
 						<form.Field
-							key={`metaData.${fieldInfo.id}`}
-							name={`metaData.${fieldInfo.id}`}
+							key={`payload.${fieldInfo.id}`}
+							name={`payload.${fieldInfo.id}`}
 							children={(field) => (
 								<>
 									<Form.Group className="mb-3">

@@ -1,7 +1,7 @@
 import { ipcAPI } from '~/lib/IPC'
 import type { AppDispatch } from './app'
 import { updateConnectionStatus } from './connectionStatus'
-import { loadPiecesManifest } from './piecesManifest'
+import { loadTypeManifest } from './typeManifest'
 import { initPlaylists } from './playlists'
 import { initRundowns } from './rundowns'
 import { loadSettings } from './settings'
@@ -29,7 +29,7 @@ export function initStore(dispatch: AppDispatch): void {
 			console.error('Error fetching rundowns:', error)
 		})
 
-	dispatch(loadPiecesManifest()).catch((error) => {
+	dispatch(loadTypeManifest()).catch((error) => {
 		console.error('Error fetching pieces manifest:', error)
 	})
 

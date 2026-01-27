@@ -2,9 +2,9 @@ import { useForm } from '@tanstack/react-form'
 import { Accordion, Button, ButtonGroup, Form } from 'react-bootstrap'
 import {
 	ManifestFieldType,
-	type PiecePayloadManifest,
-	type PiecesManifest,
-	type PieceTypeManifest
+	TypeManifestEntity,
+	type PayloadManifest,
+	type TypeManifest
 } from '~backend/background/interfaces'
 import { FieldInfo } from '../form'
 import { useAppDispatch } from '~/store/app'
@@ -12,20 +12,20 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
 import './pieceTypesForm.scss'
 import {
-	addNewPiecesManifest,
-	importPiecesManifest,
-	removePiecesManifest,
-	updatePiecesManifest
-} from '~/store/piecesManifest'
+	addNewTypeManifest,
+	importTypeManifest,
+	removeTypeManifest,
+	updateTypeManifest
+} from '~/store/typeManifest'
 import { ipcAPI } from '~/lib/IPC'
 import { useToasts } from '../toasts/useToasts'
 
-export function PieceTypesForm({ piecesManifest }: { piecesManifest: PiecesManifest }) {
+export function PieceTypesForm({ piecesManifest }: { piecesManifest: TypeManifest[] }) {
 	const dispatch = useAppDispatch()
 	const toasts = useToasts()
 
 	const addPieceType = () => {
-		dispatch(addNewPiecesManifest()).catch((e) => {
+		dispatch(addNewTypeManifest(TypeManifestEntity.Piece)).catch((e) => {
 			console.error(e)
 			toasts.show({
 				headerContent: 'Adding piece type',
@@ -48,12 +48,10 @@ export function PieceTypesForm({ piecesManifest }: { piecesManifest: PiecesManif
 		ipcAPI
 			.openFromFile({ title: 'Import piece types' })
 			.then(async (serializedPieceTypes) => {
-				console.log('importing piece types', serializedPieceTypes)
-
-				const verify = (pieceTypes: unknown): pieceTypes is PiecesManifest =>
+				const verify = (pieceTypes: unknown): pieceTypes is TypeManifest[] =>
 					Array.isArray(pieceTypes) &&
 					!!pieceTypes
-						.map((t) => 'id' in t && 'name' in t && 'payload' in t)
+						.map((t) => 'id' in t && 'entityType' in t && 'name' in t && 'payload' in t)
 						.filter((p) => p === false)
 
 				if (verify(serializedPieceTypes)) {
@@ -63,11 +61,9 @@ export function PieceTypesForm({ piecesManifest }: { piecesManifest: PiecesManif
 
 							try {
 								if (existing) {
-									await dispatch(
-										updatePiecesManifest({ originalId: existing.id, piecesManifest: p })
-									)
+									await dispatch(updateTypeManifest({ originalId: existing.id, piecesManifest: p }))
 								} else {
-									await dispatch(importPiecesManifest({ piecesManifest: p }))
+									await dispatch(importTypeManifest({ piecesManifest: p }))
 								}
 							} catch (e) {
 								console.error(e)
@@ -136,19 +132,17 @@ export function PieceTypesForm({ piecesManifest }: { piecesManifest: PiecesManif
 	)
 }
 
-export function SinglePieceTypeForm({ manifest }: { manifest: PieceTypeManifest }) {
+export function SinglePieceTypeForm({ manifest }: { manifest: TypeManifest }) {
 	const dispatch = useAppDispatch()
 	const toasts = useToasts()
 
 	const form = useForm({
 		defaultValues: manifest,
 		onSubmit: async (values) => {
-			console.log('submit', values)
-
 			try {
 				// TODO - this can have issues if the id is changed to be a duplicate of another
 				await dispatch(
-					updatePiecesManifest({ originalId: manifest.id, piecesManifest: values.value })
+					updateTypeManifest({ originalId: manifest.id, piecesManifest: values.value })
 				).unwrap()
 
 				// Mark as pristine
@@ -164,7 +158,7 @@ export function SinglePieceTypeForm({ manifest }: { manifest: PieceTypeManifest 
 	})
 
 	const addMetadataField = () => {
-		const newField: PiecePayloadManifest = {
+		const newField: PayloadManifest = {
 			id: '',
 			label: '',
 			type: ManifestFieldType.String
@@ -173,7 +167,7 @@ export function SinglePieceTypeForm({ manifest }: { manifest: PieceTypeManifest 
 	}
 
 	const deletePieceType = () => {
-		dispatch(removePiecesManifest({ id: manifest.id })).catch((e) => {
+		dispatch(removeTypeManifest({ id: manifest.id })).catch((e) => {
 			console.error(e)
 			toasts.show({
 				headerContent: 'Deleting piece type',

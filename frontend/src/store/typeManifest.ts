@@ -1,75 +1,73 @@
-import type { PiecesManifest, PieceTypeManifest } from '~backend/background/interfaces.js'
+import type { TypeManifest, TypeManifestEntity } from '~backend/background/interfaces.js'
 import { createSlice, nanoid } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
 import { ipcAPI } from '~/lib/IPC'
 
-export interface ImportPiecesManifestPayload {
-	piecesManifest: PieceTypeManifest
+export interface ImportTypeManifestPayload {
+	piecesManifest: TypeManifest
 }
-export interface UpdatePiecesManifestPayload {
+export interface UpdateTypeManifestPayload {
 	originalId: string
-	piecesManifest: PieceTypeManifest
+	piecesManifest: TypeManifest
 }
-export interface RemovePiecesManifestPayload {
+export interface RemoveTypeManifestPayload {
 	id: string
 }
 
-export const addNewPiecesManifest = createAppAsyncThunk(
-	'piecesManifest/addNewPiecesManifest',
-	async () => {
-		return ipcAPI.addNewPieceManifest({
+export const addNewTypeManifest = createAppAsyncThunk(
+	'typeManifest/addNewTypeManifest',
+	async (entityType: TypeManifestEntity) => {
+		return ipcAPI.addNewTypeManifest({
 			id: nanoid(),
 			name: 'New Piece Type',
 			shortName: 'NPT',
 			colour: '#000000',
-			payload: []
+			payload: [],
+			entityType
 		})
 	}
 )
-export const importPiecesManifest = createAppAsyncThunk(
-	'piecesManifest/importPiecesManifest',
-	async (payload: ImportPiecesManifestPayload) => {
-		return ipcAPI.addNewPieceManifest(payload.piecesManifest)
+export const importTypeManifest = createAppAsyncThunk(
+	'typeManifest/importTypesManifest',
+	async (payload: ImportTypeManifestPayload) => {
+		return ipcAPI.addNewTypeManifest(payload.piecesManifest)
 	}
 )
-export const updatePiecesManifest = createAppAsyncThunk(
-	'piecesManifest/updatePiecesManifest',
-	async (payload: UpdatePiecesManifestPayload) => {
-		const newDoc = await ipcAPI.updatePiecesManifest(payload.originalId, payload.piecesManifest)
+export const updateTypeManifest = createAppAsyncThunk(
+	'typeManifest/updateTypeManifest',
+	async (payload: UpdateTypeManifestPayload) => {
+		const newDoc = await ipcAPI.updateTypeManifest(payload.originalId, payload.piecesManifest)
 		return {
 			newDoc,
 			oldId: payload.originalId
 		}
 	}
 )
-export const removePiecesManifest = createAppAsyncThunk(
-	'piecesManifest/removePiecesManifest',
-	async (payload: RemovePiecesManifestPayload) => {
-		await ipcAPI.removePiecesManifest(payload.id)
+export const removeTypeManifest = createAppAsyncThunk(
+	'typeManifest/removeTypeManifest',
+	async (payload: RemoveTypeManifestPayload) => {
+		await ipcAPI.removeTypeManifest(payload.id)
 		return payload
 	}
 )
 
-interface PiecesManifestState {
-	manifest: PiecesManifest | null
+interface TypeManifestState {
+	manifest: TypeManifest[] | null
 	status: 'idle' | 'pending' | 'succeeded' | 'failed'
 	error: string | null
 }
 
-export const loadPiecesManifest = createAppAsyncThunk(
-	'piecesManifest/loadPiecesManifest',
-	async () => {
-		return ipcAPI.getPiecesManifest()
-	}
-)
+export const loadTypeManifest = createAppAsyncThunk('piecesManifest/loadTypeManifest', async () => {
+	return ipcAPI.getTypeManifests()
+})
 
-const piecesManifestSlice = createSlice({
-	name: 'piecesmanifest',
+const typeManifestSlice = createSlice({
+	name: 'typemanifest',
 	initialState: {
 		manifest: null,
 		status: 'idle',
 		error: null
-	} as PiecesManifestState,
+	} as TypeManifestState,
 	reducers: {
 		// initPiecesManifest: (_state, action: { type: string; payload: Setting[] }) => {
 		// 	console.log('initPiecesManifest', action)
@@ -78,32 +76,32 @@ const piecesManifestSlice = createSlice({
 	},
 	extraReducers(builder) {
 		builder
-			.addCase(loadPiecesManifest.pending, (state) => {
+			.addCase(loadTypeManifest.pending, (state) => {
 				state.status = 'pending'
 				state.manifest = null
 				state.error = null
 			})
-			.addCase(loadPiecesManifest.fulfilled, (state, action) => {
+			.addCase(loadTypeManifest.fulfilled, (state, action) => {
 				state.status = 'succeeded'
 				state.manifest = action.payload
 				state.error = null
 			})
-			.addCase(loadPiecesManifest.rejected, (state, action) => {
+			.addCase(loadTypeManifest.rejected, (state, action) => {
 				state.status = 'failed'
 				state.manifest = null
 				state.error = action.error.message ?? 'Unknown Error'
 			})
-			.addCase(importPiecesManifest.fulfilled, (state, action) => {
+			.addCase(importTypeManifest.fulfilled, (state, action) => {
 				if (!state.manifest) throw new Error('Manifest is not loaded')
 
 				state.manifest.push(action.payload)
 			})
-			.addCase(addNewPiecesManifest.fulfilled, (state, action) => {
+			.addCase(addNewTypeManifest.fulfilled, (state, action) => {
 				if (!state.manifest) throw new Error('Manifest is not loaded')
 
 				state.manifest.push(action.payload)
 			})
-			.addCase(updatePiecesManifest.fulfilled, (state, action) => {
+			.addCase(updateTypeManifest.fulfilled, (state, action) => {
 				if (!state.manifest) throw new Error('Manifest is not loaded')
 
 				let index = state.manifest.findIndex((setting) => setting.id === action.payload.newDoc.id)
@@ -115,7 +113,7 @@ const piecesManifestSlice = createSlice({
 					state.manifest[index] = action.payload.newDoc
 				}
 			})
-			.addCase(removePiecesManifest.fulfilled, (state, action) => {
+			.addCase(removeTypeManifest.fulfilled, (state, action) => {
 				if (!state.manifest) throw new Error('Manifest is not loaded')
 
 				const index = state.manifest.findIndex((setting) => setting.id === action.payload.id)
@@ -129,4 +127,4 @@ const piecesManifestSlice = createSlice({
 // Export the auto-generated action creator with the same name
 // export const {} = piecesmanifestSlice.actions
 
-export default piecesManifestSlice.reducer
+export default typeManifestSlice.reducer
