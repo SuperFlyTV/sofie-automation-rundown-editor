@@ -306,12 +306,11 @@ export const mutations = {
 				playlistId: targetPart.playlistId,
 				segmentId: targetPart.segmentId,
 				rank,
+				script: sourcePart.script,
+				partType: sourcePart.partType,
+				duration: sourcePart.duration,
 				id: uuid(),
-				payload: {
-					script: sourcePart.payload.script,
-					type: sourcePart.payload.type,
-					duration: sourcePart.payload.duration
-				}
+				payload: {}
 			})
 
 			if (!addNewPart.result) {
