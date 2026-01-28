@@ -22,7 +22,15 @@ export function SegmentButtons({
 	const toasts = useToasts()
 
 	const handleAddSegment = () => {
-		dispatch(addNewSegment({ rundownId, playlistId, rank }))
+		dispatch(
+			addNewSegment({
+				rundownId,
+				playlistId,
+				rank,
+				segmentType: undefined,
+				payload: {}
+			})
+		)
 			.unwrap()
 			.then(async (segment) => {
 				await navigate({ to: `/rundown/${rundownId}/segment/${segment.id}` })

@@ -38,13 +38,10 @@ async function mutatePart(part: Part): Promise<MutatedPart> {
 			externalId: part.id,
 			rank: part.rank,
 			name: part.name,
-			type: part.payload.type ? String(part.payload.type) : undefined,
+			type: part.partType,
 			float: part.float,
-			script: part.payload.script ? String(part.payload.script) : undefined,
-			duration:
-				part.payload.duration && !isNaN(part.payload.durations as any)
-					? Number(part.payload.duration)
-					: undefined,
+			script: part.script,
+			duration: part.duration,
 
 			pieces: await getMutatedPiecesFromPart(part.id)
 		}

@@ -74,6 +74,10 @@ export interface Part extends IHasPayload {
 	rank: number
 	/** Whether this part is floated */
 	float: boolean
+
+	script?: string
+	duration?: number
+	partType: string
 }
 export interface Piece extends IHasPayload {
 	/** Id of the adlib as reported by the ingest source. Must be unique for each adlib */

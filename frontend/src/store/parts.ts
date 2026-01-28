@@ -3,7 +3,8 @@ import type {
 	MutationPartMove,
 	MutationPartUpdate,
 	MutationReorder,
-	Part
+	Part,
+	PayloadValue
 } from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
@@ -20,11 +21,10 @@ export interface NewPartPayload {
 	segmentId: string
 	name?: string
 	rank?: number
-	payload?: {
-		script?: string
-		type?: string
-		duration?: number
-	}
+	script?: string
+	partType?: string | undefined
+	duration?: number
+	payload?: Record<string, PayloadValue>
 }
 export interface UpdatePartPayload {
 	part: Part
@@ -44,7 +44,8 @@ export const addNewPart = createAppAsyncThunk(
 			segmentId: payload.segmentId,
 			rank: payload.rank,
 			float: false,
-			payload: payload.payload ?? {}
+			payload: payload.payload ?? {},
+			partType: payload.partType ?? ''
 		})
 	}
 )

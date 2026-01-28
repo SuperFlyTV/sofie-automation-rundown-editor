@@ -85,7 +85,7 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 				/>
 
 				<form.Field
-					name="payload.type"
+					name="partType"
 					children={(field) => (
 						<>
 							<Form.Group className="mb-3">
@@ -104,7 +104,7 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 					)}
 				/>
 				<form.Field
-					name="payload.duration"
+					name="duration"
 					children={(field) => (
 						<>
 							<Form.Group className="mb-3">
@@ -122,7 +122,7 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 					)}
 				/>
 				<form.Field
-					name="payload.script"
+					name="script"
 					children={(field) => (
 						<>
 							<Form.Group className="mb-3">

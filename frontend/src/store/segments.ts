@@ -3,6 +3,7 @@ import type {
 	MutationSegmentCloneFromRundownToRundown,
 	MutationSegmentCopy,
 	MutationSegmentUpdate,
+	PayloadValue,
 	Segment
 } from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
@@ -19,6 +20,8 @@ export interface NewSegmentPayload {
 	playlistId: string | null // TODO - this should be handled by the server..
 	rundownId: string
 	rank: number
+	segmentType: string | undefined
+	payload: Record<string, PayloadValue>
 }
 export interface UpdateSegmentPayload {
 	segment: Segment
@@ -36,7 +39,9 @@ export const addNewSegment = createAppAsyncThunk(
 			rundownId: payload.rundownId,
 			rank: payload.rank,
 			float: false,
-			isTemplate: false
+			isTemplate: false,
+			segmentType: payload.segmentType ?? '',
+			payload: payload.payload
 		})
 	}
 )
