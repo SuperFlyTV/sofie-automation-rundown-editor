@@ -132,6 +132,42 @@ try {
 			process.exit(1)
 		}
 	}
+
+	// migrate rundown metaData into payload
+
+	const rundowns = db.prepare(`SELECT id, document FROM rundowns`).all() as Array<{
+		id: string
+		document: string
+	}>
+
+	const updateRundownStmt = db.prepare(`
+		UPDATE rundowns
+		SET document = ?
+		WHERE id = ?
+	`)
+
+	for (const rundown of rundowns) {
+		let parsed: any
+
+		try {
+			parsed = JSON.parse(rundown.document)
+		} catch (e) {
+			console.error(`Invalid JSON in rundown ${rundown.id}`, e)
+			process.exit(1)
+		}
+
+		// Skip if already migrated
+		if ('payload' in parsed) continue
+
+		const migrated = {
+			...parsed,
+			payload: parsed.metaData ?? {}
+		}
+
+		delete migrated.metaData
+
+		updateRundownStmt.run(JSON.stringify(migrated), rundown.id)
+	}
 } catch (error) {
 	console.error(
 		'Unable to open database',
