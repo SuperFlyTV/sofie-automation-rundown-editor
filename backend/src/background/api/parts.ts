@@ -12,8 +12,10 @@ import {
 	MutationRundownDelete,
 	MutationPartCopy,
 	MutationPartCopyResult,
-	MutationPartCloneFromSegmentToSegment
+	MutationPartCloneFromSegmentToSegment,
+	TypeManifestEntity
 } from '../interfaces'
+import { mutations as typeManifestMutations } from './typeManifests'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { coreHandler } from '../coreHandler'
@@ -31,6 +33,7 @@ async function mutatePart(part: Part): Promise<MutatedPart> {
 		name: part.name,
 		rank: part.rank,
 		payload: {
+			...part.payload,
 			segmentId: part.segmentId,
 			externalId: part.id,
 			rank: part.rank,
@@ -77,7 +80,25 @@ async function sendPartDiffToCore(oldPart: Part, newPart: Part) {
 
 export const mutations = {
 	async create(payload: MutationPartCreate): Promise<{ result?: Part; error?: Error }> {
-		const partTypes: string[] | undefined = (await settingsMutations.read()).result?.partTypes
+		const { result: partTypeManifests } = await typeManifestMutations.read({
+			entityType: TypeManifestEntity.Part
+		})
+
+		const defaultPartType =
+			Array.isArray(partTypeManifests) && partTypeManifests.length > 0
+				? partTypeManifests[0].id
+				: undefined
+		if (!defaultPartType) {
+			return { error: new Error('No part type manifests exist') }
+		}
+
+		if (payload.payload?.type) {
+			const { result } = await typeManifestMutations.readOne(String(payload.partType))
+			if (!result || result.entityType !== TypeManifestEntity.Part) {
+				return { error: new Error(`Invalid part type: ${payload.payload.type}`) }
+			}
+		}
+
 		const segmentParts: Part | Part[] | undefined = (
 			await mutations.read({ segmentId: payload.segmentId })
 		).result
@@ -91,9 +112,8 @@ export const mutations = {
 		const id = payload.id || uuid()
 		const document: Partial<MutationPartCreate> = {
 			...payload,
+			partType: payload.partType ?? defaultPartType,
 			payload: {
-				// fallback Type to avoid errors in core
-				type: partTypes?.[0],
 				...payload.payload
 			},
 			rank: payload.rank ?? partsLength

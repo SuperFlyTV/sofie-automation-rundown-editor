@@ -7,7 +7,7 @@ import {
 	TypeManifestEntity
 } from '../interfaces'
 import { db } from '../db'
-import { defaultRundownManifest, PARTS_MANIFEST, PIECES_MANIFEST } from '../manifest'
+import { defaultRundownManifest, PIECES_MANIFEST } from '../manifest'
 import { mutations as typeManifestMutations } from './typeManifests'
 import { Server, Socket } from 'socket.io'
 
@@ -130,7 +130,6 @@ export function registerSettingsHandlers(socket: Socket, _io: Server) {
 }
 
 const DEFAULT_SETTINGS: ApplicationSettings = {
-	partTypes: PARTS_MANIFEST,
 	rundownMetadata: defaultRundownManifest.payload,
 	coreUrl: '127.0.0.1',
 	corePort: 3000

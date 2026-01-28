@@ -9,11 +9,6 @@ export const defaultRundownManifest: TypeManifest = {
 	colour: '#000000',
 	payload: []
 }
-
-// Define part types that can be used in rundowns
-// ToDo - make these in better structure (id: type, name: type, etc)
-export const PARTS_MANIFEST = ['Titles', 'VO', 'Cam', 'Full', 'Remote', 'GFX', 'DVE']
-
 // Define pieces manifest with all piece types and their properties
 export const PIECES_MANIFEST: TypeManifest[] = [
 	{
@@ -208,5 +203,77 @@ export const PIECES_MANIFEST: TypeManifest[] = [
 			}
 		],
 		entityType: TypeManifestEntity.Piece
+	},
+	{
+		id: 'Titles',
+		name: 'Titles',
+		shortName: 'Titles',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'VO',
+		name: 'VO',
+		shortName: 'VO',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'Cam',
+		name: 'Cam',
+		shortName: 'Cam',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'Full',
+		name: 'Full',
+		shortName: 'Full',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'Remote',
+		name: 'Remote',
+		shortName: 'Remote',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'GFX',
+		name: 'GFX',
+		shortName: 'GFX',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'DVE',
+		name: 'DVE',
+		shortName: 'DVE',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'normal',
+		name: 'Normal',
+		shortName: 'NRM',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'opening',
+		name: 'Opening',
+		shortName: 'OP',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
 	}
 ]

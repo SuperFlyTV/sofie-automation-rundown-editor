@@ -2,6 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import sqlite from 'node:sqlite'
 import { defaultRundownManifest } from './manifest'
+import { TypeManifestEntity } from './interfaces'
 // In dev, store the database in the current working directory
 // In production, store the database in the user data directory
 const dbFile = path.join(process.cwd(), '../data/data.db')
@@ -120,7 +121,11 @@ try {
 			// Copy all entries to typeManifests with entityType='piece'
 			const insertStmt = db.prepare(`
             INSERT INTO typeManifests (id, document, entityType)
-            SELECT id, document, 'piece' FROM pieceTypeManifests
+						SELECT
+								id,
+								json_set(document, '$.entityType', 'piece') AS document,
+								'piece'
+						FROM pieceTypeManifests;
         `)
 			insertStmt.run()
 
@@ -167,6 +172,80 @@ try {
 		delete migrated.metaData
 
 		updateRundownStmt.run(JSON.stringify(migrated), rundown.id)
+	}
+
+	// ---- migrate partTypes -> typeManifests (NO normalization) ----
+
+	const settingsRow = db.prepare(`SELECT document FROM settings WHERE id = 'settings'`).get() as
+		| { document: string }
+		| undefined
+
+	if (settingsRow) {
+		const settings = JSON.parse(settingsRow.document)
+
+		const partTypes: string[] | undefined = settings.partTypes
+
+		if (Array.isArray(partTypes) && partTypes.length > 0) {
+			console.log('Migrating partTypes into typeManifests (preserving IDs)...')
+
+			const insertStmt = db.prepare(`
+			INSERT OR IGNORE INTO typeManifests (id, document, entityType)
+			VALUES (?, json(?), 'part')
+		`)
+
+			for (const partName of partTypes) {
+				const manifest = {
+					id: partName,
+					externalId: 'parts',
+					entityType: TypeManifestEntity.Part,
+					name: partName,
+					shortName: partName.slice(0, 3).toUpperCase(),
+					colour: '#666666',
+					payload: []
+				}
+
+				insertStmt.run(partName, JSON.stringify(manifest))
+			}
+
+			// Remove legacy property
+			delete settings.partTypes
+
+			db.prepare(
+				`
+				UPDATE settings
+				SET document = json(?)
+				WHERE id = 'settings'
+			`
+			).run(JSON.stringify(settings))
+
+			console.log('Part type migration completed successfully.')
+		}
+	}
+
+	// migrate partTypes
+	db.exec(`
+	UPDATE parts
+	SET document = json_set(
+		json_remove(document, '$.payload.type'),
+		'$.partType',
+		json_extract(document, '$.payload.type')
+	)
+	WHERE
+		json_extract(document, '$.payload.type') IS NOT NULL
+		AND json_extract(document, '$.partType') IS NULL;
+`)
+	const parTypeMigrationLeftovers = db
+		.prepare(
+			`
+	SELECT id
+	FROM parts
+	WHERE json_extract(document, '$.payload.type') IS NOT NULL
+`
+		)
+		.all()
+
+	if (parTypeMigrationLeftovers.length > 0) {
+		throw new Error('Migration incomplete: payload.type still exists')
 	}
 } catch (error) {
 	console.error(

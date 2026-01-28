@@ -3,7 +3,7 @@ import { Button, ButtonGroup, Form } from 'react-bootstrap'
 import {
 	ManifestFieldType,
 	type ApplicationSettings,
-	type RundownMetadataEntryManifest
+	type PayloadManifest
 } from '~backend/background/interfaces'
 import { FieldInfo } from '../form'
 import { useAppDispatch } from '~/store/app'
@@ -37,12 +37,15 @@ export function RundownSettingsForm({ settings }: { settings: ApplicationSetting
 	})
 
 	const addRundownMetadataField = () => {
-		const newField: RundownMetadataEntryManifest = {
+		const newField: PayloadManifest = {
 			id: '',
 			label: '',
 			type: ManifestFieldType.String
 		}
-		form.setFieldValue('rundownMetadata', [...form.getFieldValue('rundownMetadata'), newField])
+
+		const current = form.getFieldValue('rundownMetadata') ?? []
+
+		form.setFieldValue('rundownMetadata', [...current, newField])
 	}
 
 	return (
@@ -54,27 +57,7 @@ export function RundownSettingsForm({ settings }: { settings: ApplicationSetting
 					form.handleSubmit()
 				}}
 			>
-				<form.Field
-					name="partTypes"
-					children={(field) => (
-						<>
-							<Form.Group className="mb-3">
-								<Form.Label htmlFor={field.name}>Part types:</Form.Label>
-								<Form.Control
-									name={field.name}
-									type="text"
-									value={field.state.value?.join(', ') ?? ''}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value.split(', '))}
-								/>
-							</Form.Group>
-							<FieldInfo field={field} />
-						</>
-					)}
-				/>
-
 				<h3>
-					Rundown Metadata Fields:
 					<Button size="sm" onClick={addRundownMetadataField} className="float-end">
 						+ Add field
 					</Button>

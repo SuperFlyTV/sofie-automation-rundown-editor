@@ -14,7 +14,8 @@ import {
 	MutationSegmentsRead,
 	MutationRundownCopyResult,
 	Part,
-	Piece
+	Piece,
+	TypeManifestEntity
 } from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
@@ -25,6 +26,7 @@ import { mutations as partMutations } from './parts'
 import { mutations as pieceMutations } from './pieces'
 import { spliceReorder } from '../util'
 import { Server, Socket } from 'socket.io'
+import { mutations as typeManifestMutations } from './typeManifests'
 
 async function mutateSegment(segment: Segment): Promise<MutatedSegment> {
 	return {
@@ -32,8 +34,10 @@ async function mutateSegment(segment: Segment): Promise<MutatedSegment> {
 		name: segment.name,
 		rank: segment.rank,
 		payload: {
+			...segment.payload,
 			name: segment.name,
-			rank: segment.rank
+			rank: segment.rank,
+			type: segment.segmentType
 		},
 		parts: await getMutatedPartsFromSegment(segment.id)
 	}
@@ -63,6 +67,24 @@ export async function sendSegmentDiffToCore(oldSegment: Segment, newSegment: Seg
 export const mutations = {
 	async create(payload: MutationSegmentCreate): Promise<{ result?: Segment; error?: Error }> {
 		const id = payload.id || uuid()
+		const { result: segmentTypeManifests } = await typeManifestMutations.read({
+			entityType: TypeManifestEntity.Segment
+		})
+
+		const defaultSegmentType =
+			Array.isArray(segmentTypeManifests) && segmentTypeManifests.length > 0
+				? segmentTypeManifests[0].id
+				: undefined
+		if (!defaultSegmentType) {
+			return { error: new Error('No segment type manifests exist') }
+		}
+
+		if (payload.payload?.type) {
+			const { result } = await typeManifestMutations.readOne(String(payload.segmentType))
+			if (!result || result.entityType !== TypeManifestEntity.Segment) {
+				return { error: new Error(`Invalid segment type: ${payload.payload.type}`) }
+			}
+		}
 		const rundownSegments: Segment | Segment[] | undefined = (
 			await mutations.read({ rundownId: payload.rundownId })
 		).result
@@ -76,6 +98,7 @@ export const mutations = {
 		const document: Partial<MutationSegmentCreate> = {
 			isTemplate: false,
 			...payload,
+			segmentType: payload.segmentType ?? defaultSegmentType,
 			rank: payload.rank ?? segmentsLength
 		}
 		delete document.playlistId

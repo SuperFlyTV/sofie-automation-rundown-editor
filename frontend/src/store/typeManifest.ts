@@ -19,8 +19,8 @@ export const addNewTypeManifest = createAppAsyncThunk(
 	async (entityType: TypeManifestEntity) => {
 		return ipcAPI.addNewTypeManifest({
 			id: nanoid(),
-			name: 'New Piece Type',
-			shortName: 'NPT',
+			name: `New ${entityType} type`,
+			shortName: '',
 			colour: '#000000',
 			payload: [],
 			entityType

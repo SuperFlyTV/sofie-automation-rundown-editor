@@ -12,6 +12,10 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 	const dispatch = useAppDispatch()
 	const toasts = useToasts()
 
+	const manifest = useAppSelector((state) =>
+		state.typeManifests.manifest?.find((p) => p.id === part.partType)
+	)
+
 	const form = useForm({
 		defaultValues: part,
 		onSubmit: async (values) => {
@@ -137,6 +141,60 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 					)}
 				/>
 
+				{manifest?.payload?.map((fieldInfo) => {
+					return (
+						<form.Field
+							key={`payload.${fieldInfo.id}`}
+							name={`payload.${fieldInfo.id}`}
+							children={(field) => (
+								<>
+									<Form.Group className="mb-3">
+										<Form.Label htmlFor={field.name}>{fieldInfo.label}:</Form.Label>
+
+										{fieldInfo.type === 'string' && (
+											<Form.Control
+												name={field.name}
+												type="text"
+												// eslint-disable-next-line @typescript-eslint/no-explicit-any
+												value={field.state.value as any}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+											/>
+										)}
+
+										{fieldInfo.type === 'number' && (
+											<Form.Control
+												name={field.name}
+												type="number"
+												value={Number(field.state.value)}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(Number(e.target.value))}
+											/>
+										)}
+
+										{fieldInfo.type === 'boolean' && (
+											<Form.Switch
+												name={field.name}
+												type="text"
+												checked={Boolean(field.state.value)}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.checked)}
+											/>
+										)}
+									</Form.Group>
+									<FieldInfo field={field} />
+								</>
+							)}
+						/>
+					)
+				})}
+
+				{!manifest && (
+					<Form.Group className="mb-3">
+						<Form.Text>Type not found</Form.Text>
+					</Form.Group>
+				)}
+
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting, state.isPristine]}
 					children={([canSubmit, isSubmitting, isPristine]) => (
@@ -171,15 +229,15 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 }
 
 function PartTypeOptions() {
-	const types = useAppSelector((state) => state.settings.settings?.partTypes)
-	if (!types) return <></>
+	const partTypeManifests = useAppSelector((state) =>
+		state.typeManifests.manifest?.filter((m) => m.entityType === 'part')
+	)
 
-	// Remove duplicates
-	const typesUnique = Array.from(new Set(types))
+	if (!partTypeManifests?.length) return null
 
-	return typesUnique.map((type) => (
-		<option key={type} value={type}>
-			{type}
+	return partTypeManifests.map((m) => (
+		<option key={m.id} value={m.id}>
+			{m.name ?? m.id}
 		</option>
 	))
 }

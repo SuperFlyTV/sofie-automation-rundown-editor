@@ -12,7 +12,7 @@ function RouteComponent() {
 
 	return (
 		<>
-			<h2>Rundown Settings</h2>
+			<h2>Rundown Metadata</h2>
 
 			{settings.settings && <RundownSettingsForm settings={settings.settings} />}
 			{settings.error && <Alert variant="danger">{settings.error}</Alert>}

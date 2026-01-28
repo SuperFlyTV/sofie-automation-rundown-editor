@@ -55,6 +55,8 @@ export interface Segment extends IHasPayload {
 	float: boolean
 	/** Flags the segment as template. Template segments can be selected individually to be imported into other rundowns. */
 	isTemplate: boolean
+
+	segmentType: string
 }
 
 export interface Part extends IHasPayload {
@@ -162,8 +164,6 @@ export interface PayloadManifest {
 export interface ApplicationSettings {
 	coreUrl?: string
 	corePort?: number
-
-	partTypes: string[]
 	rundownMetadata: PayloadManifest[]
 }
 export interface DBSettings {
@@ -226,7 +226,7 @@ export interface MutatedSegment {
 	externalId: string
 	name: string
 	rank: number
-	payload: { name: string; rank: number }
+	payload: { name: string; rank: number; type: string }
 	parts: MutatedPart[]
 }
 
