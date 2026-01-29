@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Alert } from 'react-bootstrap'
-import { TypeManifestsForm } from '~/components/settings/typeManifestForm/typeManifestForm'
+import { TypeManifestsForm } from '~/components/settings/typeManifestForm/typeManifestsForm'
 import { useAppSelector } from '~/store/app'
 import { TypeManifestEntity } from '~backend/background/interfaces'
 
@@ -32,7 +32,7 @@ function RouteComponent() {
 			return <Alert variant="danger">Unknown type: {type}</Alert>
 	}
 
-	const manifests = typeManifests.manifest?.filter((m) => m.entityType === entityType)
+	const manifests = typeManifests.manifests?.filter((m) => m.entityType === entityType)
 
 	return (
 		<>

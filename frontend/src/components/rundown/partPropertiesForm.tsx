@@ -13,7 +13,7 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 	const toasts = useToasts()
 
 	const manifest = useAppSelector((state) =>
-		state.typeManifests.manifest?.find((p) => p.id === part.partType)
+		state.typeManifests.manifests?.find((p) => p.id === part.partType)
 	)
 
 	const form = useForm({
@@ -230,7 +230,7 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 
 function PartTypeOptions() {
 	const partTypeManifests = useAppSelector((state) =>
-		state.typeManifests.manifest?.filter((m) => m.entityType === 'part')
+		state.typeManifests.manifests?.filter((m) => m.entityType === 'part')
 	)
 
 	if (!partTypeManifests?.length) return null

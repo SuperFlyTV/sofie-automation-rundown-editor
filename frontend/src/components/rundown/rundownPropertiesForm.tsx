@@ -13,8 +13,9 @@ export function RundownPropertiesForm({ rundown }: { rundown: Rundown }) {
 	const store = useAppStore()
 	const toasts = useToasts()
 
-	// TODO: use the new typeManifest store for this
-	const metadataFields = useAppSelector((state) => state.settings.settings?.rundownMetadata)
+	const metadataFields = useAppSelector((state) =>
+		state.typeManifests.manifests?.find((manifest) => manifest.id === 'rundown')
+	)?.payload
 
 	const form = useForm({
 		defaultValues: rundown,

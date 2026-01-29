@@ -28,9 +28,9 @@ function RouteComponent() {
 			<Tabs activeKey={subPath} onSelect={selectTab} className="mb-3" transition={false}>
 				<Tab eventKey="connection" title="Core Connection" />
 				<Tab eventKey="rundown" title="Rundown metadata" />
-				<Tab eventKey="piece" title="Piece types" />
 				<Tab eventKey="segment" title="Segment types" />
 				<Tab eventKey="part" title="Part types" />
+				<Tab eventKey="piece" title="Piece types" />
 			</Tabs>
 
 			<MyErrorBoundary>

@@ -18,7 +18,7 @@ export function SegmentPropertiesForm({
 	const toasts = useToasts()
 
 	const manifest = useAppSelector((state) =>
-		state.typeManifests.manifest?.find((p) => p.id === segment.segmentType)
+		state.typeManifests.manifests?.find((p) => p.id === segment.segmentType)
 	)
 
 	const form = useForm({
@@ -219,7 +219,7 @@ export function SegmentPropertiesForm({
 
 function SegmentTypeOptions() {
 	const partTypeManifests = useAppSelector((state) =>
-		state.typeManifests.manifest?.filter((m) => m.entityType === 'segment')
+		state.typeManifests.manifests?.filter((m) => m.entityType === 'segment')
 	)
 
 	if (!partTypeManifests?.length) return null

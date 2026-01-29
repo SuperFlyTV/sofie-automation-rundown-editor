@@ -1,118 +1,22 @@
-import { Accordion, Button, ButtonGroup, Form } from 'react-bootstrap'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
-import { useAppDispatch } from '~/store/app'
-import {
-	addNewTypeManifest,
-	importTypeManifest,
-	removeTypeManifest,
-	updateTypeManifest
-} from '~/store/typeManifest'
-import { ipcAPI } from '~/lib/IPC'
-import { ManifestFieldType, TypeManifestEntity } from '~backend/background/interfaces'
-import type { TypeManifest, PayloadManifest } from '~backend/background/interfaces'
-import '../pieceTypesForm.scss'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useForm } from '@tanstack/react-form'
+import { Form, Button, ButtonGroup } from 'react-bootstrap'
 import { FieldInfo } from '~/components/form'
 import { useToasts } from '~/components/toasts/useToasts'
+import { useAppDispatch } from '~/store/app'
+import { updateTypeManifest, removeTypeManifest } from '~/store/typeManifest'
+import type { TypeManifest, PayloadManifest } from '~backend/background/interfaces'
+import { ManifestFieldType } from '~backend/background/interfaces'
 
-export function TypeManifestsForm({
-	typeManifests,
-	entityType,
-	title
+// Generic type manifest form
+export function TypeManifestForm({
+	manifest,
+	showTypefields
 }: {
-	typeManifests: TypeManifest[]
-	entityType: TypeManifestEntity
-	title: string
+	manifest: TypeManifest
+	showTypefields?: boolean
 }) {
-	console.log(typeManifests)
-	const dispatch = useAppDispatch()
-	const toasts = useToasts()
-
-	// Add new type
-	const addType = () => {
-		dispatch(addNewTypeManifest(entityType)).catch((e) => {
-			console.error(e)
-			toasts.show({ headerContent: `Adding ${title}`, bodyContent: 'Unexpected error' })
-		})
-	}
-
-	// Export types
-	const exportTypes = () => {
-		ipcAPI.saveToFile({ title: `Export ${title}`, document: typeManifests }).catch(console.error)
-	}
-
-	// Import types
-	const importTypes = () => {
-		ipcAPI.openFromFile({ title: `Import ${title}` }).then(async (imported) => {
-			const verify = (arr: unknown): arr is TypeManifest[] =>
-				Array.isArray(arr) &&
-				arr.every((t) => 'id' in t && 'entityType' in t && 'name' in t && 'payload' in t)
-
-			if (!verify(imported)) {
-				toasts.show({ headerContent: `Import ${title}`, bodyContent: 'Invalid file' })
-				return
-			}
-
-			await Promise.all(
-				imported.map(async (t) => {
-					const existing = typeManifests.find((m) => m.id === t.id)
-					try {
-						if (existing) {
-							await dispatch(updateTypeManifest({ originalId: existing.id, piecesManifest: t }))
-						} else {
-							await dispatch(importTypeManifest({ piecesManifest: t }))
-						}
-					} catch (e) {
-						console.error(e)
-						toasts.show({
-							headerContent: `Import ${title}`,
-							bodyContent: 'Unexpected error'
-						})
-					}
-				})
-			)
-
-			toasts.show({ headerContent: `Import ${title}`, bodyContent: 'Import complete' })
-		})
-	}
-
-	return (
-		<>
-			<h2>
-				{title}
-				<ButtonGroup className="float-end">
-					<Button size="sm" variant="secondary" onClick={importTypes}>
-						Import
-					</Button>
-					<Button size="sm" variant="secondary" onClick={exportTypes}>
-						Export
-					</Button>
-					<Button size="sm" onClick={addType}>
-						+ Add type
-					</Button>
-				</ButtonGroup>
-			</h2>
-
-			<Accordion alwaysOpen className="settings-piece-types">
-				{typeManifests.map((manifest) => (
-					<Accordion.Item eventKey={manifest.id} key={manifest.id}>
-						<Accordion.Header>
-							<div className="colour-preview me-2" style={{ backgroundColor: manifest.colour }} />
-							{manifest.name}
-						</Accordion.Header>
-						<Accordion.Body>
-							<SingleTypeManifestForm manifest={manifest} />
-						</Accordion.Body>
-					</Accordion.Item>
-				))}
-			</Accordion>
-		</>
-	)
-}
-
-// Generic single type manifest form
-export function SingleTypeManifestForm({ manifest }: { manifest: TypeManifest }) {
 	const dispatch = useAppDispatch()
 	const toasts = useToasts()
 
@@ -121,7 +25,7 @@ export function SingleTypeManifestForm({ manifest }: { manifest: TypeManifest })
 		onSubmit: async (values) => {
 			try {
 				await dispatch(
-					updateTypeManifest({ originalId: manifest.id, piecesManifest: values.value })
+					updateTypeManifest({ originalId: manifest.id, typeManifest: values.value })
 				).unwrap()
 				form.reset()
 			} catch (e) {
@@ -153,98 +57,102 @@ export function SingleTypeManifestForm({ manifest }: { manifest: TypeManifest })
 					form.handleSubmit()
 				}}
 			>
-				<form.Field
-					name="id"
-					children={(field) => (
-						<>
-							<Form.Group className="mb-3">
-								<Form.Label htmlFor={field.name}>Id:</Form.Label>
-								<Form.Control
-									name={field.name}
-									type="text"
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-							</Form.Group>
-							<FieldInfo field={field} />
-						</>
-					)}
-				/>
-				<form.Field
-					name="name"
-					children={(field) => (
-						<>
-							<Form.Group className="mb-3">
-								<Form.Label htmlFor={field.name}>Name:</Form.Label>
-								<Form.Control
-									name={field.name}
-									type="text"
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-							</Form.Group>
-							<FieldInfo field={field} />
-						</>
-					)}
-				/>
-				<form.Field
-					name="shortName"
-					children={(field) => (
-						<>
-							<Form.Group className="mb-3">
-								<Form.Label htmlFor={field.name}>Short Name:</Form.Label>
-								<Form.Control
-									name={field.name}
-									type="text"
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-							</Form.Group>
-							<FieldInfo field={field} />
-						</>
-					)}
-				/>
-				<form.Field
-					name="colour"
-					children={(field) => (
-						<>
-							<Form.Group className="mb-3">
-								<Form.Label htmlFor={field.name}>Colour:</Form.Label>
-								<Form.Control
-									name={field.name}
-									type="text"
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-							</Form.Group>
-							<FieldInfo field={field} />
-						</>
-					)}
-				/>
-				<form.Field
-					name="includeTypeInName"
-					children={(field) => (
-						<>
-							<Form.Group className="mb-3">
-								<Form.Label htmlFor={field.name}>Include in name:</Form.Label>
-								<Form.Switch
-									name={field.name}
-									checked={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.checked)}
-								/>
-							</Form.Group>
-							<FieldInfo field={field} />
-						</>
-					)}
-				/>
+				{showTypefields !== undefined || showTypefields ? null : (
+					<>
+						<form.Field
+							name="id"
+							children={(field) => (
+								<>
+									<Form.Group className="mb-3">
+										<Form.Label htmlFor={field.name}>Id:</Form.Label>
+										<Form.Control
+											name={field.name}
+											type="text"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+										/>
+									</Form.Group>
+									<FieldInfo field={field} />
+								</>
+							)}
+						/>
+						<form.Field
+							name="name"
+							children={(field) => (
+								<>
+									<Form.Group className="mb-3">
+										<Form.Label htmlFor={field.name}>Name:</Form.Label>
+										<Form.Control
+											name={field.name}
+											type="text"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+										/>
+									</Form.Group>
+									<FieldInfo field={field} />
+								</>
+							)}
+						/>
+						<form.Field
+							name="shortName"
+							children={(field) => (
+								<>
+									<Form.Group className="mb-3">
+										<Form.Label htmlFor={field.name}>Short Name:</Form.Label>
+										<Form.Control
+											name={field.name}
+											type="text"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+										/>
+									</Form.Group>
+									<FieldInfo field={field} />
+								</>
+							)}
+						/>
+						<form.Field
+							name="colour"
+							children={(field) => (
+								<>
+									<Form.Group className="mb-3">
+										<Form.Label htmlFor={field.name}>Colour:</Form.Label>
+										<Form.Control
+											name={field.name}
+											type="text"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+										/>
+									</Form.Group>
+									<FieldInfo field={field} />
+								</>
+							)}
+						/>
+						<form.Field
+							name="includeTypeInName"
+							children={(field) => (
+								<>
+									<Form.Group className="mb-3">
+										<Form.Label htmlFor={field.name}>Include in name:</Form.Label>
+										<Form.Switch
+											name={field.name}
+											checked={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.checked)}
+										/>
+									</Form.Group>
+									<FieldInfo field={field} />
+								</>
+							)}
+						/>
+					</>
+				)}
 
 				<h3>
-					Metadata Fields
+					{showTypefields !== undefined || showTypefields ? null : <>Metadata Fields</>}
 					<Button size="sm" onClick={addField} className="float-end">
 						+ Add field
 					</Button>

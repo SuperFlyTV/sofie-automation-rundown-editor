@@ -16,7 +16,6 @@ import { Route as RootSettingsRouteImport } from './routes/_root/settings'
 import { Route as RundownRundownIdIndexRouteImport } from './routes/rundown/$rundownId/index'
 import { Route as RootSettingsIndexRouteImport } from './routes/_root/settings/index'
 import { Route as RootSettingsRundownRouteImport } from './routes/_root/settings/rundown'
-import { Route as RootSettingsPieceTypesRouteImport } from './routes/_root/settings/piece-types'
 import { Route as RootSettingsConnectionRouteImport } from './routes/_root/settings/connection'
 import { Route as RootSettingsTypeTypeRouteImport } from './routes/_root/settings/type/$type'
 import { Route as RundownRundownIdSegmentSegmentIdIndexRouteImport } from './routes/rundown/$rundownId/segment/$segmentId/index'
@@ -57,11 +56,6 @@ const RootSettingsRundownRoute = RootSettingsRundownRouteImport.update({
   path: '/rundown',
   getParentRoute: () => RootSettingsRoute,
 } as any)
-const RootSettingsPieceTypesRoute = RootSettingsPieceTypesRouteImport.update({
-  id: '/piece-types',
-  path: '/piece-types',
-  getParentRoute: () => RootSettingsRoute,
-} as any)
 const RootSettingsConnectionRoute = RootSettingsConnectionRouteImport.update({
   id: '/connection',
   path: '/connection',
@@ -96,7 +90,6 @@ export interface FileRoutesByFullPath {
   '/rundown/$rundownId': typeof RundownRundownIdRouteWithChildren
   '/': typeof RootIndexRoute
   '/settings/connection': typeof RootSettingsConnectionRoute
-  '/settings/piece-types': typeof RootSettingsPieceTypesRoute
   '/settings/rundown': typeof RootSettingsRundownRoute
   '/settings/': typeof RootSettingsIndexRoute
   '/rundown/$rundownId/': typeof RundownRundownIdIndexRoute
@@ -108,7 +101,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof RootIndexRoute
   '/settings/connection': typeof RootSettingsConnectionRoute
-  '/settings/piece-types': typeof RootSettingsPieceTypesRoute
   '/settings/rundown': typeof RootSettingsRundownRoute
   '/settings': typeof RootSettingsIndexRoute
   '/rundown/$rundownId': typeof RundownRundownIdIndexRoute
@@ -124,7 +116,6 @@ export interface FileRoutesById {
   '/rundown/$rundownId': typeof RundownRundownIdRouteWithChildren
   '/_root/': typeof RootIndexRoute
   '/_root/settings/connection': typeof RootSettingsConnectionRoute
-  '/_root/settings/piece-types': typeof RootSettingsPieceTypesRoute
   '/_root/settings/rundown': typeof RootSettingsRundownRoute
   '/_root/settings/': typeof RootSettingsIndexRoute
   '/rundown/$rundownId/': typeof RundownRundownIdIndexRoute
@@ -140,7 +131,6 @@ export interface FileRouteTypes {
     | '/rundown/$rundownId'
     | '/'
     | '/settings/connection'
-    | '/settings/piece-types'
     | '/settings/rundown'
     | '/settings/'
     | '/rundown/$rundownId/'
@@ -152,7 +142,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/settings/connection'
-    | '/settings/piece-types'
     | '/settings/rundown'
     | '/settings'
     | '/rundown/$rundownId'
@@ -167,7 +156,6 @@ export interface FileRouteTypes {
     | '/rundown/$rundownId'
     | '/_root/'
     | '/_root/settings/connection'
-    | '/_root/settings/piece-types'
     | '/_root/settings/rundown'
     | '/_root/settings/'
     | '/rundown/$rundownId/'
@@ -233,13 +221,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RootSettingsRundownRouteImport
       parentRoute: typeof RootSettingsRoute
     }
-    '/_root/settings/piece-types': {
-      id: '/_root/settings/piece-types'
-      path: '/piece-types'
-      fullPath: '/settings/piece-types'
-      preLoaderRoute: typeof RootSettingsPieceTypesRouteImport
-      parentRoute: typeof RootSettingsRoute
-    }
     '/_root/settings/connection': {
       id: '/_root/settings/connection'
       path: '/connection'
@@ -280,7 +261,6 @@ declare module '@tanstack/react-router' {
 
 interface RootSettingsRouteChildren {
   RootSettingsConnectionRoute: typeof RootSettingsConnectionRoute
-  RootSettingsPieceTypesRoute: typeof RootSettingsPieceTypesRoute
   RootSettingsRundownRoute: typeof RootSettingsRundownRoute
   RootSettingsIndexRoute: typeof RootSettingsIndexRoute
   RootSettingsTypeTypeRoute: typeof RootSettingsTypeTypeRoute
@@ -288,7 +268,6 @@ interface RootSettingsRouteChildren {
 
 const RootSettingsRouteChildren: RootSettingsRouteChildren = {
   RootSettingsConnectionRoute: RootSettingsConnectionRoute,
-  RootSettingsPieceTypesRoute: RootSettingsPieceTypesRoute,
   RootSettingsRundownRoute: RootSettingsRundownRoute,
   RootSettingsIndexRoute: RootSettingsIndexRoute,
   RootSettingsTypeTypeRoute: RootSettingsTypeTypeRoute,

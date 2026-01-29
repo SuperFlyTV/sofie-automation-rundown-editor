@@ -7,7 +7,7 @@ import {
 	TypeManifestEntity
 } from '../interfaces'
 import { db } from '../db'
-import { defaultRundownManifest, PIECES_MANIFEST } from '../manifest'
+import { defaultRundownManifest, TYPE_MANIFESTS } from '../manifest'
 import { mutations as typeManifestMutations } from './typeManifests'
 import { Server, Socket } from 'socket.io'
 
@@ -64,12 +64,6 @@ export const mutations = {
 	): Promise<{ result?: ApplicationSettings; error?: Error }> {
 		const update = {
 			...payload
-		}
-		if (update.rundownMetadata) {
-			await typeManifestMutations.update({
-				id: 'rundown',
-				update: { ...defaultRundownManifest, payload: update.rundownMetadata }
-			})
 		}
 
 		try {
@@ -130,7 +124,6 @@ export function registerSettingsHandlers(socket: Socket, _io: Server) {
 }
 
 const DEFAULT_SETTINGS: ApplicationSettings = {
-	rundownMetadata: defaultRundownManifest.payload,
 	coreUrl: '127.0.0.1',
 	corePort: 3000
 }
@@ -159,7 +152,7 @@ export async function initializeDefaults() {
 			payload: defaultRundownManifest.payload
 		})
 
-		for (const pieceType of PIECES_MANIFEST) {
+		for (const pieceType of TYPE_MANIFESTS) {
 			await typeManifestMutations.create(pieceType)
 		}
 	}

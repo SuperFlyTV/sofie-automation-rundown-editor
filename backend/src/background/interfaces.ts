@@ -168,7 +168,6 @@ export interface PayloadManifest {
 export interface ApplicationSettings {
 	coreUrl?: string
 	corePort?: number
-	rundownMetadata: PayloadManifest[]
 }
 export interface DBSettings {
 	id: string

@@ -4,11 +4,11 @@ import { createAppAsyncThunk } from './app'
 import { ipcAPI } from '~/lib/IPC'
 
 export interface ImportTypeManifestPayload {
-	piecesManifest: TypeManifest
+	typeManifest: TypeManifest
 }
 export interface UpdateTypeManifestPayload {
 	originalId: string
-	piecesManifest: TypeManifest
+	typeManifest: TypeManifest
 }
 export interface RemoveTypeManifestPayload {
 	id: string
@@ -30,13 +30,13 @@ export const addNewTypeManifest = createAppAsyncThunk(
 export const importTypeManifest = createAppAsyncThunk(
 	'typeManifest/importTypesManifest',
 	async (payload: ImportTypeManifestPayload) => {
-		return ipcAPI.addNewTypeManifest(payload.piecesManifest)
+		return ipcAPI.addNewTypeManifest(payload.typeManifest)
 	}
 )
 export const updateTypeManifest = createAppAsyncThunk(
 	'typeManifest/updateTypeManifest',
 	async (payload: UpdateTypeManifestPayload) => {
-		const newDoc = await ipcAPI.updateTypeManifest(payload.originalId, payload.piecesManifest)
+		const newDoc = await ipcAPI.updateTypeManifest(payload.originalId, payload.typeManifest)
 		return {
 			newDoc,
 			oldId: payload.originalId
@@ -52,25 +52,25 @@ export const removeTypeManifest = createAppAsyncThunk(
 )
 
 interface TypeManifestState {
-	manifest: TypeManifest[] | null
+	manifests: TypeManifest[] | null
 	status: 'idle' | 'pending' | 'succeeded' | 'failed'
 	error: string | null
 }
 
-export const loadTypeManifest = createAppAsyncThunk('piecesManifest/loadTypeManifest', async () => {
+export const loadTypeManifest = createAppAsyncThunk('typeManifest/loadTypeManifest', async () => {
 	return ipcAPI.getTypeManifests()
 })
 
 const typeManifestSlice = createSlice({
 	name: 'typemanifest',
 	initialState: {
-		manifest: null,
+		manifests: null,
 		status: 'idle',
 		error: null
 	} as TypeManifestState,
 	reducers: {
-		// initPiecesManifest: (_state, action: { type: string; payload: Setting[] }) => {
-		// 	console.log('initPiecesManifest', action)
+		// inittypeManifest: (_state, action: { type: string; payload: Setting[] }) => {
+		// 	console.log('inittypeManifest', action)
 		// 	return action.payload
 		// }
 	},
@@ -78,53 +78,53 @@ const typeManifestSlice = createSlice({
 		builder
 			.addCase(loadTypeManifest.pending, (state) => {
 				state.status = 'pending'
-				state.manifest = null
+				state.manifests = null
 				state.error = null
 			})
 			.addCase(loadTypeManifest.fulfilled, (state, action) => {
 				state.status = 'succeeded'
-				state.manifest = action.payload
+				state.manifests = action.payload
 				state.error = null
 			})
 			.addCase(loadTypeManifest.rejected, (state, action) => {
 				state.status = 'failed'
-				state.manifest = null
+				state.manifests = null
 				state.error = action.error.message ?? 'Unknown Error'
 			})
 			.addCase(importTypeManifest.fulfilled, (state, action) => {
-				if (!state.manifest) throw new Error('Manifest is not loaded')
+				if (!state.manifests) throw new Error('Manifest is not loaded')
 
-				state.manifest.push(action.payload)
+				state.manifests.push(action.payload)
 			})
 			.addCase(addNewTypeManifest.fulfilled, (state, action) => {
-				if (!state.manifest) throw new Error('Manifest is not loaded')
+				if (!state.manifests) throw new Error('Manifest is not loaded')
 
-				state.manifest.push(action.payload)
+				state.manifests.push(action.payload)
 			})
 			.addCase(updateTypeManifest.fulfilled, (state, action) => {
-				if (!state.manifest) throw new Error('Manifest is not loaded')
+				if (!state.manifests) throw new Error('Manifest is not loaded')
 
-				let index = state.manifest.findIndex((setting) => setting.id === action.payload.newDoc.id)
+				let index = state.manifests.findIndex((setting) => setting.id === action.payload.newDoc.id)
 				if (index === -1) {
-					index = state.manifest.findIndex((setting) => setting.id === action.payload.oldId)
+					index = state.manifests.findIndex((setting) => setting.id === action.payload.oldId)
 				}
 
 				if (index !== -1) {
-					state.manifest[index] = action.payload.newDoc
+					state.manifests[index] = action.payload.newDoc
 				}
 			})
 			.addCase(removeTypeManifest.fulfilled, (state, action) => {
-				if (!state.manifest) throw new Error('Manifest is not loaded')
+				if (!state.manifests) throw new Error('Manifest is not loaded')
 
-				const index = state.manifest.findIndex((setting) => setting.id === action.payload.id)
+				const index = state.manifests.findIndex((setting) => setting.id === action.payload.id)
 				if (index !== -1) {
-					state.manifest.splice(index, 1)
+					state.manifests.splice(index, 1)
 				}
 			})
 	}
 })
 
 // Export the auto-generated action creator with the same name
-// export const {} = piecesmanifestSlice.actions
+// export const {} = typeManifestSlice.actions
 
 export default typeManifestSlice.reducer

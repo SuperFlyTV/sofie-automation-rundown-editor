@@ -1,6 +1,7 @@
 import { ManifestFieldType, TypeManifest, TypeManifestEntity } from './interfaces'
 
 // TODO - make this some JSON file for better flexibility
+
 export const defaultRundownManifest: TypeManifest = {
 	id: 'rundown',
 	entityType: TypeManifestEntity.Rundown,
@@ -9,8 +10,9 @@ export const defaultRundownManifest: TypeManifest = {
 	colour: '#000000',
 	payload: []
 }
+
 // Define pieces manifest with all piece types and their properties
-export const PIECES_MANIFEST: TypeManifest[] = [
+export const TYPE_MANIFESTS: TypeManifest[] = [
 	{
 		id: 'video',
 		name: 'Video Clip',
@@ -266,7 +268,7 @@ export const PIECES_MANIFEST: TypeManifest[] = [
 		shortName: 'NRM',
 		colour: '#666666',
 		payload: [],
-		entityType: TypeManifestEntity.Part
+		entityType: TypeManifestEntity.Segment
 	},
 	{
 		id: 'opening',
@@ -274,6 +276,6 @@ export const PIECES_MANIFEST: TypeManifest[] = [
 		shortName: 'OP',
 		colour: '#666666',
 		payload: [],
-		entityType: TypeManifestEntity.Part
+		entityType: TypeManifestEntity.Segment
 	}
 ]

@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import sqlite from 'node:sqlite'
 import { defaultRundownManifest } from './manifest'
-import { TypeManifestEntity } from './interfaces'
+import { PayloadManifest, TypeManifestEntity } from './interfaces'
 // In dev, store the database in the current working directory
 // In production, store the database in the user data directory
 const dbFile = path.join(process.cwd(), '../data/data.db')
@@ -174,16 +174,18 @@ try {
 		updateRundownStmt.run(JSON.stringify(migrated), rundown.id)
 	}
 
-	// ---- migrate partTypes -> typeManifests (NO normalization) ----
-
+	// migrate partTypes and rundownMetadataManifests into typeManifests
 	const settingsRow = db.prepare(`SELECT document FROM settings WHERE id = 'settings'`).get() as
 		| { document: string }
 		| undefined
-
+	console.log(settingsRow)
 	if (settingsRow) {
-		const settings = JSON.parse(settingsRow.document)
+		const oldSettings = JSON.parse(settingsRow.document)
+
+		const settings = oldSettings
 
 		const partTypes: string[] | undefined = settings.partTypes
+		const rundownMetadataManifests: PayloadManifest[] | undefined = settings.rundownMetadata
 
 		if (Array.isArray(partTypes) && partTypes.length > 0) {
 			console.log('Migrating partTypes into typeManifests (preserving IDs)...')
@@ -207,7 +209,7 @@ try {
 				insertStmt.run(partName, JSON.stringify(manifest))
 			}
 
-			// Remove legacy property
+			// Remove legacy properties
 			delete settings.partTypes
 
 			db.prepare(
@@ -220,9 +222,40 @@ try {
 
 			console.log('Part type migration completed successfully.')
 		}
+		if (rundownMetadataManifests) {
+			console.log("Migrating rundownMetadataManifests into default 'rundown' typeManifest")
+
+			const insertStmt = db.prepare(`
+			INSERT OR IGNORE INTO typeManifests (id, document, entityType)
+			VALUES (?, json(?), 'rundown')
+		`)
+
+			const manifest = {
+				id: 'rundown',
+				entityType: TypeManifestEntity.Rundown,
+				name: 'Rundown',
+				shortName: 'RND',
+				colour: '#666666',
+				payload: rundownMetadataManifests
+			}
+
+			insertStmt.run('rundown', JSON.stringify(manifest))
+			// Remove legacy property
+			delete settings.rundownMetadata
+
+			db.prepare(
+				`
+					UPDATE settings
+					SET document = json(?)
+					WHERE id = 'settings'
+				`
+			).run(JSON.stringify(settings))
+
+			console.log('Rundown Metadata migration completed successfully.')
+		}
 	}
 
-	// migrate partTypes
+	// migrate part.payload.type into part.partType
 	db.exec(`
 	UPDATE parts
 	SET document = json_set(
