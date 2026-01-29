@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.6.0...v2.7.0) (2026-01-29)
+
+
+### Features
+
+* user defined metadata on all levels ([#91](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/issues/91)) ([8e8764f](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/8e8764f0281bb61c60739b049def5d23a0e99ff6))
+
 ## [2.6.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.5.0...v2.6.0) (2026-01-15)
 
 
