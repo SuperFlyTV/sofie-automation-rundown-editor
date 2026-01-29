@@ -20,7 +20,7 @@ import type {
 	MutationSegmentUpdate,
 	OpenFromFileArgs,
 	Part,
-	PieceTypeManifest,
+	TypeManifest,
 	SaveToFileArgs
 } from '../../../backend/src/background/interfaces.js'
 import { openFromFile, saveToFile } from './files.js'
@@ -53,17 +53,17 @@ export const ipcAPI: BackendApi = {
 		return getSocket().emitWithAck('settings', 'update', settings)
 	},
 
-	getPiecesManifest: () => {
-		return getSocket().emitWithAck('pieceTypeManifests', 'read', undefined)
+	getTypeManifests: () => {
+		return getSocket().emitWithAck('typeManifests', 'read', undefined)
 	},
-	addNewPieceManifest: (manifest: PieceTypeManifest) => {
-		return getSocket().emitWithAck('pieceTypeManifests', 'create', manifest)
+	addNewTypeManifest: (manifest: TypeManifest) => {
+		return getSocket().emitWithAck('typeManifests', 'create', manifest)
 	},
-	updatePiecesManifest: (id: string, manifest: PieceTypeManifest) => {
-		return getSocket().emitWithAck('pieceTypeManifests', 'update', { update: manifest, id: id })
+	updateTypeManifest: (id: string, manifest: TypeManifest) => {
+		return getSocket().emitWithAck('typeManifests', 'update', { update: manifest, id: id })
 	},
-	removePiecesManifest: (id: string) => {
-		return getSocket().emitWithAck('pieceTypeManifests', 'delete', { id })
+	removeTypeManifest: (id: string) => {
+		return getSocket().emitWithAck('typeManifests', 'delete', { id })
 	},
 
 	getPlaylists: () => {

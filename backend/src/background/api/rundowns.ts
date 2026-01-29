@@ -26,10 +26,10 @@ export async function mutateRundown(rundown: Rundown): Promise<MutatedRundown> {
 		type: 'sofie-rundown-editor', // ?
 		segments: await getMutatedSegmentsFromRundown(rundown.id),
 		payload: {
+			...(rundown.payload || {}),
 			name: rundown.name,
 			expectedStart: rundown.expectedStartTime,
-			expectedEnd: rundown.expectedEndTime,
-			...(rundown.metaData || {})
+			expectedEnd: rundown.expectedEndTime
 		}
 	}
 }
@@ -40,15 +40,12 @@ export async function sendRundownDiffToCore(oldDocument: Rundown, newDocument: R
 
 	if (wasSynced && !willSync) {
 		// The rundown was synced, but now it should NOT be synced (so we delete it from core)
-		console.log('delete rundown', oldDocument, newDocument)
 		return coreHandler.core.coreMethods.dataRundownDelete(oldDocument.id)
 	} else if (!wasSynced && willSync) {
 		// The rundown was not synced, but now it should be synced (so we create it in core)
-		console.log('create rundown', oldDocument, newDocument)
 		return coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(newDocument))
 	} else if (wasSynced && willSync) {
 		// The rundown was synced and still should be synced (so we send an update to core)
-		console.log('update rundown', oldDocument, newDocument)
 		return coreHandler.core.coreMethods.dataRundownUpdate(await mutateRundown(newDocument))
 	}
 }
@@ -71,8 +68,6 @@ export const mutations = {
 
 			const result = stmt.run(id, payload.playlistId || null, JSON.stringify(document))
 			if (result.changes === 0) throw new Error('No rows were inserted')
-
-			console.log(result)
 
 			return this.readOne(id)
 		} catch (e) {
@@ -315,7 +310,6 @@ async function handleCreateRundown(payload: MutationRundownCreate) {
 		if (createError) returnedError = createError
 
 		if (result && result.sync) {
-			console.log('create rundown', result, createError)
 			try {
 				await coreHandler.core.coreMethods.dataRundownCreate(await mutateRundown(result))
 			} catch (error) {

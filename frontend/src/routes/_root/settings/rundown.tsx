@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Alert } from 'react-bootstrap'
-import { RundownSettingsForm } from '~/components/settings/rundownSettingsForm'
+import { TypeManifestForm } from '~/components/settings/typeManifestForm/typeManifestForm'
 import { useAppSelector } from '~/store/app'
 
 export const Route = createFileRoute('/_root/settings/rundown')({
@@ -8,14 +8,15 @@ export const Route = createFileRoute('/_root/settings/rundown')({
 })
 
 function RouteComponent() {
-	const settings = useAppSelector((state) => state.settings)
+	const typeManifests = useAppSelector((state) => state.typeManifests)
+	const manifest = typeManifests.manifests?.find((m) => m.id === 'rundown')
 
 	return (
 		<>
-			<h2>Rundown Settings</h2>
+			<h2>Rundown Metadata</h2>
 
-			{settings.settings && <RundownSettingsForm settings={settings.settings} />}
-			{settings.error && <Alert variant="danger">{settings.error}</Alert>}
+			{manifest && <TypeManifestForm manifest={manifest} showTypefields={false} />}
+			{typeManifests.error && <Alert variant="danger">{typeManifests.error}</Alert>}
 		</>
 	)
 }

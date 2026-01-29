@@ -28,8 +28,8 @@ export function RundownNavbar({ rundown }: { rundown: Rundown }) {
 	if (rundown.expectedStartTime && rundown.expectedEndTime) {
 		const expectedDuration = rundown.expectedEndTime - rundown.expectedStartTime
 		const actualDuration = parts
-			.filter((p) => p.payload && p.payload.duration)
-			.map((p) => p.payload.duration as number)
+			.filter((p) => p.payload && p.duration)
+			.map((p) => p.duration as number)
 			.reduce((a, b) => a + b, 0)
 
 		diff = toTimeDiff(actualDuration - expectedDuration / 1000)

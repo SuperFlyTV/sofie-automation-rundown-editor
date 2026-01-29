@@ -15,7 +15,15 @@ export type MutationPlaylistUpdate = Playlist
 
 export type MutationPlaylistDelete = Pick<Playlist, 'id'>
 
-export interface Rundown {
+/** Base payload value type */
+export type PayloadValue = string | number | boolean | undefined
+/** Generic payload container */
+export interface IHasPayload<TPayload extends Record<string, any> = Record<string, PayloadValue>> {
+	/** User configurable fields */
+	payload: TPayload
+}
+
+export interface Rundown extends IHasPayload {
 	/** Id of the rundown as reported by the ingest gateway. Must be unique for each rundown owned by the gateway */
 	id: string
 	/** id of the playlist this rundown is in */
@@ -31,10 +39,8 @@ export interface Rundown {
 	expectedStartTime?: number
 	/** Date of when the rundown is supposed to end */
 	expectedEndTime?: number
-	/** User configurable fields */
-	metaData?: Record<string, string | number | boolean>
 }
-export interface Segment {
+export interface Segment extends IHasPayload {
 	/** Id of the segment as reported by the ingest gateway. Must be unique for each segment in the rundown */
 	id: string
 	/** Id of the playlist this segment belongs to */
@@ -49,8 +55,11 @@ export interface Segment {
 	float: boolean
 	/** Flags the segment as template. Template segments can be selected individually to be imported into other rundowns. */
 	isTemplate: boolean
+
+	segmentType: string
 }
-export interface Part {
+
+export interface Part extends IHasPayload {
 	/** Id of the part as reported by the ingest gateway. Must be unique for each part in the rundown */
 	id: string
 	/** Id of the playlist this part belongs to */
@@ -66,14 +75,11 @@ export interface Part {
 	/** Whether this part is floated */
 	float: boolean
 
-	/** Raw payload of the part. Only used by the blueprints */
-	payload: {
-		script?: string
-		type?: string
-		duration?: number
-	}
+	script?: string
+	duration?: number
+	partType: string
 }
-export interface Piece {
+export interface Piece extends IHasPayload {
 	/** Id of the adlib as reported by the ingest source. Must be unique for each adlib */
 	id: string
 	/** Id of the playlist this piece belongs to */
@@ -91,7 +97,6 @@ export interface Piece {
 	duration?: number // todo - timing type for infintes
 
 	pieceType: string
-	payload: Record<string, string | number | boolean>
 }
 
 export interface DBPlaylist {
@@ -130,31 +135,30 @@ export enum ManifestFieldType {
 	Number = 'number',
 	Boolean = 'boolean'
 }
-
-export type RundownMetadataManifest = RundownMetadataEntryManifest[]
-export interface RundownMetadataEntryManifest {
-	id: string
-	label: string
-	type: ManifestFieldType
+export enum TypeManifestEntity {
+	Rundown = 'rundown',
+	Segment = 'segment',
+	Part = 'part',
+	Piece = 'piece'
 }
 
-export type PiecesManifest = PieceTypeManifest[]
-
-export interface PieceTypeManifest {
+export interface TypeManifest {
 	id: string
+	entityType: TypeManifestEntity
 	name: string
 	shortName: string
 	colour: string
 	includeTypeInName?: boolean
 
-	payload: PiecePayloadManifest[]
+	payload: PayloadManifest[]
 }
-export interface DBPieceTypeManifest {
+export interface DBTypeManifest {
 	id: string
+	entityType: TypeManifestEntity
 	document: string
 }
 
-export interface PiecePayloadManifest {
+export interface PayloadManifest {
 	id: string
 	label: string
 	type: ManifestFieldType
@@ -164,9 +168,6 @@ export interface PiecePayloadManifest {
 export interface ApplicationSettings {
 	coreUrl?: string
 	corePort?: number
-
-	partTypes: string[]
-	rundownMetadata: RundownMetadataManifest
 }
 export interface DBSettings {
 	id: string
@@ -228,7 +229,7 @@ export interface MutatedSegment {
 	externalId: string
 	name: string
 	rank: number
-	payload: { name: string; rank: number }
+	payload: { name: string; rank: number; type: string }
 	parts: MutatedPart[]
 }
 
@@ -291,15 +292,17 @@ export type MutationPartUpdate = Part
 
 export type MutationPartDelete = Pick<Part, 'id'>
 
-export type MutationPieceTypeManifestCreate = Pick<PieceTypeManifest, 'id' | 'name'>
+export type MutationTypeManifestCreate = Pick<TypeManifest, 'id' | 'entityType'> &
+	Partial<TypeManifest>
 
-export type MutationPieceTypeManifestRead = Pick<PieceTypeManifest, 'id'>
+export type MutationTypeManifestRead = Pick<DBTypeManifest, 'id' | 'entityType'>
 
-export type MutationPieceTypeManifestUpdate = Pick<PieceTypeManifest, 'id'> & {
-	update: Pick<PieceTypeManifest, 'name' | 'shortName' | 'colour' | 'includeTypeInName' | 'id'>
+export type MutationTypeManifestUpdate = Pick<TypeManifest, 'id'> & {
+	update: Pick<TypeManifest, 'name' | 'shortName' | 'colour' | 'includeTypeInName' | 'id'> &
+		Partial<TypeManifest>
 }
 
-export type MutationPieceTypeManifestDelete = Pick<PieceTypeManifest, 'id'>
+export type MutationTypeManifestDelete = Pick<TypeManifest, 'id'>
 
 export type MutationRundownCreate = SetOptional<Rundown, 'id'>
 

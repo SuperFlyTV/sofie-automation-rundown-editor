@@ -22,9 +22,8 @@ import type {
 	Part,
 	PartsUpdateEvent,
 	Piece,
-	PiecesManifest,
 	PiecesUpdateEvent,
-	PieceTypeManifest,
+	TypeManifest,
 	Playlist,
 	Rundown,
 	SaveToFileArgs,
@@ -46,10 +45,10 @@ export interface BackendApi {
 	getSettings: () => Promise<ApplicationSettings>
 	updateSettings: (settings: ApplicationSettings) => Promise<ApplicationSettings>
 
-	getPiecesManifest: () => Promise<PiecesManifest>
-	addNewPieceManifest: (manifest: PieceTypeManifest) => Promise<PieceTypeManifest>
-	updatePiecesManifest: (id: string, manifest: PieceTypeManifest) => Promise<PieceTypeManifest>
-	removePiecesManifest: (id: string) => Promise<void>
+	getTypeManifests: () => Promise<TypeManifest[]>
+	addNewTypeManifest: (manifest: TypeManifest) => Promise<TypeManifest>
+	updateTypeManifest: (id: string, manifest: TypeManifest) => Promise<TypeManifest>
+	removeTypeManifest: (id: string) => Promise<void>
 
 	getPlaylists: () => Promise<Playlist[]>
 

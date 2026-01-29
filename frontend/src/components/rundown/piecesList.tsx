@@ -58,7 +58,7 @@ function PieceRow({ piece }: { piece: Piece }) {
 	const toasts = useToasts()
 
 	const manifest = useAppSelector((state) =>
-		state.piecesManifest.manifest?.find((p) => p.id === piece.pieceType)
+		state.typeManifests.manifests?.find((p) => p.id === piece.pieceType)
 	)
 
 	const pieceRowClick = () => {
@@ -134,7 +134,7 @@ function NewPieceButton({
 	const dispatch = useAppDispatch()
 	const toasts = useToasts()
 
-	const piecesManifest = useAppSelector((state) => state.piecesManifest.manifest)
+	const typeManifest = useAppSelector((state) => state.typeManifests.manifests)
 
 	const [show, setShow] = useState(false)
 	const handleDeleteClose = () => setShow(false)
@@ -148,7 +148,7 @@ function NewPieceButton({
 	const performCreatePiece = () => {
 		if (!selectedPieceType) return
 
-		const manifest = piecesManifest?.find((piece) => piece.id === selectedPieceType)
+		const manifest = typeManifest?.find((piece) => piece.id === selectedPieceType)
 
 		setShow(false)
 
@@ -180,7 +180,7 @@ function NewPieceButton({
 			})
 	}
 
-	const firstPieceType = piecesManifest?.[0]?.id
+	const firstPieceType = typeManifest?.[0]?.id
 	const [selectedPieceType, setSelectedPieceType] = useState(firstPieceType)
 	useEffect(() => {
 		setSelectedPieceType((oldType) => {
@@ -207,7 +207,7 @@ function NewPieceButton({
 							value={selectedPieceType}
 							onChange={(e) => setSelectedPieceType(e.target.value)}
 						>
-							{piecesManifest?.map((piece) => (
+							{typeManifest?.map((piece) => (
 								<option key={`pieceManifest_${piece.id}`} value={piece.id}>
 									{piece.name}
 								</option>

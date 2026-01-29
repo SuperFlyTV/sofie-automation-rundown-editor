@@ -3,11 +3,12 @@ import {
 	IpcOperationType,
 	ApplicationSettings,
 	MutationApplicationSettingsCreate,
-	MutationApplicationSettingsUpdate
+	MutationApplicationSettingsUpdate,
+	TypeManifestEntity
 } from '../interfaces'
 import { db } from '../db'
-import { PARTS_MANIFEST, PIECES_MANIFEST } from '../manifest'
-import { mutations as pieceTypeManifestMutations } from './pieceManifests'
+import { defaultRundownManifest, TYPE_MANIFESTS } from '../manifest'
+import { mutations as typeManifestMutations } from './typeManifests'
 import { Server, Socket } from 'socket.io'
 
 export const mutations = {
@@ -26,8 +27,6 @@ export const mutations = {
 
 			const result = stmt.run(JSON.stringify(document))
 			if (result.changes === 0) throw new Error('No rows were inserted')
-
-			console.log(result)
 
 			return this.read()
 		} catch (e) {
@@ -125,8 +124,6 @@ export function registerSettingsHandlers(socket: Socket, _io: Server) {
 }
 
 const DEFAULT_SETTINGS: ApplicationSettings = {
-	partTypes: PARTS_MANIFEST,
-	rundownMetadata: [],
 	coreUrl: '127.0.0.1',
 	corePort: 3000
 }
@@ -138,19 +135,25 @@ export async function initializeDefaults() {
 		}
 	})
 
-	// Reset piece type manifests using the pieceManifests module
+	// Reset type manifests using the typeManifests module
 	// First, get all existing manifests
-	const existingManifests = await pieceTypeManifestMutations.read({})
+	const existingManifests = await typeManifestMutations.read({})
 
-	// Delete them all
 	if (existingManifests && Array.isArray(existingManifests)) {
+		// Delete them all
 		for (const manifest of existingManifests) {
-			await pieceTypeManifestMutations.delete({ id: manifest.id })
+			await typeManifestMutations.delete({ id: manifest.id })
 		}
 	}
-
 	// Insert the defaults
-	for (const pieceType of PIECES_MANIFEST) {
-		await pieceTypeManifestMutations.create(pieceType)
+	await typeManifestMutations.create({
+		id: 'rundown',
+		entityType: TypeManifestEntity.Rundown,
+		// Only store the payload array for now; keep other fields in settings
+		payload: defaultRundownManifest.payload
+	})
+
+	for (const typeManifest of TYPE_MANIFESTS) {
+		await typeManifestMutations.create(typeManifest)
 	}
 }

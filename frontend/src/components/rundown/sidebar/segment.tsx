@@ -47,7 +47,7 @@ export function SidebarSegment({
 		sortedParts.map((part) => [part.id, computeInsertRank(sortedParts, part.id)])
 	)
 
-	const segmentDuration = sortedParts.reduce((acc, part) => acc + (part.payload?.duration ?? 0), 0)
+	const segmentDuration = sortedParts.reduce((acc, part) => acc + (part.duration ?? 0), 0)
 
 	const handleAddPart = (rank: number) =>
 		dispatch(

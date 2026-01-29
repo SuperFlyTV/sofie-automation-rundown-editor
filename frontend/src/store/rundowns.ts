@@ -1,5 +1,6 @@
 import type {
 	MutationRundownCopy,
+	Part,
 	Rundown,
 	SerializedRundown
 } from '~backend/background/interfaces.js'
@@ -28,7 +29,8 @@ export const addNewRundown = createAppAsyncThunk(
 			name: 'New ' + (initialRundown.isTemplate ? 'Template' : 'Rundown'),
 			sync: false,
 			playlistId: initialRundown.playlistId,
-			isTemplate: initialRundown.isTemplate ? true : false
+			isTemplate: initialRundown.isTemplate ? true : false,
+			payload: {}
 		})
 	}
 )
@@ -93,10 +95,13 @@ export const importRundown = createAppAsyncThunk(
 			if (parts) {
 				const sortedParts = parts
 					.sort((a, b) => a.rank - b.rank) // Sort current segment's parts by original rank
-					.map((part, index) => ({
-						...part,
-						rank: index // Override rank with index
-					}))
+					.map((part, index) => {
+						const convertedPart = convertOldPartToNew(part)
+						return {
+							...convertedPart,
+							rank: index // Override rank with index
+						}
+					})
 				orderedParts.push(...sortedParts)
 			}
 		}
@@ -149,6 +154,30 @@ const rundownsSlice = createSlice({
 	}
 })
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertOldPartToNew(part: any): Part {
+	if ('payload' in part && 'type' in part.payload) {
+		// Destructure payload and remove legacy fields
+		const { type, script, duration, ...restPayload } = part.payload
+
+		return {
+			id: part.id,
+			playlistId: part.playlistId ?? null,
+			rundownId: part.rundownId,
+			segmentId: part.segmentId,
+			name: part.name,
+			rank: part.rank,
+			float: part.float,
+			partType: type ?? 'unknown',
+			script,
+			duration,
+			payload: restPayload // Keep only remaining payload fields
+		}
+	}
+
+	// Already in new structure
+	return part
+}
 // Export the auto-generated action creator with the same name
 export const { initRundowns } = rundownsSlice.actions
 export const { pushRundown } = rundownsSlice.actions

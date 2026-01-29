@@ -1,14 +1,18 @@
-import { RundownMetadataManifest, PiecesManifest, ManifestFieldType } from './interfaces'
+import { ManifestFieldType, TypeManifest, TypeManifestEntity } from './interfaces'
 
 // TODO - make this some JSON file for better flexibility
-export const rundownManifest: RundownMetadataManifest = []
 
-// Define part types that can be used in rundowns
-// ToDo - make these in better structure (id: type, name: type, etc)
-export const PARTS_MANIFEST = ['Titles', 'VO', 'Cam', 'Full', 'Remote', 'GFX', 'DVE']
+export const defaultRundownManifest: TypeManifest = {
+	id: 'rundown',
+	entityType: TypeManifestEntity.Rundown,
+	name: 'Default Rundown Manifest',
+	shortName: 'RD',
+	colour: '#000000',
+	payload: []
+}
 
 // Define pieces manifest with all piece types and their properties
-export const PIECES_MANIFEST: PiecesManifest = [
+export const TYPE_MANIFESTS: TypeManifest[] = [
 	{
 		id: 'video',
 		name: 'Video Clip',
@@ -27,7 +31,8 @@ export const PIECES_MANIFEST: PiecesManifest = [
 				label: 'Source Duration',
 				type: ManifestFieldType.Number
 			}
-		]
+		],
+		entityType: TypeManifestEntity.Piece
 	},
 	{
 		id: 'camera',
@@ -42,7 +47,8 @@ export const PIECES_MANIFEST: PiecesManifest = [
 				type: ManifestFieldType.Number,
 				includeInName: true
 			}
-		]
+		],
+		entityType: TypeManifestEntity.Piece
 	},
 	{
 		id: 'remote',
@@ -57,7 +63,8 @@ export const PIECES_MANIFEST: PiecesManifest = [
 				type: ManifestFieldType.Number,
 				includeInName: true
 			}
-		]
+		],
+		entityType: TypeManifestEntity.Piece
 	},
 	{
 		id: 'split',
@@ -65,7 +72,8 @@ export const PIECES_MANIFEST: PiecesManifest = [
 		shortName: 'SPLIT',
 		colour: '#d62728',
 		includeTypeInName: true,
-		payload: []
+		payload: [],
+		entityType: TypeManifestEntity.Piece
 	},
 	{
 		id: 'head',
@@ -80,7 +88,8 @@ export const PIECES_MANIFEST: PiecesManifest = [
 				type: ManifestFieldType.String,
 				includeInName: true
 			}
-		]
+		],
+		entityType: TypeManifestEntity.Piece
 	},
 	{
 		id: 'l3d',
@@ -101,7 +110,8 @@ export const PIECES_MANIFEST: PiecesManifest = [
 				type: ManifestFieldType.String,
 				includeInName: true
 			}
-		]
+		],
+		entityType: TypeManifestEntity.Piece
 	},
 	{
 		id: 'ticker',
@@ -109,7 +119,8 @@ export const PIECES_MANIFEST: PiecesManifest = [
 		shortName: 'TICK',
 		colour: '#e377c2',
 		includeTypeInName: true,
-		payload: []
+		payload: [],
+		entityType: TypeManifestEntity.Piece
 	},
 	{
 		id: 'strap',
@@ -124,7 +135,8 @@ export const PIECES_MANIFEST: PiecesManifest = [
 				type: ManifestFieldType.String,
 				includeInName: true
 			}
-		]
+		],
+		entityType: TypeManifestEntity.Piece
 	},
 	{
 		id: 'fullscreen',
@@ -138,7 +150,8 @@ export const PIECES_MANIFEST: PiecesManifest = [
 				label: 'URL',
 				type: ManifestFieldType.String
 			}
-		]
+		],
+		entityType: TypeManifestEntity.Piece
 	},
 	{
 		id: 'graphic',
@@ -161,7 +174,8 @@ export const PIECES_MANIFEST: PiecesManifest = [
 				label: 'Text',
 				type: ManifestFieldType.String
 			}
-		]
+		],
+		entityType: TypeManifestEntity.Piece
 	},
 	{
 		id: 'stepped-graphic',
@@ -189,6 +203,79 @@ export const PIECES_MANIFEST: PiecesManifest = [
 				label: 'Step Count',
 				type: ManifestFieldType.Number
 			}
-		]
+		],
+		entityType: TypeManifestEntity.Piece
+	},
+	{
+		id: 'Titles',
+		name: 'Titles',
+		shortName: 'Titles',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'VO',
+		name: 'VO',
+		shortName: 'VO',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'Cam',
+		name: 'Cam',
+		shortName: 'Cam',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'Full',
+		name: 'Full',
+		shortName: 'Full',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'Remote',
+		name: 'Remote',
+		shortName: 'Remote',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'GFX',
+		name: 'GFX',
+		shortName: 'GFX',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'DVE',
+		name: 'DVE',
+		shortName: 'DVE',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Part
+	},
+	{
+		id: 'normal',
+		name: 'Normal',
+		shortName: 'NRM',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Segment
+	},
+	{
+		id: 'opening',
+		name: 'Opening',
+		shortName: 'OP',
+		colour: '#666666',
+		payload: [],
+		entityType: TypeManifestEntity.Segment
 	}
 ]

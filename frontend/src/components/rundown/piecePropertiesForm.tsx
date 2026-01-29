@@ -13,14 +13,12 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 	const toasts = useToasts()
 
 	const manifest = useAppSelector((state) =>
-		state.piecesManifest.manifest?.find((p) => p.id === piece.pieceType)
+		state.typeManifests.manifests?.find((p) => p.id === piece.pieceType)
 	)
 
 	const form = useForm({
 		defaultValues: piece,
 		onSubmit: async (values) => {
-			console.log('submit', values)
-
 			try {
 				await dispatch(updatePiece({ piece: values.value })).unwrap()
 

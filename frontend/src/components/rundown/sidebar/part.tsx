@@ -44,7 +44,7 @@ export function SidebarPart({
 			<div className="sidebar-part copy-item bg-dark">
 				<SidebarElementHeader
 					label={part.name}
-					duration={part.payload.duration}
+					duration={part.duration}
 					linkTo={'/rundown/$rundownId/segment/$segmentId/part/$partId'}
 					linkParams={{
 						rundownId: segment.rundownId,
