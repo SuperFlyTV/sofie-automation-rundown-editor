@@ -1,6 +1,6 @@
 {
 	"name": "sofie-rundown-editor",
-	"version": "2.6.0",
+	"version": "2.7.0",
 	"private": true,
 	"description": "A standalone tool for creating and editing Sofie rundowns.",
 	"repository": {
