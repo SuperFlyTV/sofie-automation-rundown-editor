@@ -144,16 +144,16 @@ export async function initializeDefaults() {
 		for (const manifest of existingManifests) {
 			await typeManifestMutations.delete({ id: manifest.id })
 		}
-		// Insert the defaults
-		await typeManifestMutations.create({
-			id: 'rundown',
-			entityType: TypeManifestEntity.Rundown,
-			// Only store the payload array for now; keep other fields in settings
-			payload: defaultRundownManifest.payload
-		})
+	}
+	// Insert the defaults
+	await typeManifestMutations.create({
+		id: 'rundown',
+		entityType: TypeManifestEntity.Rundown,
+		// Only store the payload array for now; keep other fields in settings
+		payload: defaultRundownManifest.payload
+	})
 
-		for (const pieceType of TYPE_MANIFESTS) {
-			await typeManifestMutations.create(pieceType)
-		}
+	for (const typeManifest of TYPE_MANIFESTS) {
+		await typeManifestMutations.create(typeManifest)
 	}
 }

@@ -178,8 +178,7 @@ try {
 	const settingsRow = db.prepare(`SELECT document FROM settings WHERE id = 'settings'`).get() as
 		| { document: string }
 		| undefined
-	console.log(settingsRow)
-	if (settingsRow) {
+	if (settingsRow !== undefined) {
 		const oldSettings = JSON.parse(settingsRow.document)
 
 		const settings = oldSettings
