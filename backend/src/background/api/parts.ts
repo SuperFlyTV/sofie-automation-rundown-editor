@@ -88,11 +88,12 @@ export const mutations = {
 		if (!defaultPartType) {
 			return { error: new Error('No part type manifests exist') }
 		}
+		const payloadHasType = payload.partType && payload.partType === ''
 
-		if (payload.payload?.type) {
+		if (payloadHasType) {
 			const { result } = await typeManifestMutations.readOne(String(payload.partType))
 			if (!result || result.entityType !== TypeManifestEntity.Part) {
-				return { error: new Error(`Invalid part type: ${payload.payload.type}`) }
+				return { error: new Error(`Invalid part type: ${payload.partType}`) }
 			}
 		}
 
@@ -109,7 +110,7 @@ export const mutations = {
 		const id = payload.id || uuid()
 		const document: Partial<MutationPartCreate> = {
 			...payload,
-			partType: payload.partType ?? defaultPartType,
+			partType: payloadHasType ? payload.partType : defaultPartType,
 			payload: {
 				...payload.payload
 			},
