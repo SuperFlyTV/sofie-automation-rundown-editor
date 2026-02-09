@@ -12,9 +12,7 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 	const dispatch = useAppDispatch()
 	const toasts = useToasts()
 
-	const manifest = useAppSelector((state) =>
-		state.typeManifests.manifests?.find((p) => p.id === part.partType)
-	)
+	const manifests = useAppSelector((state) => state.typeManifests.manifests)
 
 	const form = useForm({
 		defaultValues: part,
@@ -141,59 +139,64 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 					)}
 				/>
 
-				{manifest?.payload?.map((fieldInfo) => {
-					return (
-						<form.Field
-							key={`payload.${fieldInfo.id}`}
-							name={`payload.${fieldInfo.id}`}
-							children={(field) => (
-								<>
-									<Form.Group className="mb-3">
-										<Form.Label htmlFor={field.name}>{fieldInfo.label}:</Form.Label>
+				<form.Subscribe selector={(state) => state.values.partType}>
+					{(segmentType) => {
+						const manifest = manifests?.find((m) => m.id === segmentType)
 
-										{fieldInfo.type === 'string' && (
-											<Form.Control
-												name={field.name}
-												type="text"
-												// eslint-disable-next-line @typescript-eslint/no-explicit-any
-												value={field.state.value as any}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-											/>
+						if (!manifest) {
+							return (
+								<Form.Group className="mb-3">
+									<Form.Text>Type not found</Form.Text>
+								</Form.Group>
+							)
+						}
+
+						return (
+							<>
+								{manifest.payload?.map((fieldInfo) => (
+									<form.Field key={`payload.${fieldInfo.id}`} name={`payload.${fieldInfo.id}`}>
+										{(field) => (
+											<>
+												<Form.Group className="mb-3">
+													<Form.Label htmlFor={field.name}>{fieldInfo.label}:</Form.Label>
+
+													{fieldInfo.type === 'string' && (
+														<Form.Control
+															type="text"
+															value={String(field.state.value ?? '')}
+															onBlur={field.handleBlur}
+															onChange={(e) => field.handleChange(e.target.value)}
+														/>
+													)}
+
+													{fieldInfo.type === 'number' && (
+														<Form.Control
+															name={field.name}
+															type="number"
+															value={Number(field.state.value ?? 0)}
+															onBlur={field.handleBlur}
+															onChange={(e) => field.handleChange(Number(e.target.value))}
+														/>
+													)}
+
+													{fieldInfo.type === 'boolean' && (
+														<Form.Switch
+															name={field.name}
+															checked={Boolean(field.state.value)}
+															onBlur={field.handleBlur}
+															onChange={(e) => field.handleChange(e.target.checked)}
+														/>
+													)}
+												</Form.Group>
+												<FieldInfo field={field} />
+											</>
 										)}
-
-										{fieldInfo.type === 'number' && (
-											<Form.Control
-												name={field.name}
-												type="number"
-												value={Number(field.state.value)}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(Number(e.target.value))}
-											/>
-										)}
-
-										{fieldInfo.type === 'boolean' && (
-											<Form.Switch
-												name={field.name}
-												type="text"
-												checked={Boolean(field.state.value)}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.checked)}
-											/>
-										)}
-									</Form.Group>
-									<FieldInfo field={field} />
-								</>
-							)}
-						/>
-					)
-				})}
-
-				{!manifest && (
-					<Form.Group className="mb-3">
-						<Form.Text>Type not found</Form.Text>
-					</Form.Group>
-				)}
+									</form.Field>
+								))}
+							</>
+						)
+					}}
+				</form.Subscribe>
 
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting, state.isPristine]}

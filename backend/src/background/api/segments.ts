@@ -79,7 +79,9 @@ export const mutations = {
 			return { error: new Error('No segment type manifests exist') }
 		}
 
-		if (payload.payload?.type) {
+		const payloadHasType = payload.segmentType && payload.segmentType === ''
+
+		if (payloadHasType) {
 			const { result } = await typeManifestMutations.readOne(String(payload.segmentType))
 			if (!result || result.entityType !== TypeManifestEntity.Segment) {
 				return { error: new Error(`Invalid segment type: ${payload.payload.type}`) }
@@ -98,7 +100,7 @@ export const mutations = {
 		const document: Partial<MutationSegmentCreate> = {
 			isTemplate: false,
 			...payload,
-			segmentType: payload.segmentType ?? defaultSegmentType,
+			segmentType: payloadHasType ? payload.segmentType : defaultSegmentType,
 			rank: payload.rank ?? segmentsLength
 		}
 		delete document.playlistId
