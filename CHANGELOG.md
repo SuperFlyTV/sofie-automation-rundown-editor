@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.1](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.7.0...v2.7.1) (2026-02-09)
+
+
+### Bug Fixes
+
+* type issue on property forms ([#93](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/issues/93)) ([31e5b2b](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/31e5b2b0ac7eea3b530fc238d442dc885e903a36))
+
 ## [2.7.0](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.6.0...v2.7.0) (2026-01-29)
 
 
