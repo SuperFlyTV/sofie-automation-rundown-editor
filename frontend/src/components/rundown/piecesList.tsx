@@ -207,11 +207,13 @@ function NewPieceButton({
 							value={selectedPieceType}
 							onChange={(e) => setSelectedPieceType(e.target.value)}
 						>
-							{typeManifest?.map((piece) => (
-								<option key={`pieceManifest_${piece.id}`} value={piece.id}>
-									{piece.name}
-								</option>
-							))}
+							{typeManifest
+								?.filter((type) => type.entityType === 'piece')
+								.map((piece) => (
+									<option key={`pieceManifest_${piece.id}`} value={piece.id}>
+										{piece.name}
+									</option>
+								))}
 						</Form.Select>
 					</Form.Group>
 				</Modal.Body>
