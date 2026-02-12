@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.2](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.7.1...v2.7.2) (2026-02-12)
+
+
+### Bug Fixes
+
+* new piece type dropdown ([#95](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/issues/95)) ([e169c46](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/e169c46ed61865f2ff80b30007fbc7f5866a5770))
+
 ## [2.7.1](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.7.0...v2.7.1) (2026-02-09)
 
 
