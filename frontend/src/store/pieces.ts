@@ -1,7 +1,8 @@
 import type {
 	MutationPieceCloneFromParToPart,
 	MutationPieceCopy,
-	Piece
+	Piece,
+	TypeManifest
 } from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 import { createAppAsyncThunk } from './app'
@@ -19,6 +20,7 @@ export interface NewPiecePayload {
 
 	name: string
 	pieceType: string
+	manifest?: TypeManifest
 }
 export interface UpdatePiecePayload {
 	piece: Piece
@@ -30,6 +32,13 @@ export interface RemovePiecePayload {
 export const addNewPiece = createAppAsyncThunk(
 	'pieces/addNewPiece',
 	async (payload: NewPiecePayload) => {
+		const piecePayload: Record<string, any> = {}
+		if (payload.manifest) {
+			for (const payloadManifest of payload.manifest.payload) {
+				if (payloadManifest.defaultValue)
+					piecePayload[payloadManifest.id] = payloadManifest.defaultValue
+			}
+		}
 		return ipcAPI.addNewPiece({
 			name: payload.name,
 			playlistId: payload.playlistId,
@@ -37,7 +46,7 @@ export const addNewPiece = createAppAsyncThunk(
 			segmentId: payload.segmentId,
 			partId: payload.partId,
 			pieceType: payload.pieceType,
-			payload: {}
+			payload: piecePayload
 		})
 	}
 )
