@@ -229,6 +229,9 @@ export function TypeManifestForm({
 																<option value={ManifestFieldType.String}>String</option>
 																<option value={ManifestFieldType.Number}>Number</option>
 																<option value={ManifestFieldType.Boolean}>Boolean</option>
+																<option value={ManifestFieldType.Enum}>Enum</option>
+																<option value={ManifestFieldType.Const}>Constant</option>
+																<option value={ManifestFieldType.OGrafForm}>OGraf data</option>
 															</Form.Select>
 															<FieldInfo field={field} />
 														</>

@@ -1,12 +1,14 @@
 import { Accordion, Button, ButtonGroup } from 'react-bootstrap'
 import { useAppDispatch } from '~/store/app'
-import { addNewTypeManifest, importTypeManifest, updateTypeManifest } from '~/store/typeManifest'
+import { addNewTypeManifest } from '~/store/typeManifest'
 import { ipcAPI } from '~/lib/IPC'
 import { TypeManifestEntity } from '~backend/background/interfaces'
 import type { TypeManifest } from '~backend/background/interfaces'
 import './typesForm.scss'
 import { useToasts } from '~/components/toasts/useToasts'
 import { TypeManifestForm } from './typeManifestForm'
+import { doImportTypeManifest, isImportTypeManifest } from './lib/importType'
+import { doImportOGrafManifest, isImportOGrafManifest } from './lib/importOGrafManifest'
 
 export function TypeManifestsForm({
 	typeManifests,
@@ -36,35 +38,25 @@ export function TypeManifestsForm({
 	// Import types
 	const importTypes = () => {
 		ipcAPI.openFromFile({ title: `Import ${title}` }).then(async (imported) => {
-			const verify = (arr: unknown): arr is TypeManifest[] =>
-				Array.isArray(arr) &&
-				arr.every((t) => 'id' in t && 'entityType' in t && 'name' in t && 'payload' in t)
+			// Is OGraf manifest file?
+			// console.log('imported', imported)
 
-			if (!verify(imported)) {
-				toasts.show({ headerContent: `Import ${title}`, bodyContent: 'Invalid file' })
-				return
-			}
-
-			await Promise.all(
-				imported.map(async (t) => {
-					const existing = typeManifests.find((m) => m.id === t.id)
-					try {
-						if (existing) {
-							await dispatch(updateTypeManifest({ originalId: existing.id, typeManifest: t }))
-						} else {
-							await dispatch(importTypeManifest({ typeManifest: t }))
-						}
-					} catch (e) {
-						console.error(e)
-						toasts.show({
-							headerContent: `Import ${title}`,
-							bodyContent: 'Unexpected error'
-						})
-					}
+			try {
+				if (isImportOGrafManifest(imported)) {
+					await doImportOGrafManifest(imported, typeManifests, dispatch)
+					toasts.show({ headerContent: `Import ${title}`, bodyContent: 'Import complete' })
+				} else if (isImportTypeManifest(imported)) {
+					await doImportTypeManifest(imported, typeManifests, dispatch)
+					toasts.show({ headerContent: `Import ${title}`, bodyContent: 'Import complete' })
+				} else {
+					toasts.show({ headerContent: `Import ${title}`, bodyContent: 'Invalid file' })
+				}
+			} catch (e) {
+				toasts.show({
+					headerContent: `Import ${title}`,
+					bodyContent: 'Unexpected error, se console for details'
 				})
-			)
-
-			toasts.show({ headerContent: `Import ${title}`, bodyContent: 'Import complete' })
+			}
 		})
 	}
 
