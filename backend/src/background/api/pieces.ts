@@ -8,19 +8,42 @@ import {
 	MutationPieceDelete,
 	MutationPieceRead,
 	MutationPieceUpdate,
-	Piece
+	Piece,
+	TypeManifestEntity
 } from '../interfaces'
 import { db } from '../db'
 import { v4 as uuid } from 'uuid'
 import { sendPartUpdateToCore } from './parts'
 import { mutations as partsMutations } from './parts'
 import { Server, Socket } from 'socket.io'
+import { mutations as typeManifestMutations } from './typeManifests'
 
 export const mutations = {
 	async create(payload: MutationPieceCreate): Promise<{ result?: Piece; error?: Error }> {
+		const { result: pieceTypeManifests } = await typeManifestMutations.read({
+			entityType: TypeManifestEntity.Piece
+		})
+
+		const defaultPieceType =
+			Array.isArray(pieceTypeManifests) && pieceTypeManifests.length > 0
+				? pieceTypeManifests[0].id
+				: undefined
+		if (!defaultPieceType) {
+			return { error: new Error('No part type manifests exist') }
+		}
+		const payloadHasType = payload.pieceType && payload.pieceType === ''
+
+		if (payloadHasType) {
+			const { result } = await typeManifestMutations.readOne(String(payload.pieceType))
+			if (!result || result.entityType !== TypeManifestEntity.Piece) {
+				return { error: new Error(`Invalid piece type: ${payload.pieceType}`) }
+			}
+		}
+
 		const id = payload.id || uuid()
 		const document: Partial<MutationPieceCreate> = {
-			...payload
+			...payload,
+			pieceType: payloadHasType ? payload.pieceType : defaultPieceType
 		}
 		delete document.playlistId
 		delete document.rundownId
