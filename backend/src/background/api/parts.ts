@@ -23,7 +23,6 @@ import { getMutatedPiecesFromPart } from './pieces'
 import { mutations as rundownMutations } from './rundowns'
 import { mutations as segmentsMutations, sendSegmentDiffToCore } from './segments'
 import { spliceReorder } from '../util'
-import { mutations as settingsMutations } from './settings'
 import { mutations as piecesMutations } from './pieces'
 import { Server, Socket } from 'socket.io'
 
