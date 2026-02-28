@@ -1412,6 +1412,7 @@ __metadata:
     eslint: "npm:^9.39.2"
     express: "npm:^5.2.1"
     nodemon: "npm:^3.1.11"
+    ograf: "npm:1.1.0"
     socket.io: "npm:^4.8.3"
     type-fest: "npm:^4.41.0"
     typescript: "npm:~5.8.3"
@@ -1439,6 +1440,8 @@ __metadata:
     classnames: "npm:^2.5.1"
     globals: "npm:^16.5.0"
     immutability-helper: "npm:^3.1.1"
+    ograf: "npm:1.1.0"
+    ograf-form: "npm:0.1.3"
     react: "npm:^19.2.3"
     react-bootstrap: "npm:^2.10.10"
     react-datepicker: "npm:^8.10.0"
@@ -4707,6 +4710,20 @@ __metadata:
   version: 1.13.4
   resolution: "object-inspect@npm:1.13.4"
   checksum: 10c0/d7f8711e803b96ea3191c745d6f8056ce1f2496e530e6a19a0e92d89b0fa3c76d910c31f0aa270432db6bd3b2f85500a376a83aaba849a8d518c8845b3211692
+  languageName: node
+  linkType: hard
+
+"ograf-form@npm:0.1.3":
+  version: 0.1.3
+  resolution: "ograf-form@npm:0.1.3"
+  checksum: 10c0/0132547ebb79240bdc8841b969c3efa9bb47498882d4845c901527180fa70dc073f573134448425295a35f0154ecc4d28c7b6450fb10511889f4b426626b221d
+  languageName: node
+  linkType: hard
+
+"ograf@npm:1.1.0":
+  version: 1.1.0
+  resolution: "ograf@npm:1.1.0"
+  checksum: 10c0/048bfd3f6c4ae97fff3d749db50dc628340caba3447f4d5a387b67f1756ec83ed13e2f84fb0bab3dc8d7ff8d5bee9c69918549816ab123917838961e77c4a45e
   languageName: node
   linkType: hard
 

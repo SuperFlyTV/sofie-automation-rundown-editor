@@ -1,4 +1,5 @@
 import type { SetOptional } from 'type-fest'
+import type * as OGraf from 'ograf'
 
 export interface Playlist {
 	/** Id of the playlist. */
@@ -133,7 +134,10 @@ export interface DBPiece {
 export enum ManifestFieldType {
 	String = 'string',
 	Number = 'number',
-	Boolean = 'boolean'
+	Boolean = 'boolean',
+	OGrafForm = 'ograf-form',
+	Const = 'const',
+	Enum = 'enum'
 }
 export enum TypeManifestEntity {
 	Rundown = 'rundown',
@@ -163,6 +167,14 @@ export interface PayloadManifest {
 	label: string
 	type: ManifestFieldType
 	includeInName?: boolean
+	defaultValue?: any
+	/** Only set when type is ograf-form */
+	ografManifest?: OGraf.GraphicsManifest
+	/** Only set when type is enum */
+	enumValues?: {
+		label: string
+		value: string
+	}[]
 }
 
 export interface ApplicationSettings {
