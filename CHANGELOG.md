@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.4](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.7.3...v2.7.4) (2026-03-05)
+
+
+### Bug Fixes
+
+* segment, part, piece creation ([#100](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/issues/100)) ([1bd4e93](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/1bd4e930b236c33ee05d4dd65c9a409a23dd2ec0))
+
 ## [2.7.3](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.7.2...v2.7.3) (2026-02-27)
 
 
