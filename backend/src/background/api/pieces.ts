@@ -29,9 +29,9 @@ export const mutations = {
 				? pieceTypeManifests[0].id
 				: undefined
 		if (!defaultPieceType) {
-			return { error: new Error('No part type manifests exist') }
+			return { error: new Error('No piece type manifests exist') }
 		}
-		const payloadHasType = payload.pieceType && payload.pieceType === ''
+		const payloadHasType = payload.pieceType && payload.pieceType !== ''
 
 		if (payloadHasType) {
 			const { result } = await typeManifestMutations.readOne(String(payload.pieceType))

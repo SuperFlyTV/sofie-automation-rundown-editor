@@ -79,7 +79,7 @@ export const mutations = {
 			return { error: new Error('No segment type manifests exist') }
 		}
 
-		const payloadHasType = payload.segmentType && payload.segmentType === ''
+		const payloadHasType = payload.segmentType && payload.segmentType !== ''
 
 		if (payloadHasType) {
 			const { result } = await typeManifestMutations.readOne(String(payload.segmentType))

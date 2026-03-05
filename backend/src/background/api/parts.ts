@@ -87,7 +87,7 @@ export const mutations = {
 		if (!defaultPartType) {
 			return { error: new Error('No part type manifests exist') }
 		}
-		const payloadHasType = payload.partType && payload.partType === ''
+		const payloadHasType = payload.partType && payload.partType !== ''
 
 		if (payloadHasType) {
 			const { result } = await typeManifestMutations.readOne(String(payload.partType))
