@@ -134,7 +134,9 @@ function NewPieceButton({
 	const dispatch = useAppDispatch()
 	const toasts = useToasts()
 
-	const typeManifest = useAppSelector((state) => state.typeManifests.manifests)
+	const typeManifest = useAppSelector((state) =>
+		state.typeManifests.manifests?.filter((m) => m.entityType === 'piece')
+	)
 
 	const [show, setShow] = useState(false)
 	const handleDeleteClose = () => setShow(false)
