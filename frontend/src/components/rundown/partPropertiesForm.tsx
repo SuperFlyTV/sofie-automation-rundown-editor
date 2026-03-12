@@ -17,8 +17,6 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 	const form = useForm({
 		defaultValues: part,
 		onSubmit: async (values) => {
-			console.log('submit', values)
-
 			try {
 				await dispatch(updatePart({ part: values.value })).unwrap()
 
@@ -140,8 +138,8 @@ export function PartPropertiesForm({ part }: { part: Part }) {
 				/>
 
 				<form.Subscribe selector={(state) => state.values.partType}>
-					{(segmentType) => {
-						const manifest = manifests?.find((m) => m.id === segmentType)
+					{(partType) => {
+						const manifest = manifests?.find((m) => m.id === partType)
 
 						if (!manifest) {
 							return (
