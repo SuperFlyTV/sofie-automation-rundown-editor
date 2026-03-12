@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.5](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.7.4...v2.7.5) (2026-03-12)
+
+
+### Bug Fixes
+
+* piece creation with default type ([#105](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/issues/105)) ([3c2dcfe](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/3c2dcfe40a346dad507ff6a0d8f31601d67ab90f))
+
 ## [2.7.4](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.7.3...v2.7.4) (2026-03-05)
 
 
