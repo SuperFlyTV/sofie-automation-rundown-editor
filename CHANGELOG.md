@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.6](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.7.5...v2.7.6) (2026-08-21)
+
+
+### Bug Fixes
+
+* update @sofie-automation/server-core-integration dep to latest ([95e9cc2](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/commit/95e9cc25b27cf029eeaa25114dcf636af8c34c2c))
+
 ## [2.7.5](https://github.com/SuperFlyTV/sofie-automation-rundown-editor/compare/v2.7.4...v2.7.5) (2026-03-12)
 
 
