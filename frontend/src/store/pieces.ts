@@ -1,6 +1,7 @@
 import type {
 	MutationPieceCloneFromParToPart,
 	MutationPieceCopy,
+	PayloadValue,
 	Piece,
 	TypeManifest
 } from '~backend/background/interfaces.js'
@@ -32,7 +33,7 @@ export interface RemovePiecePayload {
 export const addNewPiece = createAppAsyncThunk(
 	'pieces/addNewPiece',
 	async (payload: NewPiecePayload) => {
-		const piecePayload: Record<string, any> = {}
+		const piecePayload: Record<string, PayloadValue> = {}
 		if (payload.manifest) {
 			for (const payloadManifest of payload.manifest.payload) {
 				if (payloadManifest.defaultValue)

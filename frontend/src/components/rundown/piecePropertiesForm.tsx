@@ -158,7 +158,7 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 											<ReactOGrafForm
 												schema={fieldInfo.ografManifest?.schema as OGrafForm.GDDSchema}
 												data={field.state.value}
-												onDataChangeCallback={(value: any) => {
+												onDataChangeCallback={(value) => {
 													field.handleChange(value)
 												}}
 											/>
@@ -303,26 +303,26 @@ function DeletePieceButton({
 	)
 }
 
-declare global {
-	namespace React {
-		namespace JSX {
-			interface IntrinsicElements {
-				'superflytv-ograf-form': React.DetailedHTMLProps<
-					React.HTMLAttributes<HTMLElement> & {
-						schema: string // OGraf.GraphicsManifest['schema']
-						value: any
-					},
-					HTMLElement
-				>
-			}
-		}
-	}
-}
+// declare global {
+// 	namespace React {
+// 		namespace JSX {
+// 			interface IntrinsicElements {
+// 				'superflytv-ograf-form': React.DetailedHTMLProps<
+// 					React.HTMLAttributes<HTMLElement> & {
+// 						schema: string // OGraf.GraphicsManifest['schema']
+// 						value: any
+// 					},
+// 					HTMLElement
+// 				>
+// 			}
+// 		}
+// 	}
+// }
 
 function ReactOGrafForm(props: {
-	data: any
+	data: unknown
 	schema: OGrafForm.GDDSchema
-	onDataChangeCallback: (value: any) => void
+	onDataChangeCallback: (value: unknown) => void
 }) {
 	const containerRef = useRef<HTMLDivElement>(null)
 	const ografFormRef = useRef<OGrafForm.SuperFlyTvOgrafDataForm>(null)
@@ -340,14 +340,14 @@ function ReactOGrafForm(props: {
 		ografFormRef.current.addEventListener('change', () => {
 			if (ografFormRef.current) props.onDataChangeCallback(ografFormRef.current.value)
 		})
-		if (props.schema) ografFormRef.current.schema = props.schema as any
+		if (props.schema) ografFormRef.current.schema = props.schema
 		ografFormRef.current.value = props.data ?? {}
 
 		containerRef.current.appendChild(ografFormRef.current)
-	}, [])
+	}, [props])
 
 	useEffect(() => {
-		if (ografFormRef.current && props.schema) ografFormRef.current.schema = props.schema as any
+		if (ografFormRef.current && props.schema) ografFormRef.current.schema = props.schema
 	}, [props.schema])
 	useEffect(() => {
 		if (ografFormRef.current) ografFormRef.current.value = props.data

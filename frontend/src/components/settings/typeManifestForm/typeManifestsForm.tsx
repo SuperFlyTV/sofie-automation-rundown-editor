@@ -52,6 +52,7 @@ export function TypeManifestsForm({
 					toasts.show({ headerContent: `Import ${title}`, bodyContent: 'Invalid file' })
 				}
 			} catch (e) {
+				console.error(e)
 				toasts.show({
 					headerContent: `Import ${title}`,
 					bodyContent: 'Unexpected error, se console for details'

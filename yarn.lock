@@ -1502,7 +1502,7 @@ __metadata:
     globals: "npm:^16.5.0"
     immutability-helper: "npm:^3.1.1"
     ograf: "npm:1.1.0"
-    ograf-form: "npm:0.1.3"
+    ograf-form: "npm:^1.0.0"
     react: "npm:^19.2.3"
     react-bootstrap: "npm:^2.10.10"
     react-datepicker: "npm:^8.10.0"
@@ -5015,10 +5015,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ograf-form@npm:0.1.3":
-  version: 0.1.3
-  resolution: "ograf-form@npm:0.1.3"
-  checksum: 10c0/0132547ebb79240bdc8841b969c3efa9bb47498882d4845c901527180fa70dc073f573134448425295a35f0154ecc4d28c7b6450fb10511889f4b426626b221d
+"ograf-form@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "ograf-form@npm:1.0.0"
+  checksum: 10c0/771e333b4094b397a200b01da2fb38018bd50142d4155b838d67edcae0f8496b6632aaf463f07dd48f308a18b39390c283a695077cf40e0de502b10af8706f15
   languageName: node
   linkType: hard
 

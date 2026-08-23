@@ -12,7 +12,7 @@ Sofie Rundown Editor requires that you have a working instance of [Sofie Core](h
 
 Deploy the docker container using the `docker-compose.yml`, modify the port, volume mapping as needed. When migrating from a local install, the `data.db` file should be copied to the directory which the data volume points to otherwise the container will initialize a new database on the first run.
 
-Once up and running in Rundown Editor go to `Settings -> Core Connection` and set the address and port of your Sofie instance. This is stored in your database file.
+Once up and running in Rundown Editor go to `Settings -> Connection Settings` and set the address and port of your Sofie instance. This is stored in your database file.
 
 ## Usage (Quick Start / Demo)
 

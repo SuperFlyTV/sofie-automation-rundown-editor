@@ -52,6 +52,9 @@ export const ipcAPI: BackendApi = {
 	updateSettings: (settings) => {
 		return getSocket().emitWithAck('settings', 'update', settings)
 	},
+	reloadOGrafGraphics: (settings) => {
+		return getSocket().emitWithAck('settings', 'reloadOGrafGraphics', settings)
+	},
 
 	getTypeManifests: () => {
 		return getSocket().emitWithAck('typeManifests', 'read', undefined)

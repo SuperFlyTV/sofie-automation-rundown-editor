@@ -4,12 +4,17 @@ import {
 	ApplicationSettings,
 	MutationApplicationSettingsCreate,
 	MutationApplicationSettingsUpdate,
-	TypeManifestEntity
+	TypeManifestEntity,
+	TypeManifest,
+	ManifestFieldType,
+	PayloadManifest
 } from '../interfaces'
 import { db } from '../db'
 import { defaultRundownManifest, TYPE_MANIFESTS } from '../manifest'
 import { mutations as typeManifestMutations } from './typeManifests'
 import { Server, Socket } from 'socket.io'
+import { ografHandler } from '../ografHandler'
+import { getDefaultDataFromSchema } from '../lib/ograf-default-data'
 
 export const mutations = {
 	async create(
@@ -115,6 +120,84 @@ export function registerSettingsHandlers(socket: Socket, _io: Server) {
 				{
 					const { result, error } = await mutations.reset()
 					callback(result || error)
+				}
+				break
+			case 'reloadOGrafGraphics':
+				{
+					const ografs = await ografHandler.loadGraphics(payload)
+
+					const readPieceManifests = await typeManifestMutations.read({
+						entityType: TypeManifestEntity.Piece
+					})
+
+					let pieceManifests: TypeManifest[] = []
+					if (readPieceManifests && Array.isArray(readPieceManifests.result))
+						pieceManifests = readPieceManifests.result
+
+					const OGRAF_GRAPHICS_ID_PREFIX = 'ograf_graphic_'
+					for (const ograf of ografs) {
+						const id = `${OGRAF_GRAPHICS_ID_PREFIX}${ograf.id}`
+						const name = `OGraf: ${ograf.name}`
+						const shortName = ograf.name
+						const payload: PayloadManifest[] = [
+							// {
+							// 	id: 'inTime',
+							// 	label: 'In Time (s)',
+							// 	type: ManifestFieldType.Number,
+							// 	defaultValue: 0,
+							// 	includeInName: true
+							// },
+							// {
+							// 	id: 'duration',
+							// 	label: 'Duration (s)',
+							// 	type: ManifestFieldType.Number,
+							// 	defaultValue: 8,
+							// 	includeInName: true
+							// },
+							{
+								id: 'data',
+								label: 'Data',
+								type: ManifestFieldType.OGrafForm,
+								defaultValue: getDefaultDataFromSchema(ograf.manifest.schema),
+								includeInName: true,
+								ografManifest: ograf.manifest
+							}
+						]
+
+						console.log('OGraf', ograf.id, ograf.name)
+						const existingPieceManifest = pieceManifests.find(
+							(pieceManifest) => pieceManifest.id === id
+						)
+						if (!existingPieceManifest) {
+							console.log('Creating new')
+							await typeManifestMutations.create({
+								id,
+								entityType: TypeManifestEntity.Piece,
+								name,
+								shortName,
+								colour: '#FFCC00',
+								includeTypeInName: true,
+								payload
+							})
+						} else {
+							console.log('Updating existing')
+							await typeManifestMutations.update({
+								id,
+								update: {
+									id,
+									// entityType: TypeManifestEntity.Piece,
+									colour: existingPieceManifest.colour ?? '#FFCC00',
+									// includeTypeInName: existingPieceManifest.includeTypeInName ?? true,
+									name,
+									shortName,
+									payload
+								}
+							})
+						}
+					}
+
+					callback(null)
+					// .then(callback).catch(callback)
 				}
 				break
 			default:

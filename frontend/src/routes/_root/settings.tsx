@@ -26,7 +26,7 @@ function RouteComponent() {
 	return (
 		<div className="p-4">
 			<Tabs activeKey={subPath} onSelect={selectTab} className="mb-3" transition={false}>
-				<Tab eventKey="connection" title="Core Connection" />
+				<Tab eventKey="connection" title="Connection settings" />
 				<Tab eventKey="rundown" title="Rundown metadata" />
 				<Tab eventKey="segment" title="Segment types" />
 				<Tab eventKey="part" title="Part types" />

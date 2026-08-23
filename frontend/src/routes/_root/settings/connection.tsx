@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Alert } from 'react-bootstrap'
-import { CoreConnectionSettingsForm } from '~/components/settings/coreConnectionSettingsForm'
+import { ConnectionSettingsForm } from '~/components/settings/connectionSettingsForm'
 import { ResetToDefaults } from '~/components/settings/resetToDefaultsButton'
 import { useAppSelector } from '~/store/app'
 
@@ -13,9 +13,9 @@ function RouteComponent() {
 
 	return (
 		<>
-			<h2>Core Connection Settings</h2>
+			<h2>Connection Settings</h2>
 
-			{settings.settings && <CoreConnectionSettingsForm settings={settings.settings} />}
+			{settings.settings && <ConnectionSettingsForm settings={settings.settings} />}
 			{settings.error && <Alert variant="danger">{settings.error}</Alert>}
 
 			<ResetToDefaults />

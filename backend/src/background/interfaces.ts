@@ -180,6 +180,7 @@ export interface PayloadManifest {
 export interface ApplicationSettings {
 	coreUrl?: string
 	corePort?: number
+	ografUrl?: string
 }
 export interface DBSettings {
 	id: string

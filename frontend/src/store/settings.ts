@@ -46,6 +46,19 @@ export const updateSettings = createAppAsyncThunk(
 // 		return payload
 // 	}
 // )
+export const reloadOGrafGraphics = createAppAsyncThunk(
+	'settings/reloadOGrafGraphics',
+	async (ografUrl: string) => {
+		// const piecePayload: Record<string, PayloadValue> = {}
+		// if (payload.manifest) {
+		// 	for (const payloadManifest of payload.manifest.payload) {
+		// 		if (payloadManifest.defaultValue)
+		// 			piecePayload[payloadManifest.id] = payloadManifest.defaultValue
+		// 	}
+		// }
+		return ipcAPI.reloadOGrafGraphics(ografUrl)
+	}
+)
 
 interface SettingsState {
 	settings: ApplicationSettings | null
