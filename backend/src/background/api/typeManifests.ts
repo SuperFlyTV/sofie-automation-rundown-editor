@@ -28,7 +28,7 @@ export const mutations = {
 
 			return this.readOne(id)
 		} catch (e) {
-			console.error(e)
+			console.error(e, document)
 			return { error: e as Error }
 		}
 	},

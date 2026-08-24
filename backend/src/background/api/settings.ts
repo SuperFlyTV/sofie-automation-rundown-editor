@@ -88,7 +88,7 @@ export const mutations = {
 	},
 	async reset(): Promise<{ result?: ApplicationSettings; error?: Error }> {
 		// Reset to defaults from manifest
-		await initializeDefaults()
+		await initializeDefaults(true)
 
 		// Return the current settings
 		return await this.read()
@@ -140,20 +140,6 @@ export function registerSettingsHandlers(socket: Socket, _io: Server) {
 						const name = `OGraf: ${ograf.name}`
 						const shortName = ograf.name
 						const payload: PayloadManifest[] = [
-							// {
-							// 	id: 'inTime',
-							// 	label: 'In Time (s)',
-							// 	type: ManifestFieldType.Number,
-							// 	defaultValue: 0,
-							// 	includeInName: true
-							// },
-							// {
-							// 	id: 'duration',
-							// 	label: 'Duration (s)',
-							// 	type: ManifestFieldType.Number,
-							// 	defaultValue: 8,
-							// 	includeInName: true
-							// },
 							{
 								id: 'data',
 								label: 'Data',
@@ -211,32 +197,45 @@ const DEFAULT_SETTINGS: ApplicationSettings = {
 	corePort: 3000
 }
 
-export async function initializeDefaults() {
-	mutations.read().then(({ result }) => {
-		if (!result) {
-			mutations.create(DEFAULT_SETTINGS)
-		}
-	})
+export async function initializeDefaults(force: boolean = false): Promise<void> {
 
-	// Reset type manifests using the typeManifests module
-	// First, get all existing manifests
-	const existingManifests = await typeManifestMutations.read({})
-
-	if (existingManifests && Array.isArray(existingManifests)) {
-		// Delete them all
-		for (const manifest of existingManifests) {
-			await typeManifestMutations.delete({ id: manifest.id })
+	if (force) {
+		// Reset type manifests using the typeManifests module
+		// First, get all existing manifests
+		const existingManifests = await typeManifestMutations.read({})
+		if (existingManifests.result && Array.isArray(existingManifests.result)) {
+			// Delete them all
+			for (const manifest of existingManifests.result) {
+				await typeManifestMutations.delete({ id: manifest.id })
+				console.log('Deleted existing type manifest ', manifest.id)
+			}
 		}
+
+		await mutations.update(DEFAULT_SETTINGS)
 	}
 	// Insert the defaults
-	await typeManifestMutations.create({
-		id: 'rundown',
-		entityType: TypeManifestEntity.Rundown,
-		// Only store the payload array for now; keep other fields in settings
-		payload: defaultRundownManifest.payload
-	})
+	{
+		const existingSettings = await mutations.read()
+		if (!existingSettings.result) { {
+			await mutations.create(DEFAULT_SETTINGS)
+		}
+		}
+	}
+	{
+		const RUNDOWN_ID = 'rundown'
+		const existing = await typeManifestMutations.readOne(RUNDOWN_ID)
+		if (!existing) {
+			await typeManifestMutations.create({
+				id: RUNDOWN_ID,
+				entityType: TypeManifestEntity.Rundown,
+				// Only store the payload array for now; keep other fields in settings
+				payload: defaultRundownManifest.payload
+			})
+		}
+	}
 
 	for (const typeManifest of TYPE_MANIFESTS) {
-		await typeManifestMutations.create(typeManifest)
+		const existing = await typeManifestMutations.readOne(typeManifest.id)
+		if (!existing) await typeManifestMutations.create(typeManifest)
 	}
 }
