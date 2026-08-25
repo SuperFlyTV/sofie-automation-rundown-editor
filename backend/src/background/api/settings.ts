@@ -150,12 +150,10 @@ export function registerSettingsHandlers(socket: Socket, _io: Server) {
 							}
 						]
 
-						console.log('OGraf', ograf.id, ograf.name)
 						const existingPieceManifest = pieceManifests.find(
 							(pieceManifest) => pieceManifest.id === id
 						)
 						if (!existingPieceManifest) {
-							console.log('Creating new')
 							await typeManifestMutations.create({
 								id,
 								entityType: TypeManifestEntity.Piece,
@@ -166,7 +164,6 @@ export function registerSettingsHandlers(socket: Socket, _io: Server) {
 								payload
 							})
 						} else {
-							console.log('Updating existing')
 							await typeManifestMutations.update({
 								id,
 								update: {
@@ -198,7 +195,6 @@ const DEFAULT_SETTINGS: ApplicationSettings = {
 }
 
 export async function initializeDefaults(force: boolean = false): Promise<void> {
-
 	if (force) {
 		// Reset type manifests using the typeManifests module
 		// First, get all existing manifests
@@ -207,24 +203,22 @@ export async function initializeDefaults(force: boolean = false): Promise<void> 
 			// Delete them all
 			for (const manifest of existingManifests.result) {
 				await typeManifestMutations.delete({ id: manifest.id })
-				console.log('Deleted existing type manifest ', manifest.id)
 			}
 		}
-
-		await mutations.update(DEFAULT_SETTINGS)
 	}
 	// Insert the defaults
 	{
 		const existingSettings = await mutations.read()
-		if (!existingSettings.result) { {
+		if (!existingSettings.result) {
 			await mutations.create(DEFAULT_SETTINGS)
-		}
+		} else if (force) {
+			await mutations.update(DEFAULT_SETTINGS)
 		}
 	}
 	{
 		const RUNDOWN_ID = 'rundown'
 		const existing = await typeManifestMutations.readOne(RUNDOWN_ID)
-		if (!existing) {
+		if (!existing.result) {
 			await typeManifestMutations.create({
 				id: RUNDOWN_ID,
 				entityType: TypeManifestEntity.Rundown,
@@ -236,6 +230,8 @@ export async function initializeDefaults(force: boolean = false): Promise<void> 
 
 	for (const typeManifest of TYPE_MANIFESTS) {
 		const existing = await typeManifestMutations.readOne(typeManifest.id)
-		if (!existing) await typeManifestMutations.create(typeManifest)
+		if (!existing.result) {
+			await typeManifestMutations.create(typeManifest)
+		}
 	}
 }

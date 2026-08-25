@@ -6,17 +6,16 @@ export function ResetToDefaults() {
 	const [showDelete, setShowDelete] = useState(false)
 	const handleDeleteClose = () => setShowDelete(false)
 
-	const deletePart = (e: React.MouseEvent) => {
+	const resetSettings = (e: React.MouseEvent) => {
 		e.preventDefault()
 		e.stopPropagation()
 
 		setShowDelete(true)
 	}
-	const performDeletePart = () => {
+	const performResetSettings = () => {
 		ipcAPI
 			.resetSettings()
 			.then(() => {
-				console.log('reset settings')
 				window.location.reload()
 			})
 			.catch((e) => {
@@ -26,7 +25,7 @@ export function ResetToDefaults() {
 
 	return (
 		<>
-			<Button onClick={deletePart} variant="warning">
+			<Button onClick={resetSettings} variant="warning">
 				Reset to defaults
 			</Button>
 
@@ -42,7 +41,7 @@ export function ResetToDefaults() {
 					<Button variant="secondary" onClick={handleDeleteClose}>
 						Cancel
 					</Button>
-					<Button variant="danger" onClick={performDeletePart}>
+					<Button variant="danger" onClick={performResetSettings}>
 						Reset
 					</Button>
 				</Modal.Footer>
