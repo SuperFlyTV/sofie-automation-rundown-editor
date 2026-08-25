@@ -15,6 +15,7 @@ import { mutations as typeManifestMutations } from './typeManifests'
 import { Server, Socket } from 'socket.io'
 import { ografHandler } from '../ografHandler'
 import { getDefaultDataFromSchema } from '../lib/ograf-default-data'
+import * as OGraf from 'ograf'
 
 export const mutations = {
 	async create(
@@ -126,6 +127,8 @@ export function registerSettingsHandlers(socket: Socket, _io: Server) {
 				{
 					const ografs = await ografHandler.loadGraphics(payload)
 
+					console.log(`Loaded ${ografs.length} graphics from OGraf server`)
+
 					const readPieceManifests = await typeManifestMutations.read({
 						entityType: TypeManifestEntity.Piece
 					})
@@ -134,47 +137,20 @@ export function registerSettingsHandlers(socket: Socket, _io: Server) {
 					if (readPieceManifests && Array.isArray(readPieceManifests.result))
 						pieceManifests = readPieceManifests.result
 
-					const OGRAF_GRAPHICS_ID_PREFIX = 'ograf_graphic_'
 					for (const ograf of ografs) {
-						const id = `${OGRAF_GRAPHICS_ID_PREFIX}${ograf.id}`
-						const name = `OGraf: ${ograf.name}`
-						const shortName = ograf.name
-						const payload: PayloadManifest[] = [
-							{
-								id: 'data',
-								label: 'Data',
-								type: ManifestFieldType.OGrafForm,
-								defaultValue: getDefaultDataFromSchema(ograf.manifest.schema),
-								includeInName: true,
-								ografManifest: ograf.manifest
-							}
-						]
+						const typeManifest = getOGrafManifest(ograf.id, ograf.manifest)
 
 						const existingPieceManifest = pieceManifests.find(
-							(pieceManifest) => pieceManifest.id === id
+							(pieceManifest) => pieceManifest.id === typeManifest.id
 						)
 						if (!existingPieceManifest) {
-							await typeManifestMutations.create({
-								id,
-								entityType: TypeManifestEntity.Piece,
-								name,
-								shortName,
-								colour: '#FFCC00',
-								includeTypeInName: true,
-								payload
-							})
+							console.log(`Creating new piece manifest for OGraf graphic ${typeManifest.id}`)
+							await typeManifestMutations.create(typeManifest)
 						} else {
+							console.log(`Updating existing piece manifest for OGraf graphic ${typeManifest.id}`)
 							await typeManifestMutations.update({
-								id,
-								update: {
-									id,
-									// entityType: TypeManifestEntity.Piece,
-									colour: existingPieceManifest.colour ?? '#FFCC00',
-									// includeTypeInName: existingPieceManifest.includeTypeInName ?? true,
-									name,
-									shortName,
-									payload
-								}
+								id: typeManifest.id,
+								update: typeManifest
 							})
 						}
 					}
@@ -234,4 +210,46 @@ export async function initializeDefaults(force: boolean = false): Promise<void> 
 			await typeManifestMutations.create(typeManifest)
 		}
 	}
+}
+
+function getOGrafManifest(id: string, manifest: OGraf.GraphicsManifest): TypeManifest {
+	return {
+		id: `ograf-${id}`,
+		colour: '#5555ff',
+		entityType: TypeManifestEntity.Piece,
+		name: `${manifest.name}`,
+		shortName: 'OGraf',
+		includeTypeInName: true,
+
+		payload: [
+			{
+				id: 'ograf-id',
+				label: 'OGraf Id',
+				type: ManifestFieldType.Const,
+				defaultValue: id
+			},
+			{
+				id: 'type',
+				label: 'Type of Graphics',
+				type: ManifestFieldType.Enum,
+				enumValues: [
+					{ label: 'Full Screen', value: 'full-screen' },
+					{ label: 'Overlay 1', value: 'overlay1' },
+					{ label: 'Overlay 2', value: 'overlay2' },
+					{ label: 'Overlay 3', value: 'overlay3' },
+					{ label: 'Studio Screen 1', value: 'studio1' },
+					{ label: 'Studio Screen 2', value: 'studio2' },
+					{ label: 'Studio Screen 3', value: 'studio3' }
+				],
+				defaultValue: 'overlay1'
+			},
+			{
+				id: 'ograf-data',
+				label: 'OGraf Data',
+				type: ManifestFieldType.OGrafForm,
+				ografManifest: manifest,
+				defaultValue: manifest.schema ? getDefaultDataFromSchema(manifest.schema) : undefined
+			}
+		]
+	} satisfies TypeManifest
 }

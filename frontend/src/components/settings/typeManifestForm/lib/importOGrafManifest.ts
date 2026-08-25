@@ -18,17 +18,9 @@ export function isImportOGrafManifest(data: unknown): data is OGraf.GraphicsMani
 		manifest.$schema === 'https://ograf.ebu.io/v1/specification/json-schemas/graphics/schema.json'
 	)
 }
-export async function doImportOGrafManifest(
-	manifest: OGraf.GraphicsManifest,
-	typeManifests: TypeManifest[],
-	dispatch: AppDispatch
-) {
-	const id = `ograf-${manifest.id}`
-
-	const existing = typeManifests.find((m) => m.id === id)
-
-	const typeManifest: TypeManifest = {
-		id,
+function getOGrafManifest(id: string, manifest: OGraf.GraphicsManifest): TypeManifest {
+	return {
+		id: `ograf-${id}`,
 		colour: '#5555ff',
 		entityType: 'piece' as TypeManifestEntity,
 		name: manifest.name,
@@ -62,7 +54,16 @@ export async function doImportOGrafManifest(
 				defaultValue: getDefaultDataFromSchema(manifest.schema)
 			}
 		]
-	}
+	} satisfies TypeManifest
+}
+export async function doImportOGrafManifest(
+	manifest: OGraf.GraphicsManifest,
+	typeManifests: TypeManifest[],
+	dispatch: AppDispatch
+) {
+	const typeManifest = getOGrafManifest(manifest.id, manifest)
+
+	const existing = typeManifests.find((m) => m.id === typeManifest.id)
 
 	if (existing) {
 		await dispatch(updateTypeManifest({ originalId: existing.id, typeManifest }))
