@@ -158,8 +158,8 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 											<ReactOGrafForm
 												schema={fieldInfo.ografManifest?.schema as OGrafForm.GDDSchema}
 												data={field.state.value}
-												onDataChangeCallback={(value) => {
-													field.handleChange(value)
+												onDataChangeCallback={(value: unknown) => {
+													field.handleChange(value as typeof field.state.value)
 												}}
 											/>
 										)}

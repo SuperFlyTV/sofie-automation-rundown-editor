@@ -13,6 +13,17 @@ export default defineConfig({
 			'~bootstrap': path.resolve(__dirname, '../node_modules/bootstrap')
 		}
 	},
+	css: {
+		preprocessorOptions: {
+			scss: {
+				api: 'modern-compiler',
+				// To quiet the warnings about the internal bootstrap issues
+				// https://github.com/twbs/bootstrap/issues/40962
+				quietDeps: true,
+				silenceDeprecations: ['import']
+			}
+		}
+	},
 	plugins: [
 		//
 		TanStackRouterVite({ target: 'react', autoCodeSplitting: true }),
