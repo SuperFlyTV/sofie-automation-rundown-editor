@@ -8,6 +8,7 @@ import { useAppDispatch } from '~/store/app'
 import { updateTypeManifest, removeTypeManifest } from '~/store/typeManifest'
 import type { TypeManifest, PayloadManifest } from '~backend/background/interfaces'
 import { ManifestFieldType } from '~backend/background/interfaces'
+import { MyErrorBoundary } from '../../../util/errorBoundary'
 
 // Generic type manifest form
 export function TypeManifestForm({
@@ -178,96 +179,101 @@ export function TypeManifestForm({
 									</tr>
 								) : (
 									payload.map((_, index) => (
-										<tr key={`payload-${index}`}>
-											<td>
-												<form.Field
-													name={`payload[${index}].id`}
-													children={(field) => (
-														<>
-															<Form.Control
-																name={field.name}
-																type="text"
-																value={field.state.value ?? ''}
-																onBlur={field.handleBlur}
-																onChange={(e) => field.handleChange(e.target.value)}
-															/>
-															<FieldInfo field={field} />
-														</>
-													)}
-												/>
-											</td>
-											<td>
-												<form.Field
-													name={`payload[${index}].label`}
-													children={(field) => (
-														<>
-															<Form.Control
-																name={field.name}
-																type="text"
-																value={field.state.value ?? ''}
-																onBlur={field.handleBlur}
-																onChange={(e) => field.handleChange(e.target.value)}
-															/>
-															<FieldInfo field={field} />
-														</>
-													)}
-												/>
-											</td>
-											<td>
-												<form.Field
-													name={`payload[${index}].type`}
-													children={(field) => (
-														<>
-															<Form.Select
-																name={field.name}
-																value={field.state.value ?? ''}
-																onBlur={field.handleBlur}
-																onChange={(e) =>
-																	field.handleChange(e.target.value as ManifestFieldType)
-																}
-															>
-																<option value={ManifestFieldType.String}>String</option>
-																<option value={ManifestFieldType.Number}>Number</option>
-																<option value={ManifestFieldType.Boolean}>Boolean</option>
-																<option value={ManifestFieldType.Enum}>Enum</option>
-																<option value={ManifestFieldType.Const}>Constant</option>
-																<option value={ManifestFieldType.OGrafForm}>OGraf data</option>
-															</Form.Select>
-															<FieldInfo field={field} />
-														</>
-													)}
-												/>
-											</td>
-											<td>
-												<form.Field
-													name={`payload[${index}].includeInName`}
-													children={(field) => (
-														<>
-															<Form.Switch
-																name={field.name}
-																checked={field.state.value ?? false}
-																onBlur={field.handleBlur}
-																onChange={(e) => field.handleChange(e.target.checked)}
-															/>
-															<FieldInfo field={field} />
-														</>
-													)}
-												/>
-											</td>
-											<td>
-												<Button
-													size="sm"
-													variant="danger"
-													onClick={() => {
-														const newFields = [...form.getFieldValue('payload')]
-														newFields.splice(index, 1)
-														form.setFieldValue('payload', newFields)
-													}}
-												>
-													<FontAwesomeIcon icon={faTrash} />
-												</Button>
-											</td>
-										</tr>
+										<MyErrorBoundary>
+											<tr key={`payload-${index}`}>
+												<td>
+													<form.Field
+														name={`payload[${index}].id`}
+														children={(field) => (
+															<>
+																<Form.Control
+																	name={field.name}
+																	type="text"
+																	value={field.state.value ?? ''}
+																	onBlur={field.handleBlur}
+																	onChange={(e) => field.handleChange(e.target.value)}
+																/>
+																<FieldInfo field={field} />
+															</>
+														)}
+													/>
+												</td>
+												<td>
+													<form.Field
+														name={`payload[${index}].label`}
+														children={(field) => (
+															<>
+																<Form.Control
+																	name={field.name}
+																	type="text"
+																	value={field.state.value ?? ''}
+																	onBlur={field.handleBlur}
+																	onChange={(e) => field.handleChange(e.target.value)}
+																/>
+																<FieldInfo field={field} />
+															</>
+														)}
+													/>
+												</td>
+												<td>
+													<form.Field
+														name={`payload[${index}].type`}
+														children={(field) => (
+															<>
+																<Form.Select
+																	name={field.name}
+																	value={field.state.value ?? ''}
+																	onBlur={field.handleBlur}
+																	onChange={(e) =>
+																		field.handleChange(e.target.value as ManifestFieldType)
+																	}
+																>
+																	<option value={ManifestFieldType.String}>String</option>
+																	<option value={ManifestFieldType.Number}>Number</option>
+																	<option value={ManifestFieldType.Boolean}>Boolean</option>
+																	<option value={ManifestFieldType.Enum}>Enum</option>
+																	<option value={ManifestFieldType.Const}>Constant</option>
+																	<option value={ManifestFieldType.ConstHidden}>
+																		Hidden Constant
+																	</option>
+																	<option value={ManifestFieldType.OGrafForm}>OGraf data</option>
+																</Form.Select>
+																<FieldInfo field={field} />
+															</>
+														)}
+													/>
+												</td>
+												<td>
+													<form.Field
+														name={`payload[${index}].includeInName`}
+														children={(field) => (
+															<>
+																<Form.Switch
+																	name={field.name}
+																	checked={field.state.value ?? false}
+																	onBlur={field.handleBlur}
+																	onChange={(e) => field.handleChange(e.target.checked)}
+																/>
+																<FieldInfo field={field} />
+															</>
+														)}
+													/>
+												</td>
+												<td>
+													<Button
+														size="sm"
+														variant="danger"
+														onClick={() => {
+															const newFields = [...form.getFieldValue('payload')]
+															newFields.splice(index, 1)
+															form.setFieldValue('payload', newFields)
+														}}
+													>
+														<FontAwesomeIcon icon={faTrash} />
+													</Button>
+												</td>
+											</tr>
+										</MyErrorBoundary>
 									))
 								)
 							}

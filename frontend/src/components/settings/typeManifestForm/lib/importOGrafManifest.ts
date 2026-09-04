@@ -49,9 +49,16 @@ function getOGrafManifest(id: string, manifest: OGraf.GraphicsManifest): TypeMan
 			{
 				id: 'ograf-data',
 				label: 'OGraf Data',
-				type: 'ograf-form' as ManifestFieldType,
+				type: 'ograf-form' as ManifestFieldType.OGrafForm,
 				ografManifest: manifest,
 				defaultValue: getDefaultDataFromSchema(manifest.schema)
+			},
+			{
+				id: 'ograf-manifest',
+				label: 'OGraf Manifest',
+				type: 'const-hidden' as ManifestFieldType.ConstHidden,
+				includeInName: false,
+				defaultValue: manifest
 			}
 		]
 	} satisfies TypeManifest

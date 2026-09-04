@@ -137,6 +137,8 @@ export enum ManifestFieldType {
 	Boolean = 'boolean',
 	OGrafForm = 'ograf-form',
 	Const = 'const',
+	/** A constant field that is hidden from the user interface */
+	ConstHidden = 'const-hidden',
 	Enum = 'enum'
 }
 export enum TypeManifestEntity {

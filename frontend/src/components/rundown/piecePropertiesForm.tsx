@@ -8,6 +8,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import { removePiece, updatePiece } from '~/store/pieces'
 import { useToasts } from '../toasts/useToasts'
+import { MyErrorBoundary } from '../../util/errorBoundary'
 
 export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 	const dispatch = useAppDispatch()
@@ -116,79 +117,92 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 
 				{manifest?.payload?.map((fieldInfo) => {
 					return (
-						<form.Field
-							key={`payload.${fieldInfo.id}`}
-							name={`payload.${fieldInfo.id}`}
-							children={(field) => (
-								<>
-									<Form.Group className="mb-3">
-										<Form.Label htmlFor={field.name}>{fieldInfo.label}:&nbsp;</Form.Label>
+						<MyErrorBoundary>
+							<form.Field
+								key={`payload.${fieldInfo.id}`}
+								name={`payload.${fieldInfo.id}`}
+								children={(field) => (
+									<>
+										<Form.Group className="mb-3">
+											<Form.Label htmlFor={field.name}>{fieldInfo.label}:&nbsp;</Form.Label>
 
-										{fieldInfo.type === 'string' && (
-											<Form.Control
-												name={field.name}
-												type="text"
-												// eslint-disable-next-line @typescript-eslint/no-explicit-any
-												value={field.state.value as any}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-											/>
-										)}
-
-										{fieldInfo.type === 'number' && (
-											<Form.Control
-												name={field.name}
-												type="number"
-												value={Number(field.state.value)}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(Number(e.target.value))}
-											/>
-										)}
-
-										{fieldInfo.type === 'boolean' && (
-											<Form.Switch
-												name={field.name}
-												type="text"
-												checked={Boolean(field.state.value)}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.checked)}
-											/>
-										)}
-										{fieldInfo.type === 'ograf-form' && (
-											<ReactOGrafForm
-												schema={fieldInfo.ografManifest?.schema as OGrafForm.GDDSchema}
-												data={field.state.value}
-												onDataChangeCallback={(value: unknown) => {
-													field.handleChange(value as typeof field.state.value)
-												}}
-											/>
-										)}
-
-										{fieldInfo.type === 'enum' && (
-											<>
-												<Form.Select
+											{fieldInfo.type === 'string' && (
+												<Form.Control
 													name={field.name}
-													value={String(field.state.value)}
+													type="text"
+													// eslint-disable-next-line @typescript-eslint/no-explicit-any
+													value={field.state.value as any}
 													onBlur={field.handleBlur}
-													onChange={(e) => {
-														console.log(e.target.value)
-														field.handleChange(e.target.value)
+													onChange={(e) => field.handleChange(e.target.value)}
+												/>
+											)}
+
+											{fieldInfo.type === 'number' && (
+												<Form.Control
+													name={field.name}
+													type="number"
+													value={Number(field.state.value)}
+													onBlur={field.handleBlur}
+													onChange={(e) => field.handleChange(Number(e.target.value))}
+												/>
+											)}
+
+											{fieldInfo.type === 'boolean' && (
+												<Form.Switch
+													name={field.name}
+													type="text"
+													checked={Boolean(field.state.value)}
+													onBlur={field.handleBlur}
+													onChange={(e) => field.handleChange(e.target.checked)}
+												/>
+											)}
+											{fieldInfo.type === 'ograf-form' && (
+												<ReactOGrafForm
+													schema={fieldInfo.ografManifest?.schema as OGrafForm.GDDSchema}
+													data={field.state.value}
+													onDataChangeCallback={(value: unknown) => {
+														field.handleChange(value as typeof field.state.value)
 													}}
-												>
-													{fieldInfo.enumValues?.map((ev, i) => (
-														<option key={i} value={ev.value}>
-															{ev.label}
-														</option>
-													))}
-												</Form.Select>
-											</>
-										)}
-										{fieldInfo.type === 'const' && <span>{field.state.value}</span>}
-									</Form.Group>
-									<FieldInfo field={field} />
-								</>
-							)}
-						/>
+												/>
+											)}
+
+											{fieldInfo.type === 'enum' && (
+												<>
+													<Form.Select
+														name={field.name}
+														value={String(field.state.value)}
+														onBlur={field.handleBlur}
+														onChange={(e) => {
+															console.log(e.target.value)
+															field.handleChange(e.target.value)
+														}}
+													>
+														{fieldInfo.enumValues?.map((ev, i) => (
+															<option key={i} value={ev.value}>
+																{ev.label}
+															</option>
+														))}
+													</Form.Select>
+												</>
+											)}
+											{fieldInfo.type === 'const' && (
+												<span>
+													{typeof field.state.value === 'object'
+														? JSON.stringify(field.state.value)
+														: String(field.state.value)}
+												</span>
+											)}
+											{fieldInfo.type === 'const-hidden' && (
+												<span>
+													<i>--Hidden--</i>
+												</span>
+											)}
+										</Form.Group>
+										<FieldInfo field={field} />
+									</>
+								)}
+							/>
+						</MyErrorBoundary>
 					)
 				})}
 
