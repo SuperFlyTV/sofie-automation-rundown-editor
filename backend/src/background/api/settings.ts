@@ -237,6 +237,7 @@ function getOGrafManifest(id: string, manifest: OGraf.GraphicsManifest): TypeMan
 					{ label: 'Overlay 1', value: 'overlay1' },
 					{ label: 'Overlay 2', value: 'overlay2' },
 					{ label: 'Overlay 3', value: 'overlay3' },
+					{ label: 'Overlay 4', value: 'overlay4' },
 					{ label: 'Studio Screen 1', value: 'studio1' },
 					{ label: 'Studio Screen 2', value: 'studio2' },
 					{ label: 'Studio Screen 3', value: 'studio3' }
