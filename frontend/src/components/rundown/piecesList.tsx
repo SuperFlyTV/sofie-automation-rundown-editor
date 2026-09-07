@@ -162,7 +162,8 @@ function NewPieceButton({
 				segmentId,
 				partId,
 				name: manifest && manifest.includeTypeInName ? manifest.name : 'New piece',
-				pieceType: selectedPieceType
+				pieceType: selectedPieceType,
+				manifest
 			})
 		)
 			.unwrap()

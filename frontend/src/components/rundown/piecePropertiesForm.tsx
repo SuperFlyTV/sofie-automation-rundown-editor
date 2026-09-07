@@ -2,11 +2,13 @@ import { useForm } from '@tanstack/react-form'
 import { Button, ButtonGroup, Form, Modal } from 'react-bootstrap'
 import type { Piece } from '~backend/background/interfaces'
 import { FieldInfo } from '../form'
-import { useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import * as OGrafForm from 'ograf-form'
 import { useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import { removePiece, updatePiece } from '~/store/pieces'
 import { useToasts } from '../toasts/useToasts'
+import { MyErrorBoundary } from '../../util/errorBoundary'
 
 export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 	const dispatch = useAppDispatch()
@@ -115,49 +117,92 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 
 				{manifest?.payload?.map((fieldInfo) => {
 					return (
-						<form.Field
-							key={`payload.${fieldInfo.id}`}
-							name={`payload.${fieldInfo.id}`}
-							children={(field) => (
-								<>
-									<Form.Group className="mb-3">
-										<Form.Label htmlFor={field.name}>{fieldInfo.label}:</Form.Label>
+						<MyErrorBoundary>
+							<form.Field
+								key={`payload.${fieldInfo.id}`}
+								name={`payload.${fieldInfo.id}`}
+								children={(field) => (
+									<>
+										<Form.Group className="mb-3">
+											<Form.Label htmlFor={field.name}>{fieldInfo.label}:&nbsp;</Form.Label>
 
-										{fieldInfo.type === 'string' && (
-											<Form.Control
-												name={field.name}
-												type="text"
-												// eslint-disable-next-line @typescript-eslint/no-explicit-any
-												value={field.state.value as any}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-											/>
-										)}
+											{fieldInfo.type === 'string' && (
+												<Form.Control
+													name={field.name}
+													type="text"
+													// eslint-disable-next-line @typescript-eslint/no-explicit-any
+													value={field.state.value as any}
+													onBlur={field.handleBlur}
+													onChange={(e) => field.handleChange(e.target.value)}
+												/>
+											)}
 
-										{fieldInfo.type === 'number' && (
-											<Form.Control
-												name={field.name}
-												type="number"
-												value={Number(field.state.value)}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(Number(e.target.value))}
-											/>
-										)}
+											{fieldInfo.type === 'number' && (
+												<Form.Control
+													name={field.name}
+													type="number"
+													value={Number(field.state.value)}
+													onBlur={field.handleBlur}
+													onChange={(e) => field.handleChange(Number(e.target.value))}
+												/>
+											)}
 
-										{fieldInfo.type === 'boolean' && (
-											<Form.Switch
-												name={field.name}
-												type="text"
-												checked={Boolean(field.state.value)}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.checked)}
-											/>
-										)}
-									</Form.Group>
-									<FieldInfo field={field} />
-								</>
-							)}
-						/>
+											{fieldInfo.type === 'boolean' && (
+												<Form.Switch
+													name={field.name}
+													type="text"
+													checked={Boolean(field.state.value)}
+													onBlur={field.handleBlur}
+													onChange={(e) => field.handleChange(e.target.checked)}
+												/>
+											)}
+											{fieldInfo.type === 'ograf-form' && (
+												<ReactOGrafForm
+													schema={fieldInfo.ografManifest?.schema as OGrafForm.GDDSchema}
+													data={field.state.value}
+													onDataChangeCallback={(value: unknown) => {
+														field.handleChange(value as typeof field.state.value)
+													}}
+												/>
+											)}
+
+											{fieldInfo.type === 'enum' && (
+												<>
+													<Form.Select
+														name={field.name}
+														value={String(field.state.value)}
+														onBlur={field.handleBlur}
+														onChange={(e) => {
+															console.log(e.target.value)
+															field.handleChange(e.target.value)
+														}}
+													>
+														{fieldInfo.enumValues?.map((ev, i) => (
+															<option key={i} value={ev.value}>
+																{ev.label}
+															</option>
+														))}
+													</Form.Select>
+												</>
+											)}
+											{fieldInfo.type === 'const' && (
+												<span>
+													{typeof field.state.value === 'object'
+														? JSON.stringify(field.state.value)
+														: String(field.state.value)}
+												</span>
+											)}
+											{fieldInfo.type === 'const-hidden' && (
+												<span>
+													<i>--Hidden--</i>
+												</span>
+											)}
+										</Form.Group>
+										<FieldInfo field={field} />
+									</>
+								)}
+							/>
+						</MyErrorBoundary>
 					)
 				})}
 
@@ -270,4 +315,57 @@ function DeletePieceButton({
 			</Modal>
 		</>
 	)
+}
+
+// declare global {
+// 	namespace React {
+// 		namespace JSX {
+// 			interface IntrinsicElements {
+// 				'superflytv-ograf-form': React.DetailedHTMLProps<
+// 					React.HTMLAttributes<HTMLElement> & {
+// 						schema: string // OGraf.GraphicsManifest['schema']
+// 						value: any
+// 					},
+// 					HTMLElement
+// 				>
+// 			}
+// 		}
+// 	}
+// }
+
+function ReactOGrafForm(props: {
+	data: unknown
+	schema: OGrafForm.GDDSchema
+	onDataChangeCallback: (value: unknown) => void
+}) {
+	const containerRef = useRef<HTMLDivElement>(null)
+	const ografFormRef = useRef<OGrafForm.SuperFlyTvOgrafDataForm>(null)
+
+	useLayoutEffect(() => {
+		if (ografFormRef.current) return // Already initialized
+		if (!containerRef.current) {
+			// Should really not happen
+			console.error('Div ref not set for OGraf form')
+			return
+		}
+
+		// Initialize the form OGraf form element:
+		ografFormRef.current = new OGrafForm.SuperFlyTvOgrafDataForm()
+		ografFormRef.current.addEventListener('change', () => {
+			if (ografFormRef.current) props.onDataChangeCallback(ografFormRef.current.value)
+		})
+		if (props.schema) ografFormRef.current.schema = props.schema
+		ografFormRef.current.value = props.data ?? {}
+
+		containerRef.current.appendChild(ografFormRef.current)
+	}, [props])
+
+	useEffect(() => {
+		if (ografFormRef.current && props.schema) ografFormRef.current.schema = props.schema
+	}, [props.schema])
+	useEffect(() => {
+		if (ografFormRef.current) ografFormRef.current.value = props.data
+	}, [props.data])
+
+	return <div ref={containerRef} />
 }

@@ -8,7 +8,7 @@ async function startRundownEditorServer() {
 		? parseInt(process.env.PORT, 10)
 		: undefined
 
-	await initializeSettingsDefaults()
+	await initializeSettingsDefaults(false)
 
 	const api = new ControlAPI()
 	await api.init(portNumber).catch((error) => {

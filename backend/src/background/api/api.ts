@@ -45,6 +45,8 @@ export interface BackendApi {
 	getSettings: () => Promise<ApplicationSettings>
 	updateSettings: (settings: ApplicationSettings) => Promise<ApplicationSettings>
 
+	reloadOGrafGraphics: (ografUrl: string) => Promise<void>
+
 	getTypeManifests: () => Promise<TypeManifest[]>
 	addNewTypeManifest: (manifest: TypeManifest) => Promise<TypeManifest>
 	updateTypeManifest: (id: string, manifest: TypeManifest) => Promise<TypeManifest>
