@@ -187,6 +187,7 @@ export const mutations = {
 
 					const { result: newPart, error: createError } = await mutations.create({
 						...sourcePart,
+						rank: sourcePart.rank + 1 + Math.random(),
 						playlistId: targetPlaylistId,
 						rundownId: targetRundownId,
 						segmentId: targetSegmentId,

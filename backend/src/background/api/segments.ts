@@ -173,6 +173,7 @@ export const mutations = {
 
 					const { result: newSegment, error: createError } = await mutations.create({
 						...sourceSegment,
+						rank: sourceSegment.rank + 1 + Math.random(),
 						playlistId: targetPlaylistId,
 						rundownId: targetRundownId,
 						name: `${sourceSegment.name}${!payload.preserveName ? ' Copy' : ''}`,
