@@ -36,7 +36,7 @@ Once up and running in Rundown Editor go to `Settings -> Core Connection` and se
 
 ## MOS plugins
 
-A MOS plugin is an external web app (for example a graphics or media picker) that the editor embeds in an iframe so you can build a piece in it. A plugin URL is the address of that web app, e.g. `https://plugin.example.com/`. Plugins speak MOS 2.8.5.
+A MOS plugin is an external web app (for example a graphics or media picker) that the editor embeds in an iframe so you can build a piece in it. A plugin URL is the address of that web app, e.g. `https://plugin.example.com/`. Plugins speak the MOS plugin protocol.
 
 ### Setup
 

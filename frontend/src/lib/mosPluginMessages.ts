@@ -10,7 +10,7 @@ export type PluginEvent =
  * Returns undefined for messages we do not handle: other origins, non-string data, unknown names.
  * Throws on malformed XML: the caller reports it (and may reply with buildAck('ERROR')).
  *
- * Message names come from the MOS 2.8.5 "ActiveX / plugin" section (NCS = the newsroom system, i.e. us):
+ * Message names come from the MOS "ActiveX / plugin" section (NCS = the newsroom system, i.e. us):
  * - ncsReqAppInfo: plugin asks us to describe the host (answer with buildAppInfo)
  * - ncsItem: plugin hands us the item the user created or edited
  * - ncsReqAppClose: plugin asks us to close it
