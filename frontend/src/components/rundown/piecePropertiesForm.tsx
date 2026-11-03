@@ -3,6 +3,9 @@ import { Button, ButtonGroup, Form, Modal } from 'react-bootstrap'
 import type { Piece } from '~backend/background/interfaces'
 import { FieldInfo } from '../form'
 import { useState } from 'react'
+import { MosPluginFrame } from './mosPluginFrame'
+import { useMosPlugins } from './useMosPlugins'
+import { getMosItemXml } from '~/lib/mosItem'
 import { useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import { removePiece, updatePiece } from '~/store/pieces'
@@ -15,6 +18,10 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 	const manifest = useAppSelector((state) =>
 		state.typeManifests.manifests?.find((p) => p.id === piece.pieceType)
 	)
+
+	const mosPlugins = useMosPlugins()
+	const mosPlugin = mosPlugins.find((p) => p.id === piece.payload?.mosPluginId)
+	const [editingMos, setEditingMos] = useState(false)
 
 	const form = useForm({
 		defaultValues: piece,
@@ -112,6 +119,41 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 						</>
 					)}
 				/>
+
+				{mosPlugin && getMosItemXml(piece) && (
+					<Form.Group className="mb-3">
+						{editingMos ? (
+							<form.Subscribe
+								selector={(state) => state.values.payload?.mosItem}
+								children={(mosItem) => (
+									<MosPluginFrame
+										plugin={mosPlugin}
+										initialItemXml={typeof mosItem === 'string' ? mosItem : getMosItemXml(piece)}
+										onItem={(item) => {
+											form.setFieldValue('name', item.name)
+											form.setFieldValue('start', item.start)
+											form.setFieldValue('duration', item.duration)
+											form.setFieldValue('payload.mosItem', item.mosItem)
+											setEditingMos(false)
+										}}
+										onCancel={() => setEditingMos(false)}
+										onError={(e) => {
+											console.error(e)
+											toasts.show({
+												headerContent: 'MOS plugin',
+												bodyContent: 'Received an invalid message from the plugin'
+											})
+										}}
+									/>
+								)}
+							/>
+						) : (
+							<Button type="button" variant="outline-primary" onClick={() => setEditingMos(true)}>
+								Edit in {mosPlugin.name}
+							</Button>
+						)}
+					</Form.Group>
+				)}
 
 				{manifest?.payload?.map((fieldInfo) => {
 					return (

@@ -9,6 +9,10 @@ import { toTime } from '~/util/lib'
 import { createSelector } from '@reduxjs/toolkit'
 import { IconButton } from '../iconButton'
 import { useToasts } from '../toasts/useToasts'
+import { MosPluginFrame } from './mosPluginFrame'
+import { useMosPlugins } from './useMosPlugins'
+import type { MosPluginConfig } from '~backend/background/interfaces'
+import type { MosItemFields } from '~/lib/mosItem'
 
 const selectPiecesByPart = createSelector(
 	[
@@ -138,8 +142,14 @@ function NewPieceButton({
 		state.typeManifests.manifests?.filter((m) => m.entityType === 'piece')
 	)
 
+	const mosPlugins = useMosPlugins()
+	const [activePlugin, setActivePlugin] = useState<MosPluginConfig>()
+
 	const [show, setShow] = useState(false)
-	const handleDeleteClose = () => setShow(false)
+	const handleDeleteClose = () => {
+		setShow(false)
+		setActivePlugin(undefined)
+	}
 
 	const newPiece = (e: React.MouseEvent) => {
 		e.preventDefault()
@@ -147,12 +157,13 @@ function NewPieceButton({
 
 		setShow(true)
 	}
-	const performCreatePiece = () => {
-		if (!selectedPieceType) return
+	const performCreatePiece = (mos?: { plugin: MosPluginConfig; item: MosItemFields }) => {
+		const pieceType = mos?.plugin.pieceType ?? selectedPieceType
+		if (!pieceType) return
 
-		const manifest = typeManifest?.find((piece) => piece.id === selectedPieceType)
+		const manifest = typeManifest?.find((piece) => piece.id === pieceType)
 
-		setShow(false)
+		handleDeleteClose()
 
 		// perform operation
 		dispatch(
@@ -161,8 +172,17 @@ function NewPieceButton({
 				rundownId,
 				segmentId,
 				partId,
-				name: manifest && manifest.includeTypeInName ? manifest.name : 'New piece',
-				pieceType: selectedPieceType
+				name: mos
+					? mos.item.name
+					: manifest && manifest.includeTypeInName
+						? manifest.name
+						: 'New piece',
+				pieceType,
+				...(mos && {
+					start: mos.item.start,
+					duration: mos.item.duration,
+					payload: { mosItem: mos.item.mosItem, mosPluginId: mos.plugin.id }
+				})
 			})
 		)
 			.unwrap()
@@ -197,36 +217,64 @@ function NewPieceButton({
 				+ Add Piece
 			</button>
 
-			<Modal show={show} onHide={handleDeleteClose}>
+			<Modal show={show} onHide={handleDeleteClose} size={activePlugin ? 'xl' : undefined}>
 				<Modal.Header closeButton>
 					<Modal.Title>New piece</Modal.Title>
 				</Modal.Header>
-				<Modal.Body>
-					<Form.Group className="mb-3">
-						<Form.Label htmlFor="pieceType">Piece type:</Form.Label>
-						<Form.Select
-							name="pieceType"
-							value={selectedPieceType}
-							onChange={(e) => setSelectedPieceType(e.target.value)}
-						>
-							{typeManifest
-								?.filter((type) => type.entityType === 'piece')
-								.map((piece) => (
-									<option key={`pieceManifest_${piece.id}`} value={piece.id}>
-										{piece.name}
-									</option>
-								))}
-						</Form.Select>
-					</Form.Group>
-				</Modal.Body>
-				<Modal.Footer>
-					<Button variant="secondary" onClick={handleDeleteClose}>
-						Cancel
-					</Button>
-					<Button variant="primary" onClick={performCreatePiece}>
-						Create
-					</Button>
-				</Modal.Footer>
+				{activePlugin ? (
+					<Modal.Body>
+						<MosPluginFrame
+							plugin={activePlugin}
+							onItem={(item) => performCreatePiece({ plugin: activePlugin, item })}
+							onCancel={handleDeleteClose}
+							onError={(e) => {
+								console.error(e)
+								toasts.show({
+									headerContent: 'MOS plugin',
+									bodyContent: 'Received an invalid message from the plugin'
+								})
+							}}
+						/>
+					</Modal.Body>
+				) : (
+					<>
+						<Modal.Body>
+							<Form.Group className="mb-3">
+								<Form.Label htmlFor="pieceType">Piece type:</Form.Label>
+								<Form.Select
+									name="pieceType"
+									value={selectedPieceType}
+									onChange={(e) => setSelectedPieceType(e.target.value)}
+								>
+									{typeManifest
+										?.filter((type) => type.entityType === 'piece')
+										.map((piece) => (
+											<option key={`pieceManifest_${piece.id}`} value={piece.id}>
+												{piece.name}
+											</option>
+										))}
+								</Form.Select>
+							</Form.Group>
+						</Modal.Body>
+						<Modal.Footer>
+							{mosPlugins.map((plugin) => (
+								<Button
+									key={plugin.id}
+									variant="outline-primary"
+									onClick={() => setActivePlugin(plugin)}
+								>
+									Add via {plugin.name}
+								</Button>
+							))}
+							<Button variant="secondary" onClick={handleDeleteClose}>
+								Cancel
+							</Button>
+							<Button variant="primary" onClick={() => performCreatePiece()}>
+								Create
+							</Button>
+						</Modal.Footer>
+					</>
+				)}
 			</Modal>
 		</>
 	)
