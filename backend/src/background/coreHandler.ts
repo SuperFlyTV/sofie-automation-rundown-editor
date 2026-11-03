@@ -56,13 +56,7 @@ export class CoreHandler {
 	async init() {
 		const { result: settings } = await settingsMutations.read()
 
-		const sendConnectionInfo = () => {
-			const socketIO = getSocketIO()
-
-			if (socketIO) {
-				socketIO.emit('coreConnectionInfo', this._connectionInfo)
-			}
-		}
+		const sendConnectionInfo = () => this.sendConnectionInfo()
 
 		this.core.onConnected(() => {
 			console.log('Core Connected!')
@@ -107,6 +101,10 @@ export class CoreHandler {
 			})
 	}
 
+	private sendConnectionInfo() {
+		getSocketIO()?.emit('coreConnectionInfo', this._connectionInfo)
+	}
+
 	/**
 	 * Subscribes to events in the core.
 	 */
@@ -131,6 +129,29 @@ export class CoreHandler {
 		])
 
 		this.setupObserverForPeripheralDeviceCommands()
+		this.setupObserverForDeviceSettings()
+	}
+
+	/** Reads `frameRate` from this device's settings in Core and sends it with the connection info. */
+	setupObserverForDeviceSettings() {
+		const collectionName = PeripheralDevicePubSubCollectionsNames.peripheralDeviceForDevice
+		const observer = this.core.observe(collectionName)
+		this._observers.push(observer)
+
+		const update = () => {
+			const device = this.core.getCollection(collectionName)?.findOne(this.core.deviceId)
+			const settings = device?.deviceSettings
+			const frameRate =
+				typeof settings === 'object' && settings !== null && 'frameRate' in settings
+					? settings.frameRate
+					: undefined
+			this._connectionInfo.frameRate = typeof frameRate === 'number' ? frameRate : undefined
+			this.sendConnectionInfo()
+		}
+		observer.added = update
+		observer.changed = update
+		observer.removed = update
+		update()
 	}
 
 	getCoreConnectionOptions(deviceOptions: DeviceConfig, name: string): CoreOptions {

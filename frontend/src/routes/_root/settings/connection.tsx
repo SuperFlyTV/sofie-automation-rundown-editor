@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Alert } from 'react-bootstrap'
 import { CoreConnectionSettingsForm } from '~/components/settings/coreConnectionSettingsForm'
+import { MosPluginsForm } from '~/components/settings/mosPluginsForm'
 import { ResetToDefaults } from '~/components/settings/resetToDefaultsButton'
 import { useAppSelector } from '~/store/app'
 
@@ -16,6 +17,7 @@ function RouteComponent() {
 			<h2>Core Connection Settings</h2>
 
 			{settings.settings && <CoreConnectionSettingsForm settings={settings.settings} />}
+			{settings.settings && <MosPluginsForm settings={settings.settings} />}
 			{settings.error && <Alert variant="danger">{settings.error}</Alert>}
 
 			<ResetToDefaults />

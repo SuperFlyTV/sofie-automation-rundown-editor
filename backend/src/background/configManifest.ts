@@ -7,7 +7,14 @@ import {
 const deviceConfigSchema: JSONSchema = {
 	$schema: 'https://json-schema.org/draft/2020-12/schema',
 	type: 'object',
-	properties: {},
+	properties: {
+		frameRate: {
+			type: 'number',
+			title: 'Frame rate',
+			description:
+				'Used to convert MOS plugin item times. Match the studio frame rate. Default 25.'
+		}
+	},
 	required: []
 }
 const subDeviceConfigSchema: JSONSchema = {

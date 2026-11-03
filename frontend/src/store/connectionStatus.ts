@@ -12,9 +12,16 @@ const connectionStatusSlice = createSlice({
 			state.status = action.payload.status
 			state.url = action.payload.url
 			state.port = action.payload.port
+			state.frameRate = action.payload.frameRate
 		}
 	}
 })
+
+/** Core's frame rate for this device, or 25 if unset or invalid. */
+export const selectFrameRate = (state: { coreConnectionStatus: CoreConnectionInfo }): number => {
+	const rate = state.coreConnectionStatus.frameRate
+	return typeof rate === 'number' && Number.isFinite(rate) && rate > 0 ? rate : 25
+}
 
 // Export the auto-generated action creator with the same name
 export const { updateConnectionStatus } = connectionStatusSlice.actions

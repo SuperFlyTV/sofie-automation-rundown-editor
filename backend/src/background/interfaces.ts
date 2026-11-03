@@ -168,6 +168,13 @@ export interface PayloadManifest {
 export interface ApplicationSettings {
 	coreUrl?: string
 	corePort?: number
+	mosPlugins?: MosPluginConfig[]
+}
+export interface MosPluginConfig {
+	id: string
+	name: string
+	url: string
+	pieceType: string
 }
 export interface DBSettings {
 	id: string
@@ -355,6 +362,7 @@ export interface CoreConnectionInfo {
 	status: CoreConnectionStatus
 	url?: string
 	port?: number
+	frameRate?: number
 }
 
 export interface SerializedRundown {

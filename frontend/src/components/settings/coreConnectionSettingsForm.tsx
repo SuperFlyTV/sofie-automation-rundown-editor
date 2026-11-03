@@ -11,7 +11,7 @@ export function CoreConnectionSettingsForm({ settings }: { settings: Application
 	const toasts = useToasts()
 
 	const form = useForm({
-		defaultValues: settings,
+		defaultValues: { coreUrl: settings.coreUrl, corePort: settings.corePort },
 		onSubmit: async (values) => {
 			console.log('submit', values)
 
