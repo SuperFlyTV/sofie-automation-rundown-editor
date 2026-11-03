@@ -1,0 +1,58 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Demo MOS plugin</title>
+<style>
+	body { font: 14px sans-serif; margin: 12px; }
+	label { display: block; margin-bottom: 8px; }
+	input { display: block; width: 100%; box-sizing: border-box; }
+	pre { background: #eee; padding: 8px; white-space: pre-wrap; }
+</style>
+<h3>Demo MOS plugin</h3>
+<label>Slug <input id="slug" value="Demo item" /></label>
+<label>Start (frames) <input id="start" type="number" value="0" /></label>
+<label>Duration (frames) <input id="dur" type="number" value="250" /></label>
+<button id="save">Save</button>
+<div id="ctx"></div>
+<pre id="log"></pre>
+<script>
+	// The editor passes its origin: that is where we post, and the only origin we accept.
+	const host = new URLSearchParams(location.search).get('origin')
+	const $ = (id) => document.getElementById(id)
+	const log = (s) => ($('log').textContent += s + '\n')
+	const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+	const send = (xml) => {
+		log('-> ' + xml)
+		parent.postMessage(xml, host)
+	}
+
+	window.addEventListener('message', (e) => {
+		if (e.origin !== host || typeof e.data !== 'string') return
+		log('<- ' + e.data)
+		const doc = new DOMParser().parseFromString(e.data, 'application/xml')
+		const name = doc.documentElement.firstElementChild?.tagName
+		if (name === 'ncsAppInfo') {
+			$('ctx').textContent = 'Run context: ' + doc.querySelector('runContext')?.textContent
+			// EDIT: fill the form from the item we were given
+			const text = (tag) => doc.querySelector('item > ' + tag)?.textContent
+			if (text('itemSlug') !== undefined && text('itemSlug') !== null) {
+				$('slug').value = text('itemSlug')
+				$('start').value = text('itemEdStart') ?? 0
+				$('dur').value = text('itemEdDur') ?? 0
+			}
+		}
+	})
+
+	// The plugin decides when to save: it sends the item, the editor acks it
+	$('save').onclick = () =>
+		send(
+			'<mos><ncsItem><item>' +
+				'<itemID>1</itemID>' +
+				`<itemSlug>${esc($('slug').value)}</itemSlug>` +
+				'<objID>demo</objID><mosID>demo.plugin</mosID>' +
+				`<itemEdStart>${Number($('start').value)}</itemEdStart>` +
+				`<itemEdDur>${Number($('dur').value)}</itemEdDur>` +
+				'</item></ncsItem></mos>'
+		)
+
+	send('<mos><ncsReqAppInfo/></mos>')
+</script>

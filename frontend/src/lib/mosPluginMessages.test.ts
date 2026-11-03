@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildAck, buildAppInfo, buildItemRequest, readPluginMessage } from './mosPluginMessages'
+import { buildAck, buildAppInfo, readPluginMessage } from './mosPluginMessages'
 
 const origin = 'https://plugin.example.com'
 const send = (data: unknown, o = origin) => readPluginMessage({ origin: o, data }, origin, 25)
@@ -41,10 +41,6 @@ describe('readPluginMessage', () => {
 })
 
 describe('builders', () => {
-	it('buildItemRequest is an ncsItemRequest', () => {
-		expect(buildItemRequest).toBe('<mos><ncsItemRequest/></mos>')
-	})
-
 	it('buildAppInfo without item says CREATE', () => {
 		const xml = buildAppInfo()
 		expect(xml).toContain('<runContext>CREATE</runContext>')

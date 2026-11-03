@@ -48,8 +48,8 @@ A MOS plugin is an external web app (for example a graphics or media picker) tha
 
 ### Using a plugin
 
-- Create a piece: click "+ Add Piece", then use the plugin button "Add via <plugin name>" in the modal.
-- Edit a piece: open it, click "Edit in <plugin name>", then press the form's own Save.
+- Create a piece: click "+ Add Piece", then use the plugin button "Add from <plugin name>" in the modal.
+- Edit a piece: open it, click "Edit in <plugin name>" and press the plugin's Save; the piece is saved straight away.
 - If the item has no `itemEdStart`, the start is treated as 0, so plugin pieces are never adlibs (a piece is an adlib only when `start === undefined`).
 - If you remove a plugin, its existing pieces stay but show "plugin no longer configured".
 

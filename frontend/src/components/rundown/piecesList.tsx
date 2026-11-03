@@ -163,32 +163,29 @@ function NewPieceButton({
 
 	const pieceTypeName = (id: string) => typeManifest?.find((m) => m.id === id)?.name ?? id
 
-	const performCreatePiece = (
+	const performCreatePiece = async (
 		piece: Pick<NewPiecePayload, 'name' | 'pieceType' | 'start' | 'duration' | 'payload'>,
 		pluginName?: string
 	) => {
-		setError(undefined)
+		try {
+			const created = await dispatch(
+				addNewPiece({ playlistId, rundownId, segmentId, partId, ...piece })
+			).unwrap()
+			// Close only after success: closing unmounts the plugin frame and loses its work
+			closeModal()
 
-		// perform operation
-		dispatch(addNewPiece({ playlistId, rundownId, segmentId, partId, ...piece }))
-			.unwrap()
-			.then(async (created) => {
-				// Close only after success: closing unmounts the plugin frame and loses its work
-				closeModal()
-
-				// Navigate user to the new piece
-				await navigate({
-					to: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId',
-					params: { rundownId, segmentId, partId, pieceId: created.id }
-				})
+			// Navigate user to the new piece
+			await navigate({
+				to: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId',
+				params: { rundownId, segmentId, partId, pieceId: created.id }
 			})
-			.catch((e) => {
-				console.error(e)
-				// Keep the modal open so the user can retry
-				setError(
-					`Could not create piece "${piece.name}"${pluginName ? ` from ${pluginName}` : ''}. Try again.`
-				)
-			})
+		} catch (e) {
+			console.error(e)
+			// Keep the modal open so the user can retry
+			throw new Error(
+				`Could not create piece "${piece.name}"${pluginName ? ` from ${pluginName}` : ''}. Try again.`
+			)
+		}
 	}
 
 	const firstPieceType = typeManifest?.[0]?.id
@@ -214,14 +211,13 @@ function NewPieceButton({
 				backdrop={activePlugin ? 'static' : true}
 				keyboard={!activePlugin}
 			>
-				<Modal.Header closeButton>
+				<Modal.Header closeButton={!activePlugin}>
 					<Modal.Title>
-						{activePlugin ? `New piece via ${activePlugin.name}` : 'New piece'}
+						{activePlugin ? `New piece from ${activePlugin.name}` : 'New piece'}
 					</Modal.Title>
 				</Modal.Header>
 				{activePlugin ? (
 					<Modal.Body>
-						{error && <Alert variant="danger">{error}</Alert>}
 						<MosPluginFrame
 							plugin={activePlugin}
 							onItem={(item) =>
@@ -237,15 +233,38 @@ function NewPieceButton({
 								)
 							}
 							onCancel={closeModal}
+							workingLabel="Creating..."
 						/>
 					</Modal.Body>
 				) : (
 					<>
 						<Modal.Body>
 							{error && <Alert variant="danger">{error}</Alert>}
+							{mosPlugins.length > 0 && (
+								<>
+									<h6>Add from a plugin</h6>
+									<div className="d-flex flex-wrap gap-2">
+										{mosPlugins.map((plugin) => (
+											<Button
+												key={plugin.id}
+												variant="outline-primary"
+												title={`Uses piece type ${pieceTypeName(plugin.pieceType)}`}
+												onClick={() => setActivePlugin(plugin)}
+											>
+												Add from {plugin.name}
+											</Button>
+										))}
+									</div>
+									<Form.Text>
+										Each plugin creates pieces of its own configured piece type.
+									</Form.Text>
+									<div className="text-center text-muted my-3">or</div>
+								</>
+							)}
 							<Form.Group className="mb-3">
-								<Form.Label htmlFor="pieceType">Piece type:</Form.Label>
+								<Form.Label htmlFor="pieceType">Blank piece type:</Form.Label>
 								<Form.Select
+									id="pieceType"
 									name="pieceType"
 									value={selectedPieceType}
 									onChange={(e) => setSelectedPieceType(e.target.value)}
@@ -259,27 +278,6 @@ function NewPieceButton({
 										))}
 								</Form.Select>
 							</Form.Group>
-							{mosPlugins.length > 0 && (
-								<>
-									<div className="text-center text-muted my-3">or</div>
-									<h6>Create with a plugin</h6>
-									<div className="d-flex flex-wrap gap-2">
-										{mosPlugins.map((plugin) => (
-											<Button
-												key={plugin.id}
-												variant="outline-primary"
-												title={`Uses piece type ${pieceTypeName(plugin.pieceType)}`}
-												onClick={() => setActivePlugin(plugin)}
-											>
-												Add via {plugin.name}
-											</Button>
-										))}
-									</div>
-									<Form.Text>
-										Each plugin creates pieces of its own configured piece type.
-									</Form.Text>
-								</>
-							)}
 						</Modal.Body>
 						<Modal.Footer>
 							<Button variant="secondary" onClick={closeModal}>
@@ -288,13 +286,14 @@ function NewPieceButton({
 							<Button
 								variant="primary"
 								disabled={!selectedPieceType}
-								onClick={() =>
-									selectedPieceType &&
+								onClick={() => {
+									if (!selectedPieceType) return
+									setError(undefined)
 									performCreatePiece({
 										name: getNewPieceName(selectedPieceType),
 										pieceType: selectedPieceType
-									})
-								}
+									}).catch((e: Error) => setError(e.message))
+								}}
 							>
 								Create
 							</Button>

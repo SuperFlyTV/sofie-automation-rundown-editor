@@ -26,6 +26,11 @@ describe('readMosItem', () => {
 		expect(r.duration).toBe(510 / 25)
 	})
 
+	it('uses objTB from the item instead of the frame rate', () => {
+		const xml = '<item><itemEdStart>60</itemEdStart><itemEdDur>300</itemEdDur><mosObj><objTB>60</objTB></mosObj></item>'
+		expect(parse(xml, 50)).toMatchObject({ start: 1, duration: 5 })
+	})
+
 	it('leaves duration undefined when itemEdDur is missing', () => {
 		expect(parse(withItem('<itemSlug>a</itemSlug>'), 25).duration).toBeUndefined()
 	})

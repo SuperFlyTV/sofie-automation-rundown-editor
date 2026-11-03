@@ -59,9 +59,6 @@ export function buildAppInfo(item?: string): string {
 	)
 }
 
-/** ncsItemRequest: asks the plugin to send back its current item (as ncsItem) */
-export const buildItemRequest = '<mos><ncsItemRequest/></mos>'
-
 /** ncsAck: reply to the plugin. ERROR (with a description) tells it we could not use its message. */
 export function buildAck(status: 'ACK' | 'ERROR', description?: string): string {
 	const desc = description === undefined ? '' : `<statusDescription>${escapeXml(description)}</statusDescription>`

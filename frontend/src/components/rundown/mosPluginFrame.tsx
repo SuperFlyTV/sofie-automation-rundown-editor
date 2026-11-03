@@ -7,33 +7,32 @@ import type { MosItemFields } from '~/lib/mosItem'
 import {
 	buildAck,
 	buildAppInfo,
-	buildItemRequest,
 	readPluginMessage
 } from '~/lib/mosPluginMessages'
-import { useToasts } from '../toasts/useToasts'
 
 const READY_TIMEOUT_MS = 10_000
-const SAVE_TIMEOUT_MS = 5_000
+const ITEM_TIMEOUT_MS = 30_000
 
 export function MosPluginFrame(props: {
 	// Must have a valid http(s) URL: use plugins from useMosPlugins, which filters the rest out
 	plugin: MosPluginConfig
 	initialItemXml?: string // present means EDIT, absent means CREATE
-	onItem: (item: MosItemFields) => void // called after the user presses Save
+	// Called when the plugin sends an item (its own save). Items sent meanwhile are refused until a returned promise settles (or 30s pass); a throw is shown to the user.
+	onItem: (item: MosItemFields) => void | Promise<void>
 	onCancel: () => void
-	submitLabel?: string // text of the Save button
+	workingLabel?: string // status text while onItem runs
 	autoFocus?: boolean // focus the plugin when it loads
 }) {
-	const { plugin, initialItemXml, onItem, onCancel, submitLabel = 'Save', autoFocus = true } = props
+	const { plugin, initialItemXml, onItem, onCancel, workingLabel = 'Saving...', autoFocus = true } = props
 	const frameRate = useAppSelector(selectFrameRate)
-	const toasts = useToasts()
 	// Needed to check who sent a message and to postMessage into the frame
 	const iframeRef = useRef<HTMLIFrameElement>(null)
 	const [ready, setReady] = useState(false) // plugin has sent appInfoRequest
 	const [timedOutAttempt, setTimedOutAttempt] = useState<number>() // attempt that never became ready
-	const [awaiting, setAwaiting] = useState(false) // Save pressed, waiting for the item reply
+	const [busy, setBusy] = useState(false) // onItem is running (for display)
+	const busyRef = useRef(false) // same, but readable between renders: two items can arrive before one
 	const [attempt, setAttempt] = useState(0) // changing this remounts the iframe (Retry)
-	const [error, setError] = useState<string>() // last Save/message failure, cleared on next Save
+	const [error, setError] = useState<string>() // last item/message failure, cleared on next item
 	const timedOut = timedOutAttempt === attempt
 
 	const url = new URL(plugin.url)
@@ -48,10 +47,6 @@ export function MosPluginFrame(props: {
 	)
 
 	useEffect(() => {
-		const fail = (text: string, header = 'MOS plugin') => {
-			setError(text)
-			toasts.show({ headerContent: header, bodyContent: text })
-		}
 		const listener = (event: MessageEvent) => {
 			// Other windows can post messages to us; source identifies our iframe,
 			// and the origin check (in readPluginMessage) rejects a frame that navigated elsewhere.
@@ -65,7 +60,7 @@ export function MosPluginFrame(props: {
 				console.error(e)
 				const reason = e instanceof Error ? e.message : String(e)
 				send(buildAck('ERROR', reason))
-				fail(`Received an invalid message from ${plugin.name}: ${reason}`)
+				setError(`Received an invalid message from ${plugin.name}: ${reason}`)
 				return
 			}
 			if (!msg) return
@@ -74,21 +69,29 @@ export function MosPluginFrame(props: {
 				setReady(true)
 				send(buildAppInfo(initialItemXml))
 			} else if (msg.type === 'item') {
-				send(buildAck('ACK'))
-				// Only act on the reply to our own request
-				if (awaiting) {
-					setAwaiting(false)
-					try {
-						onItem(msg.item)
-					} catch (e) {
-						// Our own failure, not the plugin's: do not tell the plugin
-						console.error(e)
-						fail(
-							`${plugin.name}: could not use the item: ${e instanceof Error ? e.message : String(e)}`,
-							`MOS plugin: ${plugin.name}`
-						)
-					}
+				// A busy refusal is a real refusal; a failure in onItem is shown here and the item stays acknowledged
+				if (busyRef.current) {
+					send(buildAck('ERROR', 'Busy saving the previous item'))
+					return
 				}
+				send(buildAck('ACK'))
+				busyRef.current = true
+				setError(undefined)
+				setBusy(true)
+				let timer: ReturnType<typeof setTimeout> | undefined
+				const timeout = new Promise<never>((_, reject) => {
+					timer = setTimeout(() => reject(new Error('Timed out. Check whether it was saved.')), ITEM_TIMEOUT_MS)
+				})
+				Promise.race([Promise.resolve().then(() => onItem(msg.item)), timeout])
+					.catch((e) => {
+						console.error(e)
+						setError(`Could not use the item from ${plugin.name}: ${e instanceof Error ? e.message : String(e)}`)
+					})
+					.finally(() => {
+						clearTimeout(timer)
+						busyRef.current = false
+						setBusy(false)
+					})
 			} else {
 				send(buildAck('ACK'))
 				onCancel()
@@ -96,7 +99,7 @@ export function MosPluginFrame(props: {
 		}
 		window.addEventListener('message', listener)
 		return () => window.removeEventListener('message', listener)
-	}, [pluginOrigin, send, plugin.name, toasts, onItem, onCancel, awaiting, initialItemXml, frameRate])
+	}, [pluginOrigin, send, plugin.name, onItem, onCancel, initialItemXml, frameRate])
 
 	// Show a warning if the plugin never says hello
 	useEffect(() => {
@@ -104,22 +107,6 @@ export function MosPluginFrame(props: {
 		const timer = setTimeout(() => setTimedOutAttempt(attempt), READY_TIMEOUT_MS)
 		return () => clearTimeout(timer)
 	}, [attempt, ready])
-
-	// Give up waiting for the item reply so Save does not stay disabled forever
-	useEffect(() => {
-		if (!awaiting) return
-		const timer = setTimeout(() => {
-			setAwaiting(false)
-			setError(`${plugin.name} did not reply to the save request. Try again.`)
-		}, SAVE_TIMEOUT_MS)
-		return () => clearTimeout(timer)
-	}, [awaiting, plugin.name])
-
-	const save = () => {
-		setError(undefined)
-		setAwaiting(true)
-		send(buildItemRequest)
-	}
 
 	const retry = () => {
 		setReady(false)
@@ -158,7 +145,7 @@ export function MosPluginFrame(props: {
 				key={attempt}
 				ref={iframeRef}
 				src={src}
-				title={`${plugin.name} plugin`}
+				title={plugin.name}
 				onLoad={(e) => autoFocus && e.currentTarget.focus()}
 				// Capped so the Save/Cancel buttons below stay on screen
 				style={{ width: '100%', height: '60vh', maxHeight: 'calc(100vh - 220px)', border: 0 }}
@@ -169,11 +156,13 @@ export function MosPluginFrame(props: {
 				</Alert>
 			)}
 			<div className="d-flex justify-content-end gap-2 mt-2">
-				<Button type="button" variant="secondary" onClick={onCancel}>
+				{busy && (
+					<div role="status" className="d-flex align-items-center gap-2 me-auto">
+						<Spinner size="sm" aria-hidden="true" /> {workingLabel}
+					</div>
+				)}
+				<Button type="button" variant="secondary" disabled={busy} onClick={onCancel}>
 					Cancel
-				</Button>
-				<Button type="button" variant="primary" disabled={!ready || awaiting} onClick={save}>
-					{awaiting ? 'Working...' : submitLabel}
 				</Button>
 			</div>
 		</>
