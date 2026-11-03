@@ -34,6 +34,15 @@ Once up and running in Rundown Editor go to `Settings -> Core Connection` and se
 >
 >    ![Reload data image](docs/reload-data.png)
 
+## MOS plugins
+
+Pieces can optionally be created and edited through a MOS 2.8.5 plugin, shown in an iframe in the piece form.
+
+- Add plugins (name, URL, piece type) under MOS Plugins on the Settings page.
+- The plugin must allow framing from the editor's origin (`frame-ancestors`), and must be served over https if the editor is.
+- The plugin's frame rate is taken from the editor's device page in Sofie Core (default 25).
+- The MOS item is stored in the piece's `attributes.mosItem`. Blueprints must read it for it to affect playout.
+
 ## For Developers
 
 ### Project setup
