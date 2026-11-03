@@ -35,6 +35,7 @@ jobs:
         run: |
           yarn build
           yarn lint
+          yarn test
         env:
           CI: true
 
