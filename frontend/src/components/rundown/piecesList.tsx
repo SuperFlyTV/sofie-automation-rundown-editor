@@ -146,7 +146,7 @@ function NewPieceButton({
 	const [activePlugin, setActivePlugin] = useState<MosPluginConfig>()
 
 	const [show, setShow] = useState(false)
-	const handleDeleteClose = () => {
+	const closeModal = () => {
 		setShow(false)
 		setActivePlugin(undefined)
 	}
@@ -163,7 +163,7 @@ function NewPieceButton({
 
 		const manifest = typeManifest?.find((piece) => piece.id === pieceType)
 
-		handleDeleteClose()
+		closeModal()
 
 		// perform operation
 		dispatch(
@@ -217,23 +217,25 @@ function NewPieceButton({
 				+ Add Piece
 			</button>
 
-			<Modal show={show} onHide={handleDeleteClose} size={activePlugin ? 'xl' : undefined}>
+			<Modal
+				show={show}
+				onHide={closeModal}
+				size={activePlugin ? 'xl' : undefined}
+				// A stray click or Esc must not throw away work in the plugin
+				backdrop={activePlugin ? 'static' : true}
+				keyboard={!activePlugin}
+			>
 				<Modal.Header closeButton>
-					<Modal.Title>New piece</Modal.Title>
+					<Modal.Title>
+						{activePlugin ? `New piece via ${activePlugin.name}` : 'New piece'}
+					</Modal.Title>
 				</Modal.Header>
 				{activePlugin ? (
 					<Modal.Body>
 						<MosPluginFrame
 							plugin={activePlugin}
 							onItem={(item) => performCreatePiece({ plugin: activePlugin, item })}
-							onCancel={handleDeleteClose}
-							onError={(e) => {
-								console.error(e)
-								toasts.show({
-									headerContent: 'MOS plugin',
-									bodyContent: 'Received an invalid message from the plugin'
-								})
-							}}
+							onCancel={closeModal}
 						/>
 					</Modal.Body>
 				) : (
@@ -256,7 +258,7 @@ function NewPieceButton({
 								</Form.Select>
 							</Form.Group>
 						</Modal.Body>
-						<Modal.Footer>
+						<Modal.Footer className="flex-wrap">
 							{mosPlugins.map((plugin) => (
 								<Button
 									key={plugin.id}
@@ -266,7 +268,7 @@ function NewPieceButton({
 									Add via {plugin.name}
 								</Button>
 							))}
-							<Button variant="secondary" onClick={handleDeleteClose}>
+							<Button variant="secondary" onClick={closeModal}>
 								Cancel
 							</Button>
 							<Button variant="primary" onClick={() => performCreatePiece()}>

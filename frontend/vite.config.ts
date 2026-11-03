@@ -8,12 +8,12 @@ export default defineConfig({
 	base: './',
 	resolve: {
 		alias: {
-			stream: path.resolve(__dirname, './src/lib/streamStub.ts'),
 			'~': path.resolve(__dirname, './src/'),
 			'~backend': path.resolve(__dirname, '../backend/src/'),
 			'~bootstrap': path.resolve(__dirname, '../node_modules/bootstrap')
 		}
 	},
+	test: { environment: 'jsdom' }, // DOMParser is used for MOS XML
 	plugins: [
 		//
 		TanStackRouterVite({ target: 'react', autoCodeSplitting: true }),

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Piece } from '~backend/background/interfaces'
-import { getMosItemXml, parseMosItem } from './mosItem'
+import { parseMosItem } from './mosItem'
 
 const item = `<item>
   <itemID>2</itemID>
@@ -34,10 +33,6 @@ describe('parseMosItem', () => {
 		expect(parseMosItem(withItem('<itemSlug>a</itemSlug>'), 25).start).toBe(0)
 	})
 
-	it.each([0, -5, NaN])('uses 25 when frameRate is %s', (rate) => {
-		expect(parseMosItem(withItem('<itemEdDur>50</itemEdDur>'), rate).duration).toBe(2)
-	})
-
 	it('falls back to the name "MOS item" when itemSlug is missing', () => {
 		expect(parseMosItem(withItem(''), 25).name).toBe('MOS item')
 	})
@@ -64,19 +59,5 @@ describe('parseMosItem', () => {
 	it('only reads the first item', () => {
 		const r = parseMosItem(`<mos>${withItem('<itemSlug>one</itemSlug>')}${withItem('<itemSlug>two</itemSlug>')}</mos>`, 25)
 		expect(r.name).toBe('one')
-	})
-})
-
-describe('getMosItemXml', () => {
-	const piece = (payload: unknown) => ({ payload }) as unknown as Piece
-
-	it('returns the xml when set', () => {
-		expect(getMosItemXml(piece({ mosItem: '<item/>' }))).toBe('<item/>')
-	})
-
-	it('returns undefined for no payload.mosItem, empty string, or a non-string', () => {
-		expect(getMosItemXml(piece({}))).toBeUndefined()
-		expect(getMosItemXml(piece({ mosItem: '' }))).toBeUndefined()
-		expect(getMosItemXml(piece({ mosItem: 5 }))).toBeUndefined()
 	})
 })

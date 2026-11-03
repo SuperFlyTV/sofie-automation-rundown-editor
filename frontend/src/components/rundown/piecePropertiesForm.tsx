@@ -5,7 +5,6 @@ import { FieldInfo } from '../form'
 import { useState } from 'react'
 import { MosPluginFrame } from './mosPluginFrame'
 import { useMosPlugins } from './useMosPlugins'
-import { getMosItemXml } from '~/lib/mosItem'
 import { useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import { removePiece, updatePiece } from '~/store/pieces'
@@ -20,7 +19,12 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 	)
 
 	const mosPlugins = useMosPlugins()
-	const mosPlugin = mosPlugins.find((p) => p.id === piece.payload?.mosPluginId)
+	// payload is untyped; plugin-created pieces store the MOS item XML and plugin id as strings
+	const payloadMosItem =
+		typeof piece.payload?.mosItem === 'string' ? piece.payload.mosItem : undefined
+	const mosPluginId =
+		typeof piece.payload?.mosPluginId === 'string' ? piece.payload.mosPluginId : undefined
+	const mosPlugin = mosPlugins.find((p) => p.id === mosPluginId)
 	const [editingMos, setEditingMos] = useState(false)
 
 	const form = useForm({
@@ -120,7 +124,13 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 					)}
 				/>
 
-				{mosPlugin && getMosItemXml(piece) && (
+				{mosPluginId && payloadMosItem && !mosPlugin && (
+					<Form.Group className="mb-3">
+						<Form.Text>Plugin {mosPluginId} is no longer configured</Form.Text>
+					</Form.Group>
+				)}
+
+				{mosPlugin && payloadMosItem && (
 					<Form.Group className="mb-3">
 						{editingMos ? (
 							<form.Subscribe
@@ -128,22 +138,20 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 								children={(mosItem) => (
 									<MosPluginFrame
 										plugin={mosPlugin}
-										initialItemXml={typeof mosItem === 'string' ? mosItem : getMosItemXml(piece)}
+										initialItemXml={typeof mosItem === 'string' ? mosItem : payloadMosItem}
 										onItem={(item) => {
+											// Only updates the form; it reaches the DB when the form's own Save is pressed
 											form.setFieldValue('name', item.name)
 											form.setFieldValue('start', item.start)
 											form.setFieldValue('duration', item.duration)
 											form.setFieldValue('payload.mosItem', item.mosItem)
 											setEditingMos(false)
-										}}
-										onCancel={() => setEditingMos(false)}
-										onError={(e) => {
-											console.error(e)
 											toasts.show({
 												headerContent: 'MOS plugin',
-												bodyContent: 'Received an invalid message from the plugin'
+												bodyContent: 'Plugin changes applied. Save the piece to keep them'
 											})
 										}}
+										onCancel={() => setEditingMos(false)}
 									/>
 								)}
 							/>

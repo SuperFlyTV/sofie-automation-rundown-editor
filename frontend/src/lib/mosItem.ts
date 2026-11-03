@@ -1,6 +1,3 @@
-import { SaxParser } from '@nodable/sax'
-import type { Piece } from '~backend/background/interfaces'
-
 export interface MosItemFields {
 	name: string
 	start?: number // seconds
@@ -8,7 +5,8 @@ export interface MosItemFields {
 	mosItem: string // the original <item> XML
 }
 
-const DEFAULT_FRAME_RATE = 25
+/** Used when Core has not told us the device's frame rate */
+export const DEFAULT_FRAME_RATE = 25
 
 /** Samples to seconds; undefined if the text is not a number */
 function toSeconds(samples: string | undefined, frameRate: number): number | undefined {
@@ -17,54 +15,27 @@ function toSeconds(samples: string | undefined, frameRate: number): number | und
 	return Number.isFinite(n) ? n / frameRate : undefined
 }
 
-/** Reads the first <item> in `xml`: a bare item or any message containing one. Throws on invalid XML or no item. */
-export function parseMosItem(xml: string, frameRate: number): MosItemFields {
-	const rate = Number.isFinite(frameRate) && frameRate > 0 ? frameRate : DEFAULT_FRAME_RATE
-
-	const stack: string[] = []
-	const fields: Record<string, string> = {}
-	let itemDepth = -1
-	let startIndex = 0
-	let endIndex: number | undefined
-	let done = false
-
-	new SaxParser({
-		onStartElement(name, _attrs, tag) {
-			stack.push(name)
-			if (itemDepth < 0 && !done && name === 'item') {
-				itemDepth = stack.length
-				startIndex = tag.index
-				endIndex = tag.openEnd // self-closing items have no closeEnd
-			}
-		},
-		onText(text) {
-			// Only direct children of the item; nested elements (objPaths etc.) are ignored
-			if (itemDepth > 0 && stack.length === itemDepth + 1) {
-				const key = stack[stack.length - 1]
-				fields[key] = (fields[key] ?? '') + text
-			}
-		},
-		onEndElement(name, close) {
-			if (itemDepth > 0 && stack.length === itemDepth && name === 'item') {
-				endIndex = close.closeEnd ?? endIndex
-				itemDepth = -1
-				done = true
-			}
-			stack.pop()
-		}
-	}).parse(xml)
-
-	if (!done || endIndex === undefined) throw new Error('No <item> element found in MOS message')
-
-	return {
-		name: fields.itemSlug?.trim() || 'MOS item',
-		start: toSeconds(fields.itemEdStart, rate) ?? 0,
-		duration: toSeconds(fields.itemEdDur, rate),
-		mosItem: xml.slice(startIndex, endIndex)
-	}
+/** Parses XML with the browser parser. Throws on invalid XML (DOMParser reports errors as a <parsererror> element instead). */
+export function parseXml(xml: string): Document {
+	const doc = new DOMParser().parseFromString(xml, 'application/xml')
+	const error = doc.getElementsByTagName('parsererror')[0]
+	if (error) throw new Error(`Invalid XML: ${error.textContent?.trim()}`)
+	return doc
 }
 
-export function getMosItemXml(piece: Piece): string | undefined {
-	const xml = piece.payload?.mosItem
-	return typeof xml === 'string' && xml !== '' ? xml : undefined
+/** Reads the first <item> in `xml`: a bare item or any message containing one. Throws on invalid XML or no item. */
+export function parseMosItem(xml: string, frameRate: number): MosItemFields {
+	const item = parseXml(xml).getElementsByTagName('item')[0]
+	if (!item) throw new Error('No <item> element found in MOS message')
+
+	// Only direct children of the item; nested elements (objPaths etc.) are ignored
+	const field = (name: string) => Array.from(item.children).find((c) => c.tagName === name)?.textContent ?? undefined
+
+	return {
+		name: field('itemSlug')?.trim() || 'MOS item',
+		// A missing itemEdStart means the item plays from its beginning
+		start: toSeconds(field('itemEdStart'), frameRate) ?? 0,
+		duration: toSeconds(field('itemEdDur'), frameRate),
+		mosItem: new XMLSerializer().serializeToString(item)
+	}
 }

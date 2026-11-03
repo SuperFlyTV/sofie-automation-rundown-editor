@@ -10,6 +10,7 @@ export function CoreConnectionSettingsForm({ settings }: { settings: Application
 	const dispatch = useAppDispatch()
 	const toasts = useToasts()
 
+	// Pick only the Core fields: settings also holds mosPlugins, which this form must not submit
 	const form = useForm({
 		defaultValues: { coreUrl: settings.coreUrl, corePort: settings.corePort },
 		onSubmit: async (values) => {

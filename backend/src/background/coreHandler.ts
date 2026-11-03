@@ -56,19 +56,17 @@ export class CoreHandler {
 	async init() {
 		const { result: settings } = await settingsMutations.read()
 
-		const sendConnectionInfo = () => this.sendConnectionInfo()
-
 		this.core.onConnected(() => {
 			console.log('Core Connected!')
 			this._connectionInfo.status = CoreConnectionStatus.CONNECTED
-			sendConnectionInfo()
+			this.sendConnectionInfo()
 			this.setStatus(StatusCode.GOOD, [])
 			// if (this._isInitialized) this.onConnectionRestored()
 		})
 		this.core.onDisconnected(() => {
 			console.log('Core Disconnected!')
 			this._connectionInfo.status = CoreConnectionStatus.DISCONNECTED
-			sendConnectionInfo()
+			this.sendConnectionInfo()
 		})
 		this.core.onError((err) => {
 			console.log('Core Error: ' + (typeof err === 'string' ? err : err.message))
@@ -80,7 +78,7 @@ export class CoreHandler {
 		}
 		this._connectionInfo.url = ddpConfig.host
 		this._connectionInfo.port = ddpConfig.port
-		sendConnectionInfo()
+		this.sendConnectionInfo()
 		// if (this._process && this._process.certificates.length) {
 		// 	ddpConfig.tlsOpts = {
 		// 		ca: this._process.certificates
@@ -138,20 +136,17 @@ export class CoreHandler {
 		const observer = this.core.observe(collectionName)
 		this._observers.push(observer)
 
-		const update = () => {
+		const publishFrameRate = () => {
 			const device = this.core.getCollection(collectionName)?.findOne(this.core.deviceId)
-			const settings = device?.deviceSettings
-			const frameRate =
-				typeof settings === 'object' && settings !== null && 'frameRate' in settings
-					? settings.frameRate
-					: undefined
+			const frameRate = (device?.deviceSettings as { frameRate?: number } | undefined)?.frameRate
 			this._connectionInfo.frameRate = typeof frameRate === 'number' ? frameRate : undefined
 			this.sendConnectionInfo()
 		}
-		observer.added = update
-		observer.changed = update
-		observer.removed = update
-		update()
+		observer.added = publishFrameRate
+		observer.changed = publishFrameRate
+		// Device removed: rate resets to undefined, so consumers fall back to 25
+		observer.removed = publishFrameRate
+		publishFrameRate()
 	}
 
 	getCoreConnectionOptions(deviceOptions: DeviceConfig, name: string): CoreOptions {

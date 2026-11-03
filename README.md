@@ -36,12 +36,24 @@ Once up and running in Rundown Editor go to `Settings -> Core Connection` and se
 
 ## MOS plugins
 
-Pieces can optionally be created and edited through a MOS 2.8.5 plugin, shown in an iframe in the piece form.
+A MOS plugin is an external web app (for example a graphics or media picker) that the editor embeds in an iframe so you can build a piece in it. A plugin URL is the address of that web app, e.g. `https://plugin.example.com/`. Plugins speak MOS 2.8.5.
+
+### Setup
 
 - Add plugins (name, URL, piece type) under MOS Plugins on the Settings page.
-- The plugin must allow framing from the editor's origin (`frame-ancestors`), and must be served over https if the editor is.
-- The plugin's frame rate is taken from the editor's device page in Sofie Core (default 25).
-- The MOS item is stored in the piece's `attributes.mosItem`. Blueprints must read it for it to affect playout.
+- The settings form won't save a row with a missing name, a URL that isn't `http(s)`, or a missing piece type. Existing plugins whose URL is invalid or whose piece type was deleted are hidden from the piece forms.
+- The plugin server must allow the editor to embed it. This is the `frame-ancestors` directive of the server's Content-Security-Policy header; it must include the editor's origin.
+- The plugin must be served over https if the editor is.
+- Frame rate: set "Frame rate" (default 25) on the editor's device page in Sofie Core. It is used to convert the plugin's item times.
+
+### Using a plugin
+
+- Create a piece: click Add Piece, then "Add via <plugin name>".
+- Edit a piece: open it, click "Edit in <plugin name>", then press the form's own Save.
+
+### Where the data goes
+
+The MOS item is stored in the piece's `attributes.mosItem`, and the plugin used in `mosPluginId`. A blueprint is the code in Sofie Core that turns pieces into playout; it must read `mosItem` for the item to affect playout.
 
 ## For Developers
 
@@ -72,6 +84,14 @@ yarn build
 ```
 yarn lint
 ```
+
+### Runs the tests
+
+```
+yarn test
+```
+
+CI also runs it (build, lint, then test).
 
 ### Making a new release
 
