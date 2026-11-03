@@ -130,23 +130,26 @@ export class CoreHandler {
 		this.setupObserverForDeviceSettings()
 	}
 
-	/** Reads `frameRate` from this device's settings in Core and sends it with the connection info. */
+	/** Reads `frameRate` from this device's settings in Core and publishes it with the connection info. */
 	setupObserverForDeviceSettings() {
 		const collectionName = PeripheralDevicePubSubCollectionsNames.peripheralDeviceForDevice
 		const observer = this.core.observe(collectionName)
 		this._observers.push(observer)
 
-		const publishFrameRate = () => {
+		const publishDeviceSettings = () => {
 			const device = this.core.getCollection(collectionName)?.findOne(this.core.deviceId)
+			// deviceSettings is untyped in Core's schema; validated below
 			const frameRate = (device?.deviceSettings as { frameRate?: number } | undefined)?.frameRate
-			this._connectionInfo.frameRate = typeof frameRate === 'number' ? frameRate : undefined
+			// Only send a usable rate; otherwise omit it so the frontend uses its default
+			this._connectionInfo.frameRate =
+				typeof frameRate === 'number' && Number.isFinite(frameRate) && frameRate > 0 ? frameRate : undefined
 			this.sendConnectionInfo()
 		}
-		observer.added = publishFrameRate
-		observer.changed = publishFrameRate
+		observer.added = publishDeviceSettings
+		observer.changed = publishDeviceSettings
 		// Device removed: rate resets to undefined, so consumers fall back to 25
-		observer.removed = publishFrameRate
-		publishFrameRate()
+		observer.removed = publishDeviceSettings
+		publishDeviceSettings()
 	}
 
 	getCoreConnectionOptions(deviceOptions: DeviceConfig, name: string): CoreOptions {

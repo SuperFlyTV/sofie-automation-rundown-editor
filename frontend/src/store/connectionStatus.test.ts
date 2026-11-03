@@ -10,9 +10,6 @@ describe('selectFrameRate', () => {
 	it('returns 25 when unset', () => {
 		expect(selectFrameRate(state())).toBe(25)
 	})
-	it('returns 25 for 0 or negative or NaN', () => {
-		for (const v of [0, -5, NaN, Infinity]) expect(selectFrameRate(state(v))).toBe(25)
-	})
 	it('returns the set value', () => {
 		expect(selectFrameRate(state(30))).toBe(30)
 		expect(selectFrameRate(state(29.97))).toBe(29.97)

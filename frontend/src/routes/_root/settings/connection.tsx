@@ -14,8 +14,9 @@ function RouteComponent() {
 
 	return (
 		<>
-			<h2>Core Connection Settings</h2>
+			<h2>Connection Settings</h2>
 
+			<h3>Core</h3>
 			{settings.settings && <CoreConnectionSettingsForm settings={settings.settings} />}
 			{settings.settings && <MosPluginsForm settings={settings.settings} />}
 			{settings.error && <Alert variant="danger">{settings.error}</Alert>}

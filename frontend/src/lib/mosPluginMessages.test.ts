@@ -7,15 +7,15 @@ const itemXml = '<item><itemID>0</itemID><itemSlug>Clip</itemSlug><itemEdDur>50<
 
 describe('readPluginMessage', () => {
 	it('ignores a message from another origin', () => {
-		expect(send('<mos><ncsReqAppInfo/></mos>', 'https://evil.example.com')).toEqual({ type: 'ignore' })
+		expect(send('<mos><ncsReqAppInfo/></mos>', 'https://evil.example.com')).toBeUndefined()
 	})
 
 	it('ignores non-string data', () => {
-		expect(send({ a: 1 })).toEqual({ type: 'ignore' })
+		expect(send({ a: 1 })).toBeUndefined()
 	})
 
 	it('ignores an unknown message', () => {
-		expect(send('<mos><ncsAck><status>ACK</status></ncsAck></mos>')).toEqual({ type: 'ignore' })
+		expect(send('<mos><ncsAck><status>ACK</status></ncsAck></mos>')).toBeUndefined()
 	})
 
 	it('maps ncsReqAppInfo', () => {
@@ -42,7 +42,7 @@ describe('readPluginMessage', () => {
 
 describe('builders', () => {
 	it('buildItemRequest is an ncsItemRequest', () => {
-		expect(buildItemRequest()).toBe('<mos><ncsItemRequest/></mos>')
+		expect(buildItemRequest).toBe('<mos><ncsItemRequest/></mos>')
 	})
 
 	it('buildAppInfo without item says CREATE', () => {

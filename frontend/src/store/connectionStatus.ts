@@ -1,6 +1,8 @@
 import { CoreConnectionStatus, type CoreConnectionInfo } from '~backend/background/interfaces.js'
-import { DEFAULT_FRAME_RATE } from '~/lib/mosItem'
 import { createSlice } from '@reduxjs/toolkit'
+
+/** Must match the 'Default 25' text in the backend config manifest (configManifest.ts). */
+export const DEFAULT_FRAME_RATE = 25
 
 const connectionStatusSlice = createSlice({
 	name: 'coreConnectionStatus',
@@ -18,10 +20,9 @@ const connectionStatusSlice = createSlice({
 	}
 })
 
-/** Core's frame rate for this device, or DEFAULT_FRAME_RATE if unset or invalid. */
+/** Core's frame rate for this device, or DEFAULT_FRAME_RATE if unset. The backend already drops invalid values. */
 export const selectFrameRate = (state: { coreConnectionStatus: CoreConnectionInfo }): number => {
-	const rate = state.coreConnectionStatus.frameRate
-	return typeof rate === 'number' && Number.isFinite(rate) && rate > 0 ? rate : DEFAULT_FRAME_RATE
+	return state.coreConnectionStatus.frameRate ?? DEFAULT_FRAME_RATE
 }
 
 // Export the auto-generated action creator with the same name

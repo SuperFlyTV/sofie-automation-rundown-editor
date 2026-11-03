@@ -1,9 +1,9 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
-import { Button, Form, Modal } from 'react-bootstrap'
+import { Alert, Button, Form, Modal } from 'react-bootstrap'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import './piecesList.scss'
-import { addNewPiece, copyPiece } from '~/store/pieces'
+import { addNewPiece, copyPiece, type NewPiecePayload } from '~/store/pieces'
 import type { Part, Piece } from '~backend/background/interfaces'
 import { toTime } from '~/util/lib'
 import { createSelector } from '@reduxjs/toolkit'
@@ -12,7 +12,6 @@ import { useToasts } from '../toasts/useToasts'
 import { MosPluginFrame } from './mosPluginFrame'
 import { useMosPlugins } from './useMosPlugins'
 import type { MosPluginConfig } from '~backend/background/interfaces'
-import type { MosItemFields } from '~/lib/mosItem'
 
 const selectPiecesByPart = createSelector(
 	[
@@ -136,19 +135,19 @@ function NewPieceButton({
 }) {
 	const navigate = useNavigate({})
 	const dispatch = useAppDispatch()
-	const toasts = useToasts()
-
 	const typeManifest = useAppSelector((state) =>
 		state.typeManifests.manifests?.filter((m) => m.entityType === 'piece')
 	)
 
 	const mosPlugins = useMosPlugins()
 	const [activePlugin, setActivePlugin] = useState<MosPluginConfig>()
+	const [error, setError] = useState<string>()
 
 	const [show, setShow] = useState(false)
 	const closeModal = () => {
 		setShow(false)
 		setActivePlugin(undefined)
+		setError(undefined)
 	}
 
 	const newPiece = (e: React.MouseEvent) => {
@@ -157,48 +156,39 @@ function NewPieceButton({
 
 		setShow(true)
 	}
-	const performCreatePiece = (mos?: { plugin: MosPluginConfig; item: MosItemFields }) => {
-		const pieceType = mos?.plugin.pieceType ?? selectedPieceType
-		if (!pieceType) return
 
-		const manifest = typeManifest?.find((piece) => piece.id === pieceType)
+	const getNewPieceName = (pieceType: string) => {
+		const manifest = typeManifest?.find((m) => m.id === pieceType)
+		return manifest?.includeTypeInName ? manifest.name : 'New piece'
+	}
 
-		closeModal()
+	const pieceTypeName = (id: string) => typeManifest?.find((m) => m.id === id)?.name ?? id
+
+	const performCreatePiece = (
+		piece: Pick<NewPiecePayload, 'name' | 'pieceType' | 'start' | 'duration' | 'payload'>,
+		pluginName?: string
+	) => {
+		setError(undefined)
 
 		// perform operation
-		dispatch(
-			addNewPiece({
-				playlistId,
-				rundownId,
-				segmentId,
-				partId,
-				name: mos
-					? mos.item.name
-					: manifest && manifest.includeTypeInName
-						? manifest.name
-						: 'New piece',
-				pieceType,
-				...(mos && {
-					start: mos.item.start,
-					duration: mos.item.duration,
-					payload: { mosItem: mos.item.mosItem, mosPluginId: mos.plugin.id }
-				})
-			})
-		)
+		dispatch(addNewPiece({ playlistId, rundownId, segmentId, partId, ...piece }))
 			.unwrap()
-			.then(async (piece) => {
+			.then(async (created) => {
+				// Close only after success: closing unmounts the plugin frame and loses its work
+				closeModal()
+
 				// Navigate user to the new piece
 				await navigate({
 					to: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId',
-					params: { rundownId, segmentId, partId, pieceId: piece.id }
+					params: { rundownId, segmentId, partId, pieceId: created.id }
 				})
 			})
 			.catch((e) => {
 				console.error(e)
-				toasts.show({
-					headerContent: 'Adding piece',
-					bodyContent: 'Encountered an unexpected error'
-				})
+				// Keep the modal open so the user can retry
+				setError(
+					`Could not create piece "${piece.name}"${pluginName ? ` from ${pluginName}` : ''}. Try again.`
+				)
 			})
 	}
 
@@ -232,15 +222,28 @@ function NewPieceButton({
 				</Modal.Header>
 				{activePlugin ? (
 					<Modal.Body>
+						{error && <Alert variant="danger">{error}</Alert>}
 						<MosPluginFrame
 							plugin={activePlugin}
-							onItem={(item) => performCreatePiece({ plugin: activePlugin, item })}
+							onItem={(item) =>
+								performCreatePiece(
+									{
+										name: item.name,
+										pieceType: activePlugin.pieceType,
+										start: item.start,
+										duration: item.duration,
+										payload: { mosItem: item.mosItem, mosPluginId: activePlugin.id }
+									},
+									activePlugin.name
+								)
+							}
 							onCancel={closeModal}
 						/>
 					</Modal.Body>
 				) : (
 					<>
 						<Modal.Body>
+							{error && <Alert variant="danger">{error}</Alert>}
 							<Form.Group className="mb-3">
 								<Form.Label htmlFor="pieceType">Piece type:</Form.Label>
 								<Form.Select
@@ -257,21 +260,43 @@ function NewPieceButton({
 										))}
 								</Form.Select>
 							</Form.Group>
+							{mosPlugins.length > 0 && (
+								<>
+									<div className="text-center text-muted my-3">or</div>
+									<h6>Create with a plugin</h6>
+									<div className="d-flex flex-wrap gap-2">
+										{mosPlugins.map((plugin) => (
+											<Button
+												key={plugin.id}
+												variant="outline-primary"
+												title={`Uses piece type ${pieceTypeName(plugin.pieceType)}`}
+												onClick={() => setActivePlugin(plugin)}
+											>
+												Add via {plugin.name}
+											</Button>
+										))}
+									</div>
+									<Form.Text>
+										Each plugin creates pieces of its own configured piece type.
+									</Form.Text>
+								</>
+							)}
 						</Modal.Body>
-						<Modal.Footer className="flex-wrap">
-							{mosPlugins.map((plugin) => (
-								<Button
-									key={plugin.id}
-									variant="outline-primary"
-									onClick={() => setActivePlugin(plugin)}
-								>
-									Add via {plugin.name}
-								</Button>
-							))}
+						<Modal.Footer>
 							<Button variant="secondary" onClick={closeModal}>
 								Cancel
 							</Button>
-							<Button variant="primary" onClick={() => performCreatePiece()}>
+							<Button
+								variant="primary"
+								disabled={!selectedPieceType}
+								onClick={() =>
+									selectedPieceType &&
+									performCreatePiece({
+										name: getNewPieceName(selectedPieceType),
+										pieceType: selectedPieceType
+									})
+								}
+							>
 								Create
 							</Button>
 						</Modal.Footer>

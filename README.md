@@ -40,20 +40,22 @@ A MOS plugin is an external web app (for example a graphics or media picker) tha
 
 ### Setup
 
-- Add plugins (name, URL, piece type) under MOS Plugins on the Settings page.
-- The settings form won't save a row with a missing name, a URL that isn't `http(s)`, or a missing piece type. Existing plugins whose URL is invalid or whose piece type was deleted are hidden from the piece forms.
-- The plugin server must allow the editor to embed it. This is the `frame-ancestors` directive of the server's Content-Security-Policy header; it must include the editor's origin.
+- Add plugins (name, URL, piece type) in Settings -> Connection, under MOS Plugins.
+- The settings form won't save a row with a missing name, a URL that isn't `http(s)`, or an unknown piece type. Existing plugins whose URL is invalid or whose piece type was deleted are hidden from the piece forms.
+- The plugin server must allow the editor to embed it. This is the `frame-ancestors` directive of its Content-Security-Policy header, which lists the origins allowed to embed the page. It must include the editor's origin, e.g. `Content-Security-Policy: frame-ancestors https://editor.example.com`.
 - The plugin must be served over https if the editor is.
-- Frame rate: set "Frame rate" (default 25) on the editor's device page in Sofie Core. It is used to convert the plugin's item times.
+- Frame rate: in Sofie Core go to Settings -> Studio -> Attached Devices -> sofie-rundown-editor and set "Frame rate" (default 25). It is used to convert the plugin's item times.
 
 ### Using a plugin
 
-- Create a piece: click Add Piece, then "Add via <plugin name>".
+- Create a piece: click "+ Add Piece", then use the plugin button "Add via <plugin name>" in the modal.
 - Edit a piece: open it, click "Edit in <plugin name>", then press the form's own Save.
+- If the item has no `itemEdStart`, the start is treated as 0, so plugin pieces are never adlibs (a piece is an adlib only when `start === undefined`).
+- If you remove a plugin, its existing pieces stay but show "plugin no longer configured".
 
 ### Where the data goes
 
-The MOS item is stored in the piece's `attributes.mosItem`, and the plugin used in `mosPluginId`. A blueprint is the code in Sofie Core that turns pieces into playout; it must read `mosItem` for the item to affect playout.
+The MOS item (an XML string) is stored in the piece's `payload.mosItem`, and the plugin used in `payload.mosPluginId`. When sending pieces to Core, the backend spreads `payload` into `attributes`, so blueprints read `piece.attributes.mosItem`. A blueprint is the code in Sofie Core that turns pieces into playout; it must read `mosItem` for the item to affect playout.
 
 ## For Developers
 
@@ -85,7 +87,7 @@ yarn build
 yarn lint
 ```
 
-### Runs the tests
+### Run the tests
 
 ```
 yarn test
