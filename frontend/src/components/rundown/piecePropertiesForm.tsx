@@ -20,10 +20,10 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 
 	const mosPlugins = useMosPlugins()
 	// payload is untyped; plugin-created pieces store the MOS item XML and plugin id as strings
-	const payloadMosItem =
-		typeof piece.payload?.mosItem === 'string' ? piece.payload.mosItem : undefined
-	const mosPluginId =
-		typeof piece.payload?.mosPluginId === 'string' ? piece.payload.mosPluginId : undefined
+	const { mosItem: payloadMosItem, mosPluginId } = (piece.payload ?? {}) as {
+		mosItem?: string
+		mosPluginId?: string
+	}
 	const mosPlugin = mosPlugins.find((p) => p.id === mosPluginId)
 	const [editingMos, setEditingMos] = useState(false)
 

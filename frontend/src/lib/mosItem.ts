@@ -25,12 +25,7 @@ export function parseXml(xml: string): Document {
 	return doc
 }
 
-/** Reads the first <item> in `xml`: a bare item or any message containing one. Throws on invalid XML or no item. */
-export function parseMosItem(xml: string, frameRate: number): MosItemFields {
-	return readMosItem(parseXml(xml), frameRate)
-}
-
-/** Same as parseMosItem, for an XML document that is already parsed. */
+/** Reads the first <item> in a parsed document: a bare item or any message containing one. Throws if there is none. */
 export function readMosItem(doc: Document, frameRate: number): MosItemFields {
 	const item = doc.getElementsByTagName('item')[0]
 	if (!item) throw new Error('No <item> element found in MOS message')

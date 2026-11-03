@@ -1,8 +1,7 @@
 import { CoreConnectionStatus, type CoreConnectionInfo } from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 
-/** Must match the 'Default 25' text in the backend config manifest (configManifest.ts). */
-export const DEFAULT_FRAME_RATE = 25
+const DEFAULT_FRAME_RATE = 25
 
 const connectionStatusSlice = createSlice({
 	name: 'coreConnectionStatus',

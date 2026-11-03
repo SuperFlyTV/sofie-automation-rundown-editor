@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseMosItem } from './mosItem'
+import { parseXml, readMosItem } from './mosItem'
 
 const item = `<item>
   <itemID>2</itemID>
@@ -12,52 +12,53 @@ const item = `<item>
   <itemEdDur>510</itemEdDur>
 </item>`
 
+const parse = (xml: string, frameRate: number) => readMosItem(parseXml(xml), frameRate)
 const withItem = (inner: string) => `<item><itemID>1</itemID>${inner}</item>`
 
-describe('parseMosItem', () => {
+describe('readMosItem', () => {
 	it('parses name from itemSlug', () => {
-		expect(parseMosItem(item, 25).name).toBe('Cat bites dog VO')
+		expect(parse(item, 25).name).toBe('Cat bites dog VO')
 	})
 
 	it('converts itemEdStart and itemEdDur from samples to seconds using frameRate', () => {
-		const r = parseMosItem(item, 25)
+		const r = parse(item, 25)
 		expect(r.start).toBe(2)
 		expect(r.duration).toBe(510 / 25)
 	})
 
 	it('leaves duration undefined when itemEdDur is missing', () => {
-		expect(parseMosItem(withItem('<itemSlug>a</itemSlug>'), 25).duration).toBeUndefined()
+		expect(parse(withItem('<itemSlug>a</itemSlug>'), 25).duration).toBeUndefined()
 	})
 
 	it('treats a missing itemEdStart as 0', () => {
-		expect(parseMosItem(withItem('<itemSlug>a</itemSlug>'), 25).start).toBe(0)
+		expect(parse(withItem('<itemSlug>a</itemSlug>'), 25).start).toBe(0)
 	})
 
 	it('falls back to the name "MOS item" when itemSlug is missing', () => {
-		expect(parseMosItem(withItem(''), 25).name).toBe('MOS item')
+		expect(parse(withItem(''), 25).name).toBe('MOS item')
 	})
 
 	it('throws on invalid XML', () => {
-		expect(() => parseMosItem('<item><itemSlug>a</item>', 25)).toThrow()
-		expect(() => parseMosItem('not xml', 25)).toThrow()
+		expect(() => parse('<item><itemSlug>a</item>', 25)).toThrow()
+		expect(() => parse('not xml', 25)).toThrow()
 	})
 
 	it('decodes &amp; and &lt; in itemSlug', () => {
-		expect(parseMosItem(withItem('<itemSlug>a &amp; b &lt; c</itemSlug>'), 25).name).toBe('a & b < c')
+		expect(parse(withItem('<itemSlug>a &amp; b &lt; c</itemSlug>'), 25).name).toBe('a & b < c')
 	})
 
 	it('throws when there is no item element', () => {
-		expect(() => parseMosItem('<mos><ncsItem/></mos>', 25)).toThrow()
+		expect(() => parse('<mos><ncsItem/></mos>', 25)).toThrow()
 	})
 
 	it('mosItem is the exact original <item> text', () => {
-		expect(parseMosItem(item, 25).mosItem).toBe(item)
+		expect(parse(item, 25).mosItem).toBe(item)
 		const wrapped = `<mos>\n  <ncsItem>${item}</ncsItem>\n</mos>`
-		expect(parseMosItem(wrapped, 25).mosItem).toBe(item)
+		expect(parse(wrapped, 25).mosItem).toBe(item)
 	})
 
 	it('only reads the first item', () => {
-		const r = parseMosItem(`<mos>${withItem('<itemSlug>one</itemSlug>')}${withItem('<itemSlug>two</itemSlug>')}</mos>`, 25)
+		const r = parse(`<mos>${withItem('<itemSlug>one</itemSlug>')}${withItem('<itemSlug>two</itemSlug>')}</mos>`, 25)
 		expect(r.name).toBe('one')
 	})
 })

@@ -40,7 +40,7 @@ A MOS plugin is an external web app (for example a graphics or media picker) tha
 
 ### Setup
 
-- Add plugins (name, URL, piece type) in Settings -> Connection, under MOS Plugins.
+- Add plugins (name, URL, piece type) in Settings -> Core Connection, under MOS Plugins.
 - The settings form won't save a row with a missing name, a URL that isn't `http(s)`, or an unknown piece type. Existing plugins whose URL is invalid or whose piece type was deleted are hidden from the piece forms.
 - The plugin server must allow the editor to embed it. This is the `frame-ancestors` directive of its Content-Security-Policy header, which lists the origins allowed to embed the page. It must include the editor's origin, e.g. `Content-Security-Policy: frame-ancestors https://editor.example.com`.
 - The plugin must be served over https if the editor is.

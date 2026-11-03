@@ -4,14 +4,13 @@ import { Alert, Button, Form, Modal } from 'react-bootstrap'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import './piecesList.scss'
 import { addNewPiece, copyPiece, type NewPiecePayload } from '~/store/pieces'
-import type { Part, Piece } from '~backend/background/interfaces'
+import type { MosPluginConfig, Part, Piece } from '~backend/background/interfaces'
 import { toTime } from '~/util/lib'
 import { createSelector } from '@reduxjs/toolkit'
 import { IconButton } from '../iconButton'
 import { useToasts } from '../toasts/useToasts'
 import { MosPluginFrame } from './mosPluginFrame'
 import { useMosPlugins } from './useMosPlugins'
-import type { MosPluginConfig } from '~backend/background/interfaces'
 
 const selectPiecesByPart = createSelector(
 	[

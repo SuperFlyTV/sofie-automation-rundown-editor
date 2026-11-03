@@ -42,24 +42,20 @@ export function MosPluginFrame(props: {
 	url.searchParams.set('origin', window.location.origin)
 	const src = url.toString()
 
-	// Keep the latest values in refs so the message listener below can subscribe once
-	// and still see current props and state.
-	const latest = useRef({ onItem, onCancel, awaiting, initialItemXml, frameRate })
-	useEffect(() => {
-		latest.current = { onItem, onCancel, awaiting, initialItemXml, frameRate }
-	})
-
 	const send = useCallback(
 		(xml: string) => iframeRef.current?.contentWindow?.postMessage(xml, pluginOrigin),
 		[pluginOrigin]
 	)
 
 	useEffect(() => {
+		const fail = (text: string, header = 'MOS plugin') => {
+			setError(text)
+			toasts.show({ headerContent: header, bodyContent: text })
+		}
 		const listener = (event: MessageEvent) => {
 			// Other windows can post messages to us; source identifies our iframe,
 			// and the origin check (in readPluginMessage) rejects a frame that navigated elsewhere.
 			if (event.source !== iframeRef.current?.contentWindow) return
-			const { onItem, onCancel, awaiting, initialItemXml, frameRate } = latest.current
 
 			// Only a problem with the plugin's message is reported back to the plugin as ERROR
 			let msg
@@ -69,9 +65,7 @@ export function MosPluginFrame(props: {
 				console.error(e)
 				const reason = e instanceof Error ? e.message : String(e)
 				send(buildAck('ERROR', reason))
-				const text = `Received an invalid message from ${plugin.name}: ${reason}`
-				setError(text)
-				toasts.show({ headerContent: 'MOS plugin', bodyContent: text })
+				fail(`Received an invalid message from ${plugin.name}: ${reason}`)
 				return
 			}
 			if (!msg) return
@@ -89,9 +83,10 @@ export function MosPluginFrame(props: {
 					} catch (e) {
 						// Our own failure, not the plugin's: do not tell the plugin
 						console.error(e)
-						const text = `${plugin.name}: could not use the item: ${e instanceof Error ? e.message : String(e)}`
-						setError(text)
-						toasts.show({ headerContent: `MOS plugin: ${plugin.name}`, bodyContent: text })
+						fail(
+							`${plugin.name}: could not use the item: ${e instanceof Error ? e.message : String(e)}`,
+							`MOS plugin: ${plugin.name}`
+						)
 					}
 				}
 			} else {
@@ -101,7 +96,7 @@ export function MosPluginFrame(props: {
 		}
 		window.addEventListener('message', listener)
 		return () => window.removeEventListener('message', listener)
-	}, [pluginOrigin, send, plugin.name, toasts])
+	}, [pluginOrigin, send, plugin.name, toasts, onItem, onCancel, awaiting, initialItemXml, frameRate])
 
 	// Show a warning if the plugin never says hello
 	useEffect(() => {
