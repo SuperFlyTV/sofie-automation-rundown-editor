@@ -7,7 +7,8 @@ import type { MosItemFields } from '~/lib/mosItem'
 import {
 	buildAck,
 	buildAppInfo,
-	readPluginMessage
+	readPluginMessage,
+    type PluginEvent
 } from '~/lib/mosPluginMessages'
 
 const READY_TIMEOUT_MS = 10_000
@@ -53,7 +54,7 @@ export function MosPluginFrame(props: {
 			if (event.source !== iframeRef.current?.contentWindow) return
 
 			// Only a problem with the plugin's message is reported back to the plugin as ERROR
-			let msg
+			let msg: PluginEvent | undefined = undefined
 			try {
 				msg = readPluginMessage(event, pluginOrigin, frameRate)
 			} catch (e) {
@@ -92,9 +93,11 @@ export function MosPluginFrame(props: {
 						busyRef.current = false
 						setBusy(false)
 					})
-			} else {
+			} else if (msg.type === 'close') {
 				send(buildAck('ACK'))
 				onCancel()
+			} else {
+				throw new Error(`Unknown plugin message type: ${(msg as any).type}`)
 			}
 		}
 		window.addEventListener('message', listener)

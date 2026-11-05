@@ -26,16 +26,20 @@ export function readPluginMessage(
 
 	// Parse once; the first child of <mos> is the message name
 	const doc = parseXml(event.data)
-	switch (doc.documentElement.firstElementChild?.tagName) {
-		case 'ncsReqAppInfo':
-			return { type: 'appInfoRequest' }
-		case 'ncsItem':
-			return { type: 'item', item: readMosItem(doc, frameRate) }
-		case 'ncsReqAppClose':
-			return { type: 'close' }
-		default:
-			return undefined
+	
+	if (!doc?.documentElement?.children) return undefined
+
+	for (const child of doc.documentElement.children) {
+		switch (child.tagName) {
+			case 'ncsReqAppInfo':
+				return { type: 'appInfoRequest' }
+			case 'ncsItem':
+				return { type: 'item', item: readMosItem(doc, frameRate) }
+			case 'ncsReqAppClose':
+				return { type: 'close' }
+		}
 	}
+	return undefined
 }
 
 const escapeXml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
