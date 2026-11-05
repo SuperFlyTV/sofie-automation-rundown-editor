@@ -19,6 +19,9 @@ export interface NewPiecePayload {
 
 	name: string
 	pieceType: string
+	start?: number
+	duration?: number
+	payload?: Piece['payload']
 }
 export interface UpdatePiecePayload {
 	piece: Piece
@@ -37,7 +40,9 @@ export const addNewPiece = createAppAsyncThunk(
 			segmentId: payload.segmentId,
 			partId: payload.partId,
 			pieceType: payload.pieceType,
-			payload: {}
+			start: payload.start,
+			duration: payload.duration,
+			payload: payload.payload ?? {}
 		})
 	}
 )

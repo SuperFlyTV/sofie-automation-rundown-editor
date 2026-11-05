@@ -34,6 +34,29 @@ Once up and running in Rundown Editor go to `Settings -> Core Connection` and se
 >
 >    ![Reload data image](docs/reload-data.png)
 
+## MOS plugins
+
+A MOS plugin is an external web app (for example a graphics or media picker) that the editor embeds in an iframe so you can build a piece in it. A plugin URL is the address of that web app, e.g. `https://plugin.example.com/`. Plugins speak the MOS plugin protocol.
+
+### Setup
+
+- Add plugins (name, URL, piece type) in Settings -> Core Connection, under MOS Plugins.
+- The settings form won't save a row with a missing name, a URL that isn't `http(s)`, or an unknown piece type. Existing plugins whose URL is invalid or whose piece type was deleted are hidden from the piece forms.
+- The plugin server must allow the editor to embed it. This is the `frame-ancestors` directive of its Content-Security-Policy header, which lists the origins allowed to embed the page. It must include the editor's origin, e.g. `Content-Security-Policy: frame-ancestors https://editor.example.com`.
+- The plugin must be served over https if the editor is.
+- Frame rate: in Sofie Core go to Settings -> Studio -> Attached Devices -> sofie-rundown-editor and set "Frame rate" (default 25). It is used to convert the plugin's item times.
+
+### Using a plugin
+
+- Create a piece: click "+ Add Piece", then use the plugin button "Add from <plugin name>" in the modal.
+- Edit a piece: open it, click "Edit in <plugin name>" and press the plugin's Save; the piece is saved straight away.
+- If the item has no `itemEdStart`, the start is treated as 0, so plugin pieces are never adlibs (a piece is an adlib only when `start === undefined`).
+- If you remove a plugin, its existing pieces stay but show "plugin no longer configured".
+
+### Where the data goes
+
+The MOS item (an XML string) is stored in the piece's `payload.mosItem`, and the plugin used in `payload.mosPluginId`. When sending pieces to Core, the backend spreads `payload` into `attributes`, so blueprints read `piece.attributes.mosItem`. A blueprint is the code in Sofie Core that turns pieces into playout; it must read `mosItem` for the item to affect playout.
+
 ## For Developers
 
 ### Project setup
@@ -63,6 +86,14 @@ yarn build
 ```
 yarn lint
 ```
+
+### Run the tests
+
+```
+yarn test
+```
+
+CI also runs it (build, lint, then test).
 
 ### Making a new release
 

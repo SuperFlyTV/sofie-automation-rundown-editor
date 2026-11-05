@@ -1,6 +1,8 @@
 import { CoreConnectionStatus, type CoreConnectionInfo } from '~backend/background/interfaces.js'
 import { createSlice } from '@reduxjs/toolkit'
 
+const DEFAULT_FRAME_RATE = 25
+
 const connectionStatusSlice = createSlice({
 	name: 'coreConnectionStatus',
 	initialState: {
@@ -12,9 +14,15 @@ const connectionStatusSlice = createSlice({
 			state.status = action.payload.status
 			state.url = action.payload.url
 			state.port = action.payload.port
+			state.frameRate = action.payload.frameRate
 		}
 	}
 })
+
+/** Core's frame rate for this device, or DEFAULT_FRAME_RATE if unset. The backend already drops invalid values. */
+export const selectFrameRate = (state: { coreConnectionStatus: CoreConnectionInfo }): number => {
+	return state.coreConnectionStatus.frameRate ?? DEFAULT_FRAME_RATE
+}
 
 // Export the auto-generated action creator with the same name
 export const { updateConnectionStatus } = connectionStatusSlice.actions

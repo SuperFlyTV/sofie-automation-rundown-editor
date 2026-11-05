@@ -1,14 +1,16 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
-import { Button, Form, Modal } from 'react-bootstrap'
+import { Alert, Button, Form, Modal } from 'react-bootstrap'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import './piecesList.scss'
-import { addNewPiece, copyPiece } from '~/store/pieces'
-import type { Part, Piece } from '~backend/background/interfaces'
+import { addNewPiece, copyPiece, type NewPiecePayload } from '~/store/pieces'
+import type { MosPluginConfig, Part, Piece } from '~backend/background/interfaces'
 import { toTime } from '~/util/lib'
 import { createSelector } from '@reduxjs/toolkit'
 import { IconButton } from '../iconButton'
 import { useToasts } from '../toasts/useToasts'
+import { MosPluginFrame } from './mosPluginFrame'
+import { useMosPlugins } from './useMosPlugins'
 
 const selectPiecesByPart = createSelector(
 	[
@@ -132,14 +134,20 @@ function NewPieceButton({
 }) {
 	const navigate = useNavigate({})
 	const dispatch = useAppDispatch()
-	const toasts = useToasts()
-
 	const typeManifest = useAppSelector((state) =>
 		state.typeManifests.manifests?.filter((m) => m.entityType === 'piece')
 	)
 
+	const mosPlugins = useMosPlugins()
+	const [activePlugin, setActivePlugin] = useState<MosPluginConfig>()
+	const [error, setError] = useState<string>()
+
 	const [show, setShow] = useState(false)
-	const handleDeleteClose = () => setShow(false)
+	const closeModal = () => {
+		setShow(false)
+		setActivePlugin(undefined)
+		setError(undefined)
+	}
 
 	const newPiece = (e: React.MouseEvent) => {
 		e.preventDefault()
@@ -147,39 +155,37 @@ function NewPieceButton({
 
 		setShow(true)
 	}
-	const performCreatePiece = () => {
-		if (!selectedPieceType) return
 
-		const manifest = typeManifest?.find((piece) => piece.id === selectedPieceType)
+	const getNewPieceName = (pieceType: string) => {
+		const manifest = typeManifest?.find((m) => m.id === pieceType)
+		return manifest?.includeTypeInName ? manifest.name : 'New piece'
+	}
 
-		setShow(false)
+	const pieceTypeName = (id: string) => typeManifest?.find((m) => m.id === id)?.name ?? id
 
-		// perform operation
-		dispatch(
-			addNewPiece({
-				playlistId,
-				rundownId,
-				segmentId,
-				partId,
-				name: manifest && manifest.includeTypeInName ? manifest.name : 'New piece',
-				pieceType: selectedPieceType
+	const performCreatePiece = async (
+		piece: Pick<NewPiecePayload, 'name' | 'pieceType' | 'start' | 'duration' | 'payload'>,
+		pluginName?: string
+	) => {
+		try {
+			const created = await dispatch(
+				addNewPiece({ playlistId, rundownId, segmentId, partId, ...piece })
+			).unwrap()
+			// Close only after success: closing unmounts the plugin frame and loses its work
+			closeModal()
+
+			// Navigate user to the new piece
+			await navigate({
+				to: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId',
+				params: { rundownId, segmentId, partId, pieceId: created.id }
 			})
-		)
-			.unwrap()
-			.then(async (piece) => {
-				// Navigate user to the new piece
-				await navigate({
-					to: '/rundown/$rundownId/segment/$segmentId/part/$partId/piece/$pieceId',
-					params: { rundownId, segmentId, partId, pieceId: piece.id }
-				})
-			})
-			.catch((e) => {
-				console.error(e)
-				toasts.show({
-					headerContent: 'Adding piece',
-					bodyContent: 'Encountered an unexpected error'
-				})
-			})
+		} catch (e) {
+			console.error(e)
+			// Keep the modal open so the user can retry
+			throw new Error(
+				`Could not create piece "${piece.name}"${pluginName ? ` from ${pluginName}` : ''}. Try again.`
+			)
+		}
 	}
 
 	const firstPieceType = typeManifest?.[0]?.id
@@ -197,36 +203,103 @@ function NewPieceButton({
 				+ Add Piece
 			</button>
 
-			<Modal show={show} onHide={handleDeleteClose}>
-				<Modal.Header closeButton>
-					<Modal.Title>New piece</Modal.Title>
+			<Modal
+				show={show}
+				onHide={closeModal}
+				size={activePlugin ? 'xl' : undefined}
+				// A stray click or Esc must not throw away work in the plugin
+				backdrop={activePlugin ? 'static' : true}
+				keyboard={!activePlugin}
+			>
+				<Modal.Header closeButton={!activePlugin}>
+					<Modal.Title>
+						{activePlugin ? `New piece from ${activePlugin.name}` : 'New piece'}
+					</Modal.Title>
 				</Modal.Header>
-				<Modal.Body>
-					<Form.Group className="mb-3">
-						<Form.Label htmlFor="pieceType">Piece type:</Form.Label>
-						<Form.Select
-							name="pieceType"
-							value={selectedPieceType}
-							onChange={(e) => setSelectedPieceType(e.target.value)}
-						>
-							{typeManifest
-								?.filter((type) => type.entityType === 'piece')
-								.map((piece) => (
-									<option key={`pieceManifest_${piece.id}`} value={piece.id}>
-										{piece.name}
-									</option>
-								))}
-						</Form.Select>
-					</Form.Group>
-				</Modal.Body>
-				<Modal.Footer>
-					<Button variant="secondary" onClick={handleDeleteClose}>
-						Cancel
-					</Button>
-					<Button variant="primary" onClick={performCreatePiece}>
-						Create
-					</Button>
-				</Modal.Footer>
+				{activePlugin ? (
+					<Modal.Body>
+						<MosPluginFrame
+							plugin={activePlugin}
+							onItem={(item) =>
+								performCreatePiece(
+									{
+										name: item.name,
+										pieceType: activePlugin.pieceType,
+										start: item.start,
+										duration: item.duration,
+										payload: { mosItem: item.mosItem, mosPluginId: activePlugin.id }
+									},
+									activePlugin.name
+								)
+							}
+							onCancel={closeModal}
+							workingLabel="Creating..."
+						/>
+					</Modal.Body>
+				) : (
+					<>
+						<Modal.Body>
+							{error && <Alert variant="danger">{error}</Alert>}
+							{mosPlugins.length > 0 && (
+								<>
+									<h6>Add from a plugin</h6>
+									<div className="d-flex flex-wrap gap-2">
+										{mosPlugins.map((plugin) => (
+											<Button
+												key={plugin.id}
+												variant="outline-primary"
+												title={`Uses piece type ${pieceTypeName(plugin.pieceType)}`}
+												onClick={() => setActivePlugin(plugin)}
+											>
+												Add from {plugin.name}
+											</Button>
+										))}
+									</div>
+									<Form.Text>
+										Each plugin creates pieces of its own configured piece type.
+									</Form.Text>
+									<div className="text-center text-muted my-3">or</div>
+								</>
+							)}
+							<Form.Group className="mb-3">
+								<Form.Label htmlFor="pieceType">Blank piece type:</Form.Label>
+								<Form.Select
+									id="pieceType"
+									name="pieceType"
+									value={selectedPieceType}
+									onChange={(e) => setSelectedPieceType(e.target.value)}
+								>
+									{typeManifest
+										?.filter((type) => type.entityType === 'piece')
+										.map((piece) => (
+											<option key={`pieceManifest_${piece.id}`} value={piece.id}>
+												{piece.name}
+											</option>
+										))}
+								</Form.Select>
+							</Form.Group>
+						</Modal.Body>
+						<Modal.Footer>
+							<Button variant="secondary" onClick={closeModal}>
+								Cancel
+							</Button>
+							<Button
+								variant="primary"
+								disabled={!selectedPieceType}
+								onClick={() => {
+									if (!selectedPieceType) return
+									setError(undefined)
+									performCreatePiece({
+										name: getNewPieceName(selectedPieceType),
+										pieceType: selectedPieceType
+									}).catch((e: Error) => setError(e.message))
+								}}
+							>
+								Create
+							</Button>
+						</Modal.Footer>
+					</>
+				)}
 			</Modal>
 		</>
 	)

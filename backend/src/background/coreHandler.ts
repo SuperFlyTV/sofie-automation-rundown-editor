@@ -56,25 +56,17 @@ export class CoreHandler {
 	async init() {
 		const { result: settings } = await settingsMutations.read()
 
-		const sendConnectionInfo = () => {
-			const socketIO = getSocketIO()
-
-			if (socketIO) {
-				socketIO.emit('coreConnectionInfo', this._connectionInfo)
-			}
-		}
-
 		this.core.onConnected(() => {
 			console.log('Core Connected!')
 			this._connectionInfo.status = CoreConnectionStatus.CONNECTED
-			sendConnectionInfo()
+			this.sendConnectionInfo()
 			this.setStatus(StatusCode.GOOD, [])
 			// if (this._isInitialized) this.onConnectionRestored()
 		})
 		this.core.onDisconnected(() => {
 			console.log('Core Disconnected!')
 			this._connectionInfo.status = CoreConnectionStatus.DISCONNECTED
-			sendConnectionInfo()
+			this.sendConnectionInfo()
 		})
 		this.core.onError((err) => {
 			console.log('Core Error: ' + (typeof err === 'string' ? err : err.message))
@@ -86,7 +78,7 @@ export class CoreHandler {
 		}
 		this._connectionInfo.url = ddpConfig.host
 		this._connectionInfo.port = ddpConfig.port
-		sendConnectionInfo()
+		this.sendConnectionInfo()
 		// if (this._process && this._process.certificates.length) {
 		// 	ddpConfig.tlsOpts = {
 		// 		ca: this._process.certificates
@@ -105,6 +97,10 @@ export class CoreHandler {
 					this.init() // Keep retrying until successful.
 				}, 1000) // Debounce to ensure it doesnt cause an infinite loop on an EHOSTUNREACH
 			})
+	}
+
+	private sendConnectionInfo() {
+		getSocketIO()?.emit('coreConnectionInfo', this._connectionInfo)
 	}
 
 	/**
@@ -131,6 +127,27 @@ export class CoreHandler {
 		])
 
 		this.setupObserverForPeripheralDeviceCommands()
+		this.setupObserverForDeviceSettings()
+	}
+
+	/** Reads `frameRate` from this device's settings in Core and publishes it with the connection info. */
+	private setupObserverForDeviceSettings() {
+		const collectionName = PeripheralDevicePubSubCollectionsNames.peripheralDeviceForDevice
+		const observer = this.core.observe(collectionName)
+		this._observers.push(observer)
+
+		const publishDeviceSettings = () => {
+			const device = this.core.getCollection(collectionName)?.findOne(this.core.deviceId)
+			// deviceSettings is untyped in Core's schema; validated below
+			const frameRate = (device?.deviceSettings as { frameRate?: number } | undefined)?.frameRate
+			// Only send a usable rate; otherwise omit it so the frontend uses its default
+			this._connectionInfo.frameRate =
+				typeof frameRate === 'number' && Number.isFinite(frameRate) && frameRate > 0 ? frameRate : undefined
+			this.sendConnectionInfo()
+		}
+		// removed resets the rate to undefined, so consumers use their default
+		observer.added = observer.changed = observer.removed = publishDeviceSettings
+		publishDeviceSettings()
 	}
 
 	getCoreConnectionOptions(deviceOptions: DeviceConfig, name: string): CoreOptions {

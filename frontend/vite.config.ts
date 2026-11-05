@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
@@ -13,6 +13,7 @@ export default defineConfig({
 			'~bootstrap': path.resolve(__dirname, '../node_modules/bootstrap')
 		}
 	},
+	test: { environment: 'jsdom' }, // DOMParser is used for MOS XML
 	plugins: [
 		//
 		TanStackRouterVite({ target: 'react', autoCodeSplitting: true }),

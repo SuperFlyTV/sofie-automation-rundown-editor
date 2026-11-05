@@ -2,7 +2,9 @@ import { useForm } from '@tanstack/react-form'
 import { Button, ButtonGroup, Form, Modal } from 'react-bootstrap'
 import type { Piece } from '~backend/background/interfaces'
 import { FieldInfo } from '../form'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { MosPluginFrame } from './mosPluginFrame'
+import { useMosPlugins } from './useMosPlugins'
 import { useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '~/store/app'
 import { removePiece, updatePiece } from '~/store/pieces'
@@ -16,15 +18,33 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 		state.typeManifests.manifests?.find((p) => p.id === piece.pieceType)
 	)
 
+	const mosPlugins = useMosPlugins()
+	// payload is untyped; plugin-created pieces store the MOS item XML and plugin id as strings
+	const { mosItem: payloadMosItem, mosPluginId } = (piece.payload ?? {}) as {
+		mosItem?: string
+		mosPluginId?: string
+	}
+	const mosPlugin = mosPlugins.find((p) => p.id === mosPluginId)
+	const [editingMos, setEditingMos] = useState(false)
+	const editButtonRef = useRef<HTMLButtonElement>(null)
+	const saveFailed = useRef(false) // onSubmit reports its own failure; the plugin frame needs to know
+	const closeMosEditor = () => {
+		setEditingMos(false)
+		// The frame (and focus with it) is unmounted; give focus back once the button is rendered
+		requestAnimationFrame(() => editButtonRef.current?.focus())
+	}
+
 	const form = useForm({
 		defaultValues: piece,
 		onSubmit: async (values) => {
+			saveFailed.current = false
 			try {
 				await dispatch(updatePiece({ piece: values.value })).unwrap()
 
 				// Mark as pristine
 				form.reset()
 			} catch (e) {
+				saveFailed.current = true
 				console.error(e)
 				toasts.show({
 					headerContent: 'Saving piece',
@@ -58,6 +78,7 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 							<Form.Group className="mb-3">
 								<Form.Label htmlFor={field.name}>Name:</Form.Label>
 								<Form.Control
+									id={field.name}
 									name={field.name}
 									type="text"
 									value={field.state.value ?? ''}
@@ -77,6 +98,7 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 							<Form.Group className="mb-3">
 								<Form.Label htmlFor={field.name}>Start (seconds):</Form.Label>
 								<Form.Control
+									id={field.name}
 									name={field.name}
 									type="number"
 									value={field.state.value ?? ''}
@@ -98,6 +120,7 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 							<Form.Group className="mb-3">
 								<Form.Label htmlFor={field.name}>Duration (seconds):</Form.Label>
 								<Form.Control
+									id={field.name}
 									name={field.name}
 									type="number"
 									value={field.state.value ?? ''}
@@ -113,6 +136,44 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 					)}
 				/>
 
+				{mosPluginId && payloadMosItem && !mosPlugin && (
+					<Form.Group className="mb-3">
+						<Form.Text>The plugin used for this piece is no longer configured</Form.Text>
+					</Form.Group>
+				)}
+
+				{mosPlugin && payloadMosItem && (
+					<Form.Group className="mb-3">
+						{editingMos ? (
+							<form.Subscribe
+								selector={(state) => state.values.payload?.mosItem}
+								children={(mosItem) => (
+									<MosPluginFrame
+										plugin={mosPlugin}
+										initialItemXml={typeof mosItem === 'string' ? mosItem : payloadMosItem}
+										onItem={async (item) => {
+											form.setFieldValue('name', item.name)
+											form.setFieldValue('start', item.start)
+											form.setFieldValue('duration', item.duration)
+											form.setFieldValue('payload.mosItem', item.mosItem)
+											saveFailed.current = false
+											await form.handleSubmit()
+											// A failed save is toasted by onSubmit; a validation failure never reaches it. Keep the frame open for both.
+											if (saveFailed.current || !form.state.canSubmit) throw new Error('Could not save the piece. Try again.')
+											closeMosEditor()
+										}}
+										onCancel={closeMosEditor}
+									/>
+								)}
+							/>
+						) : (
+							<Button ref={editButtonRef} type="button" variant="outline-primary" onClick={() => setEditingMos(true)}>
+								Edit in {mosPlugin.name}
+							</Button>
+						)}
+					</Form.Group>
+				)}
+
 				{manifest?.payload?.map((fieldInfo) => {
 					return (
 						<form.Field
@@ -125,6 +186,7 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 
 										{fieldInfo.type === 'string' && (
 											<Form.Control
+												id={field.name}
 												name={field.name}
 												type="text"
 												// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -136,6 +198,7 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 
 										{fieldInfo.type === 'number' && (
 											<Form.Control
+												id={field.name}
 												name={field.name}
 												type="number"
 												value={Number(field.state.value)}
@@ -146,6 +209,7 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 
 										{fieldInfo.type === 'boolean' && (
 											<Form.Switch
+												id={field.name}
 												name={field.name}
 												type="text"
 												checked={Boolean(field.state.value)}
@@ -185,11 +249,11 @@ export function PiecePropertiesForm({ piece }: { piece: Piece }) {
 									type="reset"
 									onClick={() => form.reset()}
 									variant="secondary"
-									disabled={isSubmitting || isPristine}
+									disabled={isSubmitting || isPristine || editingMos}
 								>
 									Discard
 								</Button>
-								<Button type="submit" disabled={!canSubmit || isPristine} variant="primary">
+								<Button type="submit" disabled={!canSubmit || isPristine || editingMos} variant="primary">
 									{isSubmitting ? '...' : 'Save'}
 								</Button>
 							</ButtonGroup>
