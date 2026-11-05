@@ -97,6 +97,7 @@ export function MosPluginFrame(props: {
 				send(buildAck('ACK'))
 				onCancel()
 			} else {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				throw new Error(`Unknown plugin message type: ${(msg as any).type}`)
 			}
 		}
